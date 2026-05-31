@@ -1,0 +1,155 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  MS_PER_DAY,
+  type Viewport,
+  originForAnchor,
+  xToMs,
+} from "@/lib/projection";
+import { isoToMs, todayISO } from "@/lib/dates";
+import { MIN_DATE } from "@/lib/constants";
+import { type Lod, baseLod, computeLod } from "./lod";
+
+export const PX_PER_DAY_MAX = 60;
+const PADDING_DAYS = 45;
+const ZOOM_SENSITIVITY = 0.0015;
+const STORAGE_KEY = "timeline:viewport";
+
+const MIN_MS = isoToMs(MIN_DATE);
+
+type Bounds = { minMs: number; maxMs: number };
+type State = { vp: Viewport; lod: Lod };
+
+function currentBounds(): Bounds {
+  return { minMs: MIN_MS, maxMs: isoToMs(todayISO()) };
+}
+
+function minPxPerDay(width: number, bounds: Bounds): number {
+  const totalDays = (bounds.maxMs - bounds.minMs) / MS_PER_DAY + PADDING_DAYS * 2;
+  if (totalDays <= 0 || width <= 0) return 0.02;
+  return Math.max(0.02, width / totalDays);
+}
+
+function clampViewport(vp: Viewport, width: number, bounds: Bounds): Viewport {
+  const minPpd = minPxPerDay(width, bounds);
+  const pxPerDay = Math.min(PX_PER_DAY_MAX, Math.max(minPpd, vp.pxPerDay));
+
+  const padMs = PADDING_DAYS * MS_PER_DAY;
+  const spanMs = (width / pxPerDay) * MS_PER_DAY;
+  const minOrigin = bounds.minMs - padMs;
+  const maxOrigin = bounds.maxMs + padMs - spanMs;
+
+  let originMs: number;
+  if (minOrigin > maxOrigin) {
+    originMs = (bounds.minMs + bounds.maxMs) / 2 - spanMs / 2;
+  } else {
+    originMs = Math.min(maxOrigin, Math.max(minOrigin, vp.originMs));
+  }
+  return { pxPerDay, originMs };
+}
+
+function defaultViewport(width: number, bounds: Bounds): Viewport {
+  const visibleDays = 365;
+  const pxPerDay = width > 0 ? width / visibleDays : 1;
+  const originMs = bounds.maxMs - visibleDays * MS_PER_DAY;
+  return clampViewport({ pxPerDay, originMs }, width, bounds);
+}
+
+function loadStored(): Viewport | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<Viewport>;
+    if (typeof parsed.pxPerDay === "number" && typeof parsed.originMs === "number") {
+      return { pxPerDay: parsed.pxPerDay, originMs: parsed.originMs };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/** Применить новый viewport: клампинг + пересчёт LOD с гистерезисом относительно prev. */
+function nextState(prev: State, vp: Viewport, width: number, bounds: Bounds): State {
+  const clamped = clampViewport(vp, width, bounds);
+  return { vp: clamped, lod: computeLod(clamped.pxPerDay, prev.lod) };
+}
+
+export type UseViewportResult = {
+  viewport: Viewport;
+  lod: Lod;
+  zoomAt: (offsetX: number, deltaY: number) => void;
+  panByPixels: (dx: number) => void;
+  setAnchored: (ms: number, x: number, pxPerDay: number) => void;
+};
+
+export function useViewport(width: number): UseViewportResult {
+  const [state, setState] = useState<State>(() => ({
+    vp: { pxPerDay: 1, originMs: MIN_MS },
+    lod: "days",
+  }));
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (width <= 0) return;
+    const bounds = currentBounds();
+    if (!initialized.current) {
+      initialized.current = true;
+      const stored = loadStored();
+      const vp = clampViewport(stored ?? defaultViewport(width, bounds), width, bounds);
+      setState({ vp, lod: baseLod(vp.pxPerDay) });
+    } else {
+      setState((prev) => nextState(prev, prev.vp, width, bounds));
+    }
+  }, [width]);
+
+  useEffect(() => {
+    if (!initialized.current) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.vp));
+    } catch {
+      /* ignore */
+    }
+  }, [state.vp]);
+
+  const zoomAt = useCallback(
+    (offsetX: number, deltaY: number) => {
+      if (width <= 0) return;
+      const bounds = currentBounds();
+      setState((prev) => {
+        const anchorMs = xToMs(offsetX, prev.vp);
+        const factor = Math.exp(-deltaY * ZOOM_SENSITIVITY);
+        const nextPpd = prev.vp.pxPerDay * factor;
+        const originMs = originForAnchor(anchorMs, offsetX, nextPpd);
+        return nextState(prev, { pxPerDay: nextPpd, originMs }, width, bounds);
+      });
+    },
+    [width],
+  );
+
+  const panByPixels = useCallback(
+    (dx: number) => {
+      if (width <= 0) return;
+      const bounds = currentBounds();
+      setState((prev) => {
+        const originMs = prev.vp.originMs - (dx / prev.vp.pxPerDay) * MS_PER_DAY;
+        return nextState(prev, { ...prev.vp, originMs }, width, bounds);
+      });
+    },
+    [width],
+  );
+
+  const setAnchored = useCallback(
+    (ms: number, x: number, pxPerDay: number) => {
+      if (width <= 0) return;
+      const bounds = currentBounds();
+      setState((prev) =>
+        nextState(prev, { pxPerDay, originMs: originForAnchor(ms, x, pxPerDay) }, width, bounds),
+      );
+    },
+    [width],
+  );
+
+  return { viewport: state.vp, lod: state.lod, zoomAt, panByPixels, setAnchored };
+}
