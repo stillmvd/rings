@@ -146,6 +146,20 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     } else {
       // days/weeks
       const ppd = viewport.pxPerDay;
+      // Месяцы не скрываем на днях: подпись месяца (и год на январе) над осью.
+      for (const ms of eachMonthStart(fromMs, toMs)) {
+        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
+        const x = drawTick(ms, 16, true);
+        const iso = msToISO(ms);
+        ctx.textAlign = "left";
+        ctx.font = "500 12px system-ui, sans-serif";
+        ctx.fillStyle = colors.text;
+        ctx.fillText(formatMonthShortRu(iso), x + 5, axisY - 20);
+        if (isJanuary(ms)) {
+          ctx.font = "600 13px system-ui, sans-serif";
+          ctx.fillText(formatYear(iso), x + 5, axisY - 38);
+        }
+      }
       for (const ms of eachWeekDivider(fromMs, toMs)) {
         ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
         drawTick(ms, 12, true);

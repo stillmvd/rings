@@ -73,7 +73,7 @@ export function TimelineStage() {
       onPointerCancel={endDrag}
     >
       <GridCanvas viewport={viewport} width={size.width} height={size.height} lod={lod} />
-      <StickyContext viewport={viewport} lod={lod} />
+      <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />
     </div>
   );
 }
