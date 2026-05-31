@@ -2,12 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { GridCanvas } from "./GridCanvas";
+import { StickyContext } from "./StickyContext";
 import { useViewport } from "./useViewport";
-import { xToMs } from "@/lib/projection";
-import { isoToMs } from "@/lib/dates";
-import { MIN_DATE } from "@/lib/constants";
-
-const MIN_MS = isoToMs(MIN_DATE);
 
 export function TimelineStage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,18 +47,10 @@ export function TimelineStage() {
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = containerRef.current;
     if (dragging.current) {
       const dx = e.clientX - lastX.current;
       lastX.current = e.clientX;
       panByPixels(dx);
-      return;
-    }
-    // Курсор not-allowed над недоступной (серой) зоной.
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      const ms = xToMs(e.clientX - rect.left, viewport);
-      el.style.cursor = ms < MIN_MS ? "not-allowed" : "grab";
     }
   };
 
@@ -85,6 +73,7 @@ export function TimelineStage() {
       onPointerCancel={endDrag}
     >
       <GridCanvas viewport={viewport} width={size.width} height={size.height} lod={lod} />
+      <StickyContext viewport={viewport} lod={lod} />
     </div>
   );
 }

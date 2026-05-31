@@ -12,7 +12,7 @@ import {
   formatDayNum,
   formatWeekdayShortRu,
 } from "@/lib/dates";
-import { MIN_DATE } from "@/lib/constants";
+import { BIRTH_DATE } from "@/lib/constants";
 import {
   eachYearStart,
   eachMonthStart,
@@ -44,7 +44,9 @@ function readColors(): GridColors {
   };
 }
 
-const MIN_MS = isoToMs(MIN_DATE);
+const BIRTH_MS = isoToMs(BIRTH_DATE);
+/** Прозрачность дат вне «прожитой жизни» (прошлое до рождения и будущее). */
+const OUT_OF_LIFE_ALPHA = 0.4;
 
 type Props = {
   viewport: Viewport;
@@ -82,21 +84,20 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     const fromMs = xToMs(0, viewport);
     const toMs = xToMs(width, viewport);
 
-    // Серая недоступная зона до даты рождения (18.03.2002).
-    const minX = msToX(MIN_MS, viewport);
-    if (minX > 0) {
-      ctx.fillStyle = colors.grayZone;
-      ctx.globalAlpha = 0.6;
-      ctx.fillRect(0, 0, Math.min(width, minX), height);
-      ctx.globalAlpha = 1;
-      // граница зоны
-      const bx = Math.round(minX) + 0.5;
-      ctx.strokeStyle = colors.lineStrong;
-      ctx.beginPath();
-      ctx.moveTo(bx, 0);
-      ctx.lineTo(bx, height);
-      ctx.stroke();
+    const todayMs = isoToMs(todayISO());
+    const birthX = msToX(BIRTH_MS, viewport);
+    const todayX = msToX(todayMs, viewport);
+    const inLife = (ms: number) => ms >= BIRTH_MS && ms <= todayMs;
+
+    // Лёгкая вуаль на зонах вне «прожитой жизни» (прошлое до рождения и будущее).
+    ctx.fillStyle = colors.grayZone;
+    ctx.globalAlpha = 0.14;
+    if (birthX > 0) ctx.fillRect(0, 0, Math.min(width, birthX), height);
+    if (todayX < width) {
+      const x0 = Math.max(0, todayX);
+      ctx.fillRect(x0, 0, width - x0, height);
     }
+    ctx.globalAlpha = 1;
 
     // Центральная ось.
     ctx.strokeStyle = colors.line;
@@ -121,6 +122,7 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     if (lod === "years") {
       ctx.font = "600 13px system-ui, sans-serif";
       for (const ms of eachYearStart(fromMs, toMs)) {
+        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
         const x = drawTick(ms, 10, true);
         ctx.fillStyle = colors.text;
         ctx.textAlign = "left";
@@ -128,6 +130,7 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       }
     } else if (lod === "months") {
       for (const ms of eachMonthStart(fromMs, toMs)) {
+        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
         const jan = isJanuary(ms);
         const x = drawTick(ms, jan ? 10 : 6, jan);
         ctx.textAlign = "left";
@@ -143,13 +146,13 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     } else {
       // days/weeks
       const ppd = viewport.pxPerDay;
-      // недельные делители — заметные линии
       for (const ms of eachWeekDivider(fromMs, toMs)) {
+        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
         drawTick(ms, 12, true);
       }
-      // дни — число + день недели (если помещается)
       const showWeekday = ppd >= 22;
       for (const ms of eachDayStart(fromMs, toMs)) {
+        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
         const x = drawTick(ms, 5, false);
         const iso = msToISO(ms);
         ctx.textAlign = "center";
@@ -163,10 +166,21 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
         }
       }
     }
+    ctx.globalAlpha = 1;
 
-    // Маркер «сегодня» — акцентная вертикаль (правая граница доступного времени).
-    const todayMs = isoToMs(todayISO());
-    const todayX = msToX(todayMs, viewport);
+    // Отметка дня рождения (начало «прожитой жизни»).
+    if (birthX >= 0 && birthX <= width) {
+      const bx = Math.round(birthX) + 0.5;
+      ctx.strokeStyle = colors.lineStrong;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(bx, 0);
+      ctx.lineTo(bx, height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Маркер «сегодня» — акцентная вертикаль + точка на оси.
     if (todayX >= 0 && todayX <= width) {
       const tx = Math.round(todayX) + 0.5;
       ctx.strokeStyle = colors.accent;
@@ -176,7 +190,6 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       ctx.lineTo(tx, height);
       ctx.stroke();
       ctx.lineWidth = 1;
-      // точка-маркер на оси
       ctx.fillStyle = colors.accent;
       ctx.beginPath();
       ctx.arc(tx, axisY, 4, 0, Math.PI * 2);

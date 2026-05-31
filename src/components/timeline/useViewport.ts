@@ -8,7 +8,7 @@ import {
   xToMs,
 } from "@/lib/projection";
 import { isoToMs, todayISO } from "@/lib/dates";
-import { MIN_DATE } from "@/lib/constants";
+import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { type Lod, baseLod, computeLod } from "./lod";
 
 export const PX_PER_DAY_MAX = 60;
@@ -16,13 +16,14 @@ const PADDING_DAYS = 45;
 const ZOOM_SENSITIVITY = 0.0015;
 const STORAGE_KEY = "timeline:viewport";
 
-const MIN_MS = isoToMs(MIN_DATE);
+const SCROLL_MIN_MS = isoToMs(TIMELINE_MIN_DATE);
+const SCROLL_MAX_MS = isoToMs(TIMELINE_MAX_DATE);
 
 type Bounds = { minMs: number; maxMs: number };
 type State = { vp: Viewport; lod: Lod };
 
 function currentBounds(): Bounds {
-  return { minMs: MIN_MS, maxMs: isoToMs(todayISO()) };
+  return { minMs: SCROLL_MIN_MS, maxMs: SCROLL_MAX_MS };
 }
 
 function minPxPerDay(width: number, bounds: Bounds): number {
@@ -50,9 +51,11 @@ function clampViewport(vp: Viewport, width: number, bounds: Bounds): Viewport {
 }
 
 function defaultViewport(width: number, bounds: Bounds): Viewport {
+  // Стартуем у «сегодня»: ~год истории, сегодня ближе к правому краю.
   const visibleDays = 365;
   const pxPerDay = width > 0 ? width / visibleDays : 1;
-  const originMs = bounds.maxMs - visibleDays * MS_PER_DAY;
+  const todayMs = isoToMs(todayISO());
+  const originMs = todayMs - visibleDays * 0.85 * MS_PER_DAY;
   return clampViewport({ pxPerDay, originMs }, width, bounds);
 }
 
@@ -86,7 +89,7 @@ export type UseViewportResult = {
 
 export function useViewport(width: number): UseViewportResult {
   const [state, setState] = useState<State>(() => ({
-    vp: { pxPerDay: 1, originMs: MIN_MS },
+    vp: { pxPerDay: 1, originMs: SCROLL_MIN_MS },
     lod: "days",
   }));
   const initialized = useRef(false);

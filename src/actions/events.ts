@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createEvent, deleteEvent, updateEvent } from "@/db/queries/events";
-import { MIN_DATE, isValidISODate } from "@/lib/constants";
+import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 
 export type EventResult = { ok: true; id?: number } | { ok: false; error: string };
 
@@ -17,7 +17,9 @@ type EventActionInput = {
 function validate(input: EventActionInput): string | null {
   if (!input.title.trim()) return "Название не может быть пустым";
   if (!isValidISODate(input.date)) return "Некорректная дата";
-  if (input.date < MIN_DATE) return `Дата не может быть раньше ${MIN_DATE}`;
+  if (input.date < TIMELINE_MIN_DATE || input.date > TIMELINE_MAX_DATE) {
+    return "Дата вне диапазона таймлайна";
+  }
   if (![1, 2, 3].includes(input.significance)) return "Неверная значимость";
   return null;
 }

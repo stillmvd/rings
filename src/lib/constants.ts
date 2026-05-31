@@ -1,4 +1,9 @@
-export const MIN_DATE = "2002-03-18";
+/** Дата рождения — граница «прожитой жизни» (для приглушения прошлого визуально). */
+export const BIRTH_DATE = "2002-03-18";
+
+/** Границы прокрутки таймлайна (прошлое предков и долгосрочные планы). */
+export const TIMELINE_MIN_DATE = "1900-01-01";
+export const TIMELINE_MAX_DATE = "2100-12-31";
 
 export const SIGNIFICANCE_VALUES = [1, 2, 3] as const;
 export type Significance = (typeof SIGNIFICANCE_VALUES)[number];
