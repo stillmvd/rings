@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { GridCanvas } from "./GridCanvas";
 import { StickyContext } from "./StickyContext";
+import { EventLayer } from "./EventLayer";
 import { useViewport } from "./useViewport";
+import type { TimelineEvent } from "@/db/queries/events";
 
-export function TimelineStage() {
+export function TimelineStage({ events }: { events: TimelineEvent[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const { viewport, lod, zoomAt, panByPixels } = useViewport(size.width);
@@ -73,6 +75,13 @@ export function TimelineStage() {
       onPointerCancel={endDrag}
     >
       <GridCanvas viewport={viewport} width={size.width} height={size.height} lod={lod} />
+      <EventLayer
+        events={events}
+        viewport={viewport}
+        width={size.width}
+        height={size.height}
+        lod={lod}
+      />
       <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />
     </div>
   );
