@@ -19,9 +19,10 @@ type Props = {
   width: number;
   height: number;
   lod: Lod;
+  onEventClick?: (event: TimelineEvent, anchor: { x: number; y: number }) => void;
 };
 
-export function EventLayer({ events, viewport, width, height, lod }: Props) {
+export function EventLayer({ events, viewport, width, height, lod, onEventClick }: Props) {
   const axisY = height / 2;
   const rank = lodRank(lod);
   const [hovered, setHovered] = useState<Cluster | null>(null);
@@ -56,12 +57,22 @@ export function EventLayer({ events, viewport, width, height, lod }: Props) {
           style: { left: cluster.x, top: axisY },
           onMouseEnter: () => setHovered(cluster),
           onMouseLeave: () => setHovered((h) => (h === cluster ? null : h)),
+          onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
+          onPointerUp: (e: React.PointerEvent) => e.stopPropagation(),
         };
 
         if (cluster.events.length === 1) {
+          const ev = cluster.events[0];
           return (
-            <div key={key} {...common}>
-              <EventDot event={cluster.events[0]} />
+            <div
+              key={key}
+              {...common}
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                onEventClick?.(ev, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+              }}
+            >
+              <EventDot event={ev} />
             </div>
           );
         }

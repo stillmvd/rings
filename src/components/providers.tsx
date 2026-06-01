@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { type ReactNode } from "react";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -12,7 +13,7 @@ export function Providers({ children }: { children: ReactNode }) {
       disableTransitionOnChange={false}
       themes={["light", "dark"]}
     >
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </ThemeProvider>
   );
 }
