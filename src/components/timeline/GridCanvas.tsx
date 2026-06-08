@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
+import { animate } from "motion/react";
 import { type Viewport, msToX, xToMs } from "@/lib/projection";
 import {
   msToISO,
@@ -47,6 +48,102 @@ function readColors(): GridColors {
 const BIRTH_MS = isoToMs(BIRTH_DATE);
 /** Прозрачность дат вне «прожитой жизни» (прошлое до рождения и будущее). */
 const OUT_OF_LIFE_ALPHA = 0.4;
+/** Длительность кроссфейда подписей/делений при смене LOD. */
+const LOD_FADE_S = 0.26;
+
+type DrawCtx = {
+  ctx: CanvasRenderingContext2D;
+  viewport: Viewport;
+  axisY: number;
+  fromMs: number;
+  toMs: number;
+  colors: GridColors;
+  inLife: (ms: number) => boolean;
+};
+
+function drawTick(d: DrawCtx, ms: number, tickH: number, strong: boolean): number {
+  const { ctx, viewport, axisY, colors } = d;
+  const x = Math.round(msToX(ms, viewport)) + 0.5;
+  ctx.strokeStyle = strong ? colors.lineStrong : colors.line;
+  ctx.beginPath();
+  ctx.moveTo(x, axisY - tickH);
+  ctx.lineTo(x, axisY + tickH);
+  ctx.stroke();
+  return x;
+}
+
+/** Деления и подписи одного LOD; layerAlpha домножает прозрачность — для кроссфейда. */
+function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
+  if (layerAlpha <= 0.001) return;
+  const { ctx, viewport, axisY, colors, fromMs, toMs, inLife } = d;
+  const alpha = (ms: number) => (inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA) * layerAlpha;
+  ctx.textBaseline = "middle";
+
+  if (lod === "years") {
+    ctx.font = "600 13px system-ui, sans-serif";
+    for (const ms of eachYearStart(fromMs, toMs)) {
+      ctx.globalAlpha = alpha(ms);
+      const x = drawTick(d, ms, 10, true);
+      ctx.fillStyle = colors.text;
+      ctx.textAlign = "left";
+      ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 18);
+    }
+  } else if (lod === "months") {
+    for (const ms of eachMonthStart(fromMs, toMs)) {
+      ctx.globalAlpha = alpha(ms);
+      const jan = isJanuary(ms);
+      const x = drawTick(d, ms, jan ? 10 : 6, jan);
+      ctx.textAlign = "left";
+      if (jan) {
+        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.fillStyle = colors.text;
+        ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 18);
+      }
+      ctx.font = "500 11px system-ui, sans-serif";
+      ctx.fillStyle = colors.muted;
+      ctx.fillText(formatMonthShortRu(msToISO(ms)), x + 4, axisY + 16);
+    }
+  } else {
+    // days/weeks
+    const ppd = viewport.pxPerDay;
+    // Месяцы не скрываем на днях: подпись месяца (и год на январе) над осью.
+    for (const ms of eachMonthStart(fromMs, toMs)) {
+      ctx.globalAlpha = alpha(ms);
+      const x = drawTick(d, ms, 16, true);
+      const iso = msToISO(ms);
+      ctx.textAlign = "left";
+      ctx.font = "500 12px system-ui, sans-serif";
+      ctx.fillStyle = colors.text;
+      ctx.fillText(formatMonthShortRu(iso), x + 5, axisY - 20);
+      if (isJanuary(ms)) {
+        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.fillText(formatYear(iso), x + 5, axisY - 38);
+      }
+    }
+    for (const ms of eachWeekDivider(fromMs, toMs)) {
+      ctx.globalAlpha = alpha(ms);
+      drawTick(d, ms, 12, true);
+    }
+    const showWeekday = ppd >= 22;
+    for (const ms of eachDayStart(fromMs, toMs)) {
+      ctx.globalAlpha = alpha(ms);
+      const x = drawTick(d, ms, 5, false);
+      const iso = msToISO(ms);
+      ctx.textAlign = "center";
+      ctx.font = "500 11px system-ui, sans-serif";
+      ctx.fillStyle = colors.text;
+      ctx.fillText(formatDayNum(iso), x + ppd / 2, axisY + 16);
+      if (showWeekday) {
+        ctx.font = "400 9px system-ui, sans-serif";
+        ctx.fillStyle = colors.muted;
+        ctx.fillText(formatWeekdayShortRu(iso), x + ppd / 2, axisY + 30);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+type Transition = { from: Lod; to: Lod; progress: number };
 
 type Props = {
   viewport: Viewport;
@@ -59,15 +156,16 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
   const { resolvedTheme } = useTheme();
 
-  useEffect(() => {
+  const transitionRef = useRef<Transition | null>(null);
+  const prevLodRef = useRef<Lod>(lod);
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
+  const rafRef = useRef(0);
+  const drawRef = useRef<() => void>(() => {});
+
+  // Полный кадр; пересоздаётся каждый рендер, замыкая актуальные пропсы и transitionRef.
+  const draw = () => {
     const canvas = ref.current;
     if (!canvas || width <= 0 || height <= 0) return;
-
-    const frame = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(frame);
-
-    function draw() {
-      if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
@@ -107,80 +205,14 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     ctx.lineTo(width, axisY + 0.5);
     ctx.stroke();
 
-    ctx.textBaseline = "middle";
-
-    const drawTick = (ms: number, tickH: number, strong: boolean) => {
-      const x = Math.round(msToX(ms, viewport)) + 0.5;
-      ctx.strokeStyle = strong ? colors.lineStrong : colors.line;
-      ctx.beginPath();
-      ctx.moveTo(x, axisY - tickH);
-      ctx.lineTo(x, axisY + tickH);
-      ctx.stroke();
-      return x;
-    };
-
-    if (lod === "years") {
-      ctx.font = "600 13px system-ui, sans-serif";
-      for (const ms of eachYearStart(fromMs, toMs)) {
-        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
-        const x = drawTick(ms, 10, true);
-        ctx.fillStyle = colors.text;
-        ctx.textAlign = "left";
-        ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 18);
-      }
-    } else if (lod === "months") {
-      for (const ms of eachMonthStart(fromMs, toMs)) {
-        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
-        const jan = isJanuary(ms);
-        const x = drawTick(ms, jan ? 10 : 6, jan);
-        ctx.textAlign = "left";
-        if (jan) {
-          ctx.font = "600 13px system-ui, sans-serif";
-          ctx.fillStyle = colors.text;
-          ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 18);
-        }
-        ctx.font = "500 11px system-ui, sans-serif";
-        ctx.fillStyle = colors.muted;
-        ctx.fillText(formatMonthShortRu(msToISO(ms)), x + 4, axisY + 16);
-      }
+    const d: DrawCtx = { ctx, viewport, axisY, fromMs, toMs, colors, inLife };
+    const t = transitionRef.current;
+    if (t) {
+      drawLodLayer(d, t.from, 1 - t.progress);
+      drawLodLayer(d, t.to, t.progress);
     } else {
-      // days/weeks
-      const ppd = viewport.pxPerDay;
-      // Месяцы не скрываем на днях: подпись месяца (и год на январе) над осью.
-      for (const ms of eachMonthStart(fromMs, toMs)) {
-        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
-        const x = drawTick(ms, 16, true);
-        const iso = msToISO(ms);
-        ctx.textAlign = "left";
-        ctx.font = "500 12px system-ui, sans-serif";
-        ctx.fillStyle = colors.text;
-        ctx.fillText(formatMonthShortRu(iso), x + 5, axisY - 20);
-        if (isJanuary(ms)) {
-          ctx.font = "600 13px system-ui, sans-serif";
-          ctx.fillText(formatYear(iso), x + 5, axisY - 38);
-        }
-      }
-      for (const ms of eachWeekDivider(fromMs, toMs)) {
-        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
-        drawTick(ms, 12, true);
-      }
-      const showWeekday = ppd >= 22;
-      for (const ms of eachDayStart(fromMs, toMs)) {
-        ctx.globalAlpha = inLife(ms) ? 1 : OUT_OF_LIFE_ALPHA;
-        const x = drawTick(ms, 5, false);
-        const iso = msToISO(ms);
-        ctx.textAlign = "center";
-        ctx.font = "500 11px system-ui, sans-serif";
-        ctx.fillStyle = colors.text;
-        ctx.fillText(formatDayNum(iso), x + ppd / 2, axisY + 16);
-        if (showWeekday) {
-          ctx.font = "400 9px system-ui, sans-serif";
-          ctx.fillStyle = colors.muted;
-          ctx.fillText(formatWeekdayShortRu(iso), x + ppd / 2, axisY + 30);
-        }
-      }
+      drawLodLayer(d, lod, 1);
     }
-    ctx.globalAlpha = 1;
 
     // Отметка дня рождения (начало «прожитой жизни»).
     if (birthX >= 0 && birthX <= width) {
@@ -209,8 +241,65 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       ctx.arc(tx, axisY, 4, 0, Math.PI * 2);
       ctx.fill();
     }
-    }
-  }, [viewport, width, height, lod, resolvedTheme]);
+  };
+
+  // Держим ссылку на актуальный draw для rAF/onUpdate (ref-запись только в эффекте).
+  useEffect(() => {
+    drawRef.current = draw;
+  });
+
+  const schedule = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => drawRef.current());
+  }, []);
+
+  // Обычная перерисовка при пане/зуме/ресайзе/смене темы.
+  useEffect(() => {
+    schedule();
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [viewport, width, height, resolvedTheme, schedule]);
+
+  // Перерисовка при смене devicePixelRatio (перенос окна между мониторами
+  // с разным масштабом) — иначе canvas остаётся размытым до следующего пана/зума.
+  useEffect(() => {
+    let mql: MediaQueryList | null = null;
+    const onChange = () => {
+      schedule();
+      subscribe();
+    };
+    const subscribe = () => {
+      const dpr = window.devicePixelRatio || 1;
+      mql = window.matchMedia(`(resolution: ${dpr}dppx)`);
+      mql.addEventListener("change", onChange, { once: true });
+    };
+    subscribe();
+    return () => mql?.removeEventListener("change", onChange);
+  }, [schedule]);
+
+  // Смена LOD → кроссфейд уходящего и приходящего слоёв через motion animate.
+  useEffect(() => {
+    const from = prevLodRef.current;
+    if (from === lod) return;
+    prevLodRef.current = lod;
+    controlsRef.current?.stop();
+    transitionRef.current = { from, to: lod, progress: 0 };
+    const controls = animate(0, 1, {
+      duration: LOD_FADE_S,
+      ease: "easeInOut",
+      onUpdate: (p) => {
+        const t = transitionRef.current;
+        if (t) t.progress = p;
+        schedule();
+      },
+      onComplete: () => {
+        transitionRef.current = null;
+        controlsRef.current = null;
+        schedule();
+      },
+    });
+    controlsRef.current = controls;
+    return () => controls.stop();
+  }, [lod, schedule]);
 
   return <canvas ref={ref} className="absolute inset-0" />;
 }

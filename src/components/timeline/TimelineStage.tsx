@@ -5,6 +5,7 @@ import { GridCanvas } from "./GridCanvas";
 import { StickyContext } from "./StickyContext";
 import { EventLayer } from "./EventLayer";
 import { EventPopover } from "./EventPopover";
+import { TimelineControls } from "./TimelineControls";
 import { useViewport } from "./useViewport";
 import { xToMs } from "@/lib/projection";
 import { msToISO } from "@/lib/dates";
@@ -37,7 +38,7 @@ export function TimelineStage({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const { viewport, lod, zoomAt, panByPixels } = useViewport(size.width);
+  const { viewport, lod, zoomAt, zoomStep, panByPixels, centerToday } = useViewport(size.width);
 
   type PopoverState =
     | { mode: "create"; anchor: PopoverAnchor; date: string }
@@ -136,17 +137,43 @@ export function TimelineStage({
   }, []);
 
   // Зум колесом (non-passive, чтобы блокировать прокрутку страницы).
+  // Ctrl+колесо — точный зум (пониженная чувствительность).
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
-      zoomAt(e.clientX - rect.left, e.deltaY);
+      const delta = e.ctrlKey ? e.deltaY * 0.3 : e.deltaY;
+      zoomAt(e.clientX - rect.left, delta);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [zoomAt]);
+
+  // Горячие клавиши: +/- зум к центру, Home — к сегодня.
+  // Игнорируем при вводе в форму поповера и системные шорткаты (Ctrl/Meta/Alt).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "Home") {
+        e.preventDefault();
+        centerToday();
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        zoomStep(1);
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomStep(-1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomStep, centerToday]);
 
   // Drag-панорама. Захват указателя — только после превышения порога,
   // иначе capture перехватывает click по точкам и ломает открытие поповера.
@@ -229,6 +256,14 @@ export function TimelineStage({
         onEventClick={handleEventClick}
       />
       <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />
+      <TimelineControls
+        viewport={viewport}
+        lod={lod}
+        containerRef={containerRef}
+        onZoomIn={() => zoomStep(1)}
+        onZoomOut={() => zoomStep(-1)}
+        onToday={centerToday}
+      />
       <EventPopover
         open={popover !== null}
         anchor={popover?.anchor ?? null}

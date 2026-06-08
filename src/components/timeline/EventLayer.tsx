@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { type Viewport, msToX } from "@/lib/projection";
+import { type Viewport, msToX, xToMs } from "@/lib/projection";
 import { isoToMs, formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { isVisibleAtLod, getSignificanceMeta } from "@/lib/significance";
 import { type Lod, lodRank } from "./lod";
@@ -48,56 +48,94 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
     return out.map(({ x, events: e }) => ({ x, events: e }));
   }, [events, viewport, width, rank]);
 
+  // Подсказка для пустого диапазона: считаем по времени, без LOD-фильтра.
+  const emptyHint = useMemo<string | null>(() => {
+    if (width <= 0) return null;
+    const fromMs = xToMs(0, viewport);
+    const toMs = xToMs(width, viewport);
+    const hasInRange = events.some((ev) => {
+      const ms = isoToMs(ev.date);
+      return ms >= fromMs && ms <= toMs;
+    });
+    if (hasInRange) return null;
+    return events.length === 0
+      ? "Пока нет событий. Кликните по оси, чтобы добавить первое."
+      : "Здесь пока пусто. Кликните по оси, чтобы добавить событие.";
+  }, [events, viewport, width]);
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {clusters.map((cluster) => {
-        const key = cluster.events[0].id;
-        const common = {
-          className: "pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer",
-          style: { left: cluster.x, top: axisY },
-          onMouseEnter: () => setHovered(cluster),
-          onMouseLeave: () => setHovered((h) => (h === cluster ? null : h)),
-          onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
-          onPointerUp: (e: React.PointerEvent) => e.stopPropagation(),
-        };
+      <AnimatePresence initial={false}>
+        {clusters.map((cluster) => {
+          const key = cluster.events[0].id;
+          // Центрирование через motion x/y — иначе animate scale перетирает translate.
+          const common = {
+            className: "pointer-events-auto absolute cursor-pointer",
+            style: { left: cluster.x, top: axisY, x: "-50%", y: "-50%" },
+            initial: { opacity: 0, scale: 0.4 },
+            animate: { opacity: 1, scale: 1 },
+            exit: { opacity: 0, scale: 0.4 },
+            transition: { duration: 0.18, ease: "easeOut" as const },
+            onMouseEnter: () => setHovered(cluster),
+            onMouseLeave: () => setHovered((h) => (h === cluster ? null : h)),
+            onPointerDown: (e: React.PointerEvent) => e.stopPropagation(),
+            onPointerUp: (e: React.PointerEvent) => e.stopPropagation(),
+          };
 
-        if (cluster.events.length === 1) {
-          const ev = cluster.events[0];
+          if (cluster.events.length === 1) {
+            const ev = cluster.events[0];
+            return (
+              <motion.div
+                key={key}
+                {...common}
+                onClick={(e) => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  onEventClick?.(ev, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+                }}
+              >
+                <EventDot event={ev} />
+              </motion.div>
+            );
+          }
+
+          const maxSig = Math.max(...cluster.events.map((e) => e.significance));
+          const meta = getSignificanceMeta(maxSig);
+          const size = meta.dotRadius * 2 + 6;
           return (
-            <div
+            <motion.div
               key={key}
               {...common}
-              onClick={(e) => {
-                const r = e.currentTarget.getBoundingClientRect();
-                onEventClick?.(ev, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+              className={`${common.className} flex items-center justify-center rounded-full text-[10px] font-semibold`}
+              style={{
+                ...common.style,
+                width: size,
+                height: size,
+                background: meta.color,
+                color: "#0a0a0b",
+                boxShadow: "0 0 0 2px var(--tl-surface-0)",
               }}
             >
-              <EventDot event={ev} />
-            </div>
+              {cluster.events.length}
+            </motion.div>
           );
-        }
+        })}
+      </AnimatePresence>
 
-        const maxSig = Math.max(...cluster.events.map((e) => e.significance));
-        const meta = getSignificanceMeta(maxSig);
-        const size = meta.dotRadius * 2 + 6;
-        return (
-          <div
-            key={key}
-            {...common}
-            className={`${common.className} flex items-center justify-center rounded-full text-[10px] font-semibold`}
-            style={{
-              ...common.style,
-              width: size,
-              height: size,
-              background: meta.color,
-              color: "#0a0a0b",
-              boxShadow: "0 0 0 2px var(--tl-surface-0)",
-            }}
+      <AnimatePresence>
+        {emptyHint && (
+          <motion.div
+            key="empty-hint"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ duration: 0.25 }}
+            className="pointer-events-none absolute left-1/2 max-w-sm -translate-x-1/2 px-4 text-center text-sm text-muted"
+            style={{ top: axisY + 36 }}
           >
-            {cluster.events.length}
-          </div>
-        );
-      })}
+            {emptyHint}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {hovered && (

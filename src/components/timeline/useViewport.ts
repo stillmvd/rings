@@ -14,6 +14,8 @@ import { type Lod, baseLod, computeLod } from "./lod";
 export const PX_PER_DAY_MAX = 60;
 const PADDING_DAYS = 45;
 const ZOOM_SENSITIVITY = 0.0015;
+/** Шаг зума по клавишам +/- (эквивалент нескольких щелчков колеса). */
+const ZOOM_STEP_DELTA = 240;
 const STORAGE_KEY = "timeline:viewport";
 
 const SCROLL_MIN_MS = isoToMs(TIMELINE_MIN_DATE);
@@ -83,8 +85,10 @@ export type UseViewportResult = {
   viewport: Viewport;
   lod: Lod;
   zoomAt: (offsetX: number, deltaY: number) => void;
+  zoomStep: (direction: 1 | -1) => void;
   panByPixels: (dx: number) => void;
   setAnchored: (ms: number, x: number, pxPerDay: number) => void;
+  centerToday: () => void;
 };
 
 export function useViewport(width: number): UseViewportResult {
@@ -131,6 +135,14 @@ export function useViewport(width: number): UseViewportResult {
     [width],
   );
 
+  // Зум к центру экрана по клавишам: direction +1 приближает, -1 отдаляет.
+  const zoomStep = useCallback(
+    (direction: 1 | -1) => {
+      zoomAt(width / 2, direction === 1 ? -ZOOM_STEP_DELTA : ZOOM_STEP_DELTA);
+    },
+    [width, zoomAt],
+  );
+
   const panByPixels = useCallback(
     (dx: number) => {
       if (width <= 0) return;
@@ -154,5 +166,20 @@ export function useViewport(width: number): UseViewportResult {
     [width],
   );
 
-  return { viewport: state.vp, lod: state.lod, zoomAt, panByPixels, setAnchored };
+  // «К сегодня»: центрируем today, сохраняя текущий масштаб.
+  const centerToday = useCallback(() => {
+    if (width <= 0) return;
+    const bounds = currentBounds();
+    const todayMs = isoToMs(todayISO());
+    setState((prev) =>
+      nextState(
+        prev,
+        { pxPerDay: prev.vp.pxPerDay, originMs: originForAnchor(todayMs, width / 2, prev.vp.pxPerDay) },
+        width,
+        bounds,
+      ),
+    );
+  }, [width]);
+
+  return { viewport: state.vp, lod: state.lod, zoomAt, zoomStep, panByPixels, setAnchored, centerToday };
 }
