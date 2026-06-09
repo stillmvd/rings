@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { formatMonthRu } from "@/lib/dates";
 import { EventCard } from "./EventCard";
 import { DateScrubber } from "./DateScrubber";
+import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
 
 const GALLERY_MIN_SIGNIFICANCE = 2;
@@ -16,10 +17,13 @@ type MonthGroup = {
   events: TimelineEvent[];
 };
 
-function groupByMonth(events: TimelineEvent[]): MonthGroup[] {
+function groupByMonth(events: TimelineEvent[], filter: EventFilter): MonthGroup[] {
+  const filterOn = isFilterActive(filter);
   const map = new Map<string, TimelineEvent[]>();
   for (const e of events) {
+    // Базовый порог галереи sig 2–3 + пользовательский фильтр поверх.
     if (e.significance < GALLERY_MIN_SIGNIFICANCE) continue;
+    if (filterOn && !matchesFilter(e, filter)) continue;
     const key = e.date.slice(0, 7);
     const bucket = map.get(key);
     if (bucket) bucket.push(e);
@@ -36,18 +40,32 @@ function groupByMonth(events: TimelineEvent[]): MonthGroup[] {
 
 export function GalleryView({
   events,
+  filter = EMPTY_FILTER,
+  onFilterChange,
   onEventClick,
 }: {
   events: TimelineEvent[];
+  filter?: EventFilter;
+  onFilterChange?: (filter: EventFilter) => void;
   onEventClick: (event: TimelineEvent) => void;
 }) {
-  const groups = useMemo(() => groupByMonth(events), [events]);
+  const groups = useMemo(() => groupByMonth(events, filter), [events, filter]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   if (groups.length === 0) {
+    const filterOn = isFilterActive(filter);
     return (
-      <div className="flex h-full w-full items-center justify-center px-6 text-center text-muted">
-        Нет важных событий для галереи.
+      <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-muted">
+        {filterOn ? "Ничего не найдено по фильтру." : "Нет важных событий для галереи."}
+        {filterOn && onFilterChange && (
+          <button
+            type="button"
+            onClick={() => onFilterChange(EMPTY_FILTER)}
+            className="text-sm text-app-text underline-offset-4 transition-colors hover:underline"
+          >
+            Сбросить фильтры
+          </button>
+        )}
       </div>
     );
   }

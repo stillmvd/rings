@@ -8,13 +8,14 @@ import { EventPopover } from "./EventPopover";
 import { TimelineControls } from "./TimelineControls";
 import { useViewport } from "./useViewport";
 import { xToMs } from "@/lib/projection";
-import { msToISO } from "@/lib/dates";
+import { msToISO, isoToMs } from "@/lib/dates";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { listMediaAction } from "@/actions/media";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { EventMedia } from "@/db/queries/media";
 import type { CategoryNode } from "@/db/queries/categories";
 import type { PopoverAnchor } from "@/components/ui/Popover";
+import type { EventFilter } from "@/lib/filter";
 import type { EventFormPayload } from "./EventForm";
 
 const CLICK_THRESHOLD_PX = 4;
@@ -22,19 +23,26 @@ const CLICK_THRESHOLD_PX = 4;
 export function TimelineStage({
   events,
   categories,
+  filter,
+  focus,
   onCreate,
   onUpdate,
   onDelete,
 }: {
   events: TimelineEvent[];
   categories: CategoryNode[];
+  filter?: EventFilter;
+  onFilterChange?: (filter: EventFilter) => void;
+  focus?: { event: TimelineEvent; token: number } | null;
   onCreate: (payload: EventFormPayload) => void;
   onUpdate: (id: number, payload: EventFormPayload) => void;
   onDelete: (id: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const { viewport, lod, zoomAt, zoomStep, panByPixels, centerToday } = useViewport(size.width);
+  const { viewport, lod, zoomAt, zoomStep, panByPixels, centerToday, centerToMs } = useViewport(
+    size.width,
+  );
 
   type PopoverState =
     | { mode: "create"; anchor: PopoverAnchor; date: string }
@@ -115,6 +123,11 @@ export function TimelineStage({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [zoomStep, centerToday]);
+
+  // Центрирование оси к событию, выбранному в результатах поиска.
+  useEffect(() => {
+    if (focus && size.width > 0) centerToMs(isoToMs(focus.event.date));
+  }, [focus, centerToMs, size.width]);
 
   // Drag-панорама. Захват указателя — только после превышения порога,
   // иначе capture перехватывает click по точкам и ломает открытие поповера.
@@ -201,6 +214,8 @@ export function TimelineStage({
         width={size.width}
         height={size.height}
         lod={lod}
+        filter={filter}
+        highlightId={focus?.event.id ?? null}
         onEventClick={handleEventClick}
       />
       <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />

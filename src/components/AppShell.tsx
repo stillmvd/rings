@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { EventDetails } from "@/components/gallery/EventDetails";
+import { SearchPanel } from "@/components/search/SearchPanel";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ModeToggle, type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
+import { EMPTY_FILTER, type EventFilter } from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { EventMedia } from "@/db/queries/media";
 import type { CategoryNode } from "@/db/queries/categories";
@@ -58,6 +60,38 @@ export function AppShell({
   const [mode, setMode] = useViewMode();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   const [detail, setDetail] = useState<Detail | null>(null);
+  // Стейт фильтра поднят сюда — общий для обоих режимов (таймлайн и галерея).
+  const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
+  const [searchOpen, setSearchOpen] = useState(false);
+  // Выбранный в поиске результат: таймлайн центрируется и подсвечивает событие.
+  const [focus, setFocus] = useState<{ event: TimelineEvent; token: number } | null>(null);
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSelectResult = (event: TimelineEvent) => {
+    setSearchOpen(false);
+    setMode("timeline");
+    setFocus({ event, token: Date.now() });
+    if (focusTimer.current) clearTimeout(focusTimer.current);
+    focusTimer.current = setTimeout(() => setFocus(null), 2800);
+  };
+
+  // Горячие клавиши открытия панели поиска: "/" или Ctrl/Cmd+F.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const t = e.target as HTMLElement | null;
+      const editable =
+        t?.tagName === "INPUT" || t?.tagName === "TEXTAREA" || t?.isContentEditable;
+      if ((e.ctrlKey || e.metaKey) && (e.key === "f" || e.key === "F")) {
+        e.preventDefault();
+        setSearchOpen(true);
+      } else if (e.key === "/" && !editable && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   // Грузим фото ДО открытия — форма редактирования берёт initialMedia один раз.
   const openDetail = (event: TimelineEvent) => {
@@ -72,15 +106,32 @@ export function AppShell({
         <TimelineStage
           events={liveEvents}
           categories={categories}
+          filter={filter}
+          onFilterChange={setFilter}
+          focus={focus}
           onCreate={create}
           onUpdate={update}
           onDelete={remove}
         />
       ) : (
-        <GalleryView events={liveEvents} onEventClick={openDetail} />
+        <GalleryView
+          events={liveEvents}
+          filter={filter}
+          onFilterChange={setFilter}
+          onEventClick={openDetail}
+        />
       )}
 
       <div className="fixed right-4 top-4 z-30 flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Поиск"
+          title="Поиск (/)"
+          onClick={() => setSearchOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text"
+        >
+          <Search size={18} />
+        </button>
         <ModeToggle value={mode} onChange={setMode} />
         <ThemeToggle />
         <Link
@@ -91,6 +142,16 @@ export function AppShell({
           <Settings size={18} />
         </Link>
       </div>
+
+      <SearchPanel
+        open={searchOpen}
+        filter={filter}
+        categories={categories}
+        events={liveEvents}
+        onFilterChange={setFilter}
+        onSelectResult={handleSelectResult}
+        onClose={() => setSearchOpen(false)}
+      />
 
       <EventDetails
         open={detail !== null}

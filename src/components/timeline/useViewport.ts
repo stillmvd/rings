@@ -89,6 +89,7 @@ export type UseViewportResult = {
   panByPixels: (dx: number) => void;
   setAnchored: (ms: number, x: number, pxPerDay: number) => void;
   centerToday: () => void;
+  centerToMs: (ms: number) => void;
 };
 
 export function useViewport(width: number): UseViewportResult {
@@ -166,20 +167,36 @@ export function useViewport(width: number): UseViewportResult {
     [width],
   );
 
+  // Центрировать ось к произвольной дате (ms), сохраняя текущий масштаб.
+  const centerToMs = useCallback(
+    (ms: number) => {
+      if (width <= 0) return;
+      const bounds = currentBounds();
+      setState((prev) =>
+        nextState(
+          prev,
+          { pxPerDay: prev.vp.pxPerDay, originMs: originForAnchor(ms, width / 2, prev.vp.pxPerDay) },
+          width,
+          bounds,
+        ),
+      );
+    },
+    [width],
+  );
+
   // «К сегодня»: центрируем today, сохраняя текущий масштаб.
   const centerToday = useCallback(() => {
-    if (width <= 0) return;
-    const bounds = currentBounds();
-    const todayMs = isoToMs(todayISO());
-    setState((prev) =>
-      nextState(
-        prev,
-        { pxPerDay: prev.vp.pxPerDay, originMs: originForAnchor(todayMs, width / 2, prev.vp.pxPerDay) },
-        width,
-        bounds,
-      ),
-    );
-  }, [width]);
+    centerToMs(isoToMs(todayISO()));
+  }, [centerToMs]);
 
-  return { viewport: state.vp, lod: state.lod, zoomAt, zoomStep, panByPixels, setAnchored, centerToday };
+  return {
+    viewport: state.vp,
+    lod: state.lod,
+    zoomAt,
+    zoomStep,
+    panByPixels,
+    setAnchored,
+    centerToday,
+    centerToMs,
+  };
 }
