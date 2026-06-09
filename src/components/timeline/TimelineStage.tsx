@@ -11,8 +11,15 @@ import { xToMs } from "@/lib/projection";
 import { msToISO } from "@/lib/dates";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { createEventAction, updateEventAction, deleteEventAction } from "@/actions/events";
+import {
+  listMediaAction,
+  uploadMediaAction,
+  deleteMediaAction,
+  reorderMediaAction,
+} from "@/actions/media";
 import { useToast } from "@/components/ui/Toast";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { EventMedia } from "@/db/queries/media";
 import type { Category, CategoryNode } from "@/db/queries/categories";
 import type { PopoverAnchor } from "@/components/ui/Popover";
 import type { EventFormPayload } from "./EventForm";
@@ -42,7 +49,7 @@ export function TimelineStage({
 
   type PopoverState =
     | { mode: "create"; anchor: PopoverAnchor; date: string }
-    | { mode: "edit"; anchor: PopoverAnchor; event: TimelineEvent };
+    | { mode: "edit"; anchor: PopoverAnchor; event: TimelineEvent; media: EventMedia[] };
 
   const [popover, setPopover] = useState<PopoverState | null>(null);
 
@@ -68,7 +75,11 @@ export function TimelineStage({
     },
   );
 
-  const buildEvent = (id: number, payload: EventFormPayload): TimelineEvent => {
+  const buildEvent = (
+    id: number,
+    payload: EventFormPayload,
+    cover: string | null = null,
+  ): TimelineEvent => {
     const cat = findCategory(categories, payload.categoryId);
     return {
       id,
@@ -81,6 +92,7 @@ export function TimelineStage({
       category_name: cat?.name ?? null,
       category_icon: cat?.icon ?? null,
       category_color: cat?.color ?? null,
+      cover,
     };
   };
 
@@ -93,22 +105,36 @@ export function TimelineStage({
     categoryId: payload.categoryId,
   });
 
+  const finalizeMedia = async (eventId: number, media: EventFormPayload["media"]) => {
+    for (const mediaId of media.removedIds) await deleteMediaAction(eventId, mediaId);
+    if (media.orderedIds.length > 0) await reorderMediaAction(eventId, media.orderedIds);
+    if (media.files.length > 0) {
+      const fd = new FormData();
+      for (const f of media.files) fd.append("files", f);
+      const res = await uploadMediaAction(eventId, fd);
+      if (!res.ok) show(res.error, "error");
+    }
+  };
+
   const handleCreate = (payload: EventFormPayload) => {
     setPopover(null);
     const temp = buildEvent(-Date.now(), payload);
     startTransition(async () => {
       applyOptimistic({ type: "add", event: temp });
       const res = await createEventAction(actionInput(payload));
+      if (res.ok && res.id != null) await finalizeMedia(res.id, payload.media);
       show(res.ok ? "Событие создано" : res.error, res.ok ? "success" : "error");
     });
   };
 
   const handleUpdate = (id: number, payload: EventFormPayload) => {
     setPopover(null);
-    const updated = buildEvent(id, payload);
+    const cover = optimisticEvents.find((e) => e.id === id)?.cover ?? null;
+    const updated = buildEvent(id, payload, cover);
     startTransition(async () => {
       applyOptimistic({ type: "update", event: updated });
       const res = await updateEventAction(id, actionInput(payload));
+      if (res.ok) await finalizeMedia(id, payload.media);
       show(res.ok ? "Изменения сохранены" : res.error, res.ok ? "success" : "error");
     });
   };
@@ -123,7 +149,11 @@ export function TimelineStage({
   };
 
   const handleEventClick = (event: TimelineEvent, anchor: PopoverAnchor) => {
-    setPopover({ mode: "edit", anchor, event });
+    // Грузим фото ДО открытия — форма берёт initialMedia в useState-инициализаторе
+    // один раз при монтировании, поэтому media должны быть готовы заранее.
+    listMediaAction(event.id)
+      .then((media) => setPopover({ mode: "edit", anchor, event, media }))
+      .catch(() => setPopover({ mode: "edit", anchor, event, media: [] }));
   };
 
   // Размеры контейнера.
@@ -279,6 +309,7 @@ export function TimelineStage({
         mode={popover?.mode ?? "create"}
         dateISO={popover?.mode === "create" ? popover.date : null}
         event={popover?.mode === "edit" ? popover.event : null}
+        media={popover?.mode === "edit" ? popover.media : []}
         categories={categories}
         onCreate={handleCreate}
         onUpdate={handleUpdate}

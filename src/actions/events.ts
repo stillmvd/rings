@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createEvent, deleteEvent, updateEvent } from "@/db/queries/events";
+import { listMediaByEvent } from "@/db/queries/media";
+import { deleteMediaFile } from "@/lib/media";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 
 export type EventResult = { ok: true; id?: number } | { ok: false; error: string };
@@ -69,6 +71,7 @@ export async function updateEventAction(
 }
 
 export async function deleteEventAction(id: number): Promise<EventResult> {
+  for (const m of listMediaByEvent(id)) deleteMediaFile(m.path);
   deleteEvent(id);
   revalidatePath("/");
   return { ok: true };

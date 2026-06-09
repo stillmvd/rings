@@ -28,6 +28,15 @@ CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
 CREATE INDEX IF NOT EXISTS idx_events_category ON events(category_id);
 CREATE INDEX IF NOT EXISTS idx_events_significance ON events(significance);
 
+CREATE TABLE IF NOT EXISTS event_media (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  path TEXT NOT NULL,                              -- относительный путь в data/media/
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_event_media_event ON event_media(event_id);
+
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

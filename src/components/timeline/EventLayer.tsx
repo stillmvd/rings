@@ -204,6 +204,14 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
           >
             {hovered.events.length === 1 ? (
               <>
+                {hovered.events[0].cover && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/media/${hovered.events[0].cover}`}
+                    alt=""
+                    className="mb-1.5 h-24 w-full rounded-md object-cover"
+                  />
+                )}
                 <div className="text-sm font-semibold text-app-text">
                   {hovered.events[0].title}
                 </div>

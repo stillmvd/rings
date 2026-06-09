@@ -12,6 +12,7 @@ export type TimelineEvent = {
   category_name: string | null;
   category_icon: string | null;
   category_color: string | null;
+  cover: string | null;
 };
 
 export type EventInput = {
@@ -33,7 +34,10 @@ const SELECT = `
          e.category_id,
          c.name  AS category_name,
          c.icon  AS category_icon,
-         c.color AS category_color
+         c.color AS category_color,
+         (SELECT m.path FROM event_media m
+           WHERE m.event_id = e.id
+           ORDER BY m.sort_order, m.id LIMIT 1) AS cover
   FROM events e
   LEFT JOIN categories c ON c.id = e.category_id`;
 

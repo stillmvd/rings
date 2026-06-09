@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CategoryNode } from "@/db/queries/categories";
+import type { EventMedia } from "@/db/queries/media";
+import { MediaUploader, type MediaItem } from "./MediaUploader";
 import {
   SIGNIFICANCE_VALUES,
   TIMELINE_MIN_DATE,
@@ -28,6 +30,12 @@ export interface EventFormValues {
   subcategoryId: number | null;
 }
 
+export interface EventMediaPayload {
+  files: File[];
+  removedIds: number[];
+  orderedIds: number[];
+}
+
 export interface EventFormPayload {
   title: string;
   description: string;
@@ -35,11 +43,13 @@ export interface EventFormPayload {
   endDate: string | null;
   significance: Significance;
   categoryId: number | null;
+  media: EventMediaPayload;
 }
 
 interface EventFormProps {
   categories: CategoryNode[];
   initial?: Partial<EventFormValues>;
+  initialMedia?: EventMedia[];
   mode?: "create" | "edit";
   submitting?: boolean;
   onSubmit: (payload: EventFormPayload) => void;
@@ -60,6 +70,7 @@ const kindSegments: { value: "point" | "period"; label: string }[] = [
 export function EventForm({
   categories,
   initial,
+  initialMedia,
   mode = "create",
   submitting = false,
   onSubmit,
@@ -86,6 +97,35 @@ export function EventForm({
   const [titleError, setTitleError] = useState<string>();
   const [dateError, setDateError] = useState<string>();
   const [endDateError, setEndDateError] = useState<string>();
+
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() =>
+    (initialMedia ?? []).map((m) => ({ key: `e-${m.id}`, kind: "existing", media: m })),
+  );
+  const pendingUrls = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const urls = pendingUrls.current;
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, []);
+
+  function handlePick(files: File[]) {
+    setMediaItems((prev) => [
+      ...prev,
+      ...files.map((file) => {
+        const url = URL.createObjectURL(file);
+        pendingUrls.current.add(url);
+        return { key: `p-${crypto.randomUUID()}`, kind: "pending" as const, file, url };
+      }),
+    ]);
+  }
+
+  function handleRemoveMedia(item: MediaItem) {
+    if (item.kind === "pending") {
+      URL.revokeObjectURL(item.url);
+      pendingUrls.current.delete(item.url);
+    }
+    setMediaItems((prev) => prev.filter((it) => it.key !== item.key));
+  }
 
   function handleKindChange(next: "point" | "period") {
     setKind(next);
@@ -155,6 +195,16 @@ export function EventForm({
 
     if (!valid) return;
 
+    const orderedIds = mediaItems
+      .filter((i) => i.kind === "existing")
+      .map((i) => i.media.id);
+    const removedIds = (initialMedia ?? [])
+      .map((m) => m.id)
+      .filter((id) => !orderedIds.includes(id));
+    const files = mediaItems
+      .filter((i): i is Extract<MediaItem, { kind: "pending" }> => i.kind === "pending")
+      .map((i) => i.file);
+
     onSubmit({
       title: title.trim(),
       description: description.trim(),
@@ -162,6 +212,7 @@ export function EventForm({
       endDate: kind === "period" ? endDate : null,
       significance,
       categoryId: subcategoryId ?? categoryId,
+      media: { files, removedIds, orderedIds },
     });
   }
 
@@ -234,6 +285,13 @@ export function EventForm({
           placeholder="—"
         />
       )}
+
+      <MediaUploader
+        items={mediaItems}
+        onReorder={setMediaItems}
+        onPick={handlePick}
+        onRemove={handleRemoveMedia}
+      />
 
       <div className="mt-1 flex items-center justify-between gap-2">
         {onDelete ? (

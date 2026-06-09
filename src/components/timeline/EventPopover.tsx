@@ -2,6 +2,7 @@
 
 import type { CategoryNode } from "@/db/queries/categories";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { EventMedia } from "@/db/queries/media";
 import { Popover, type PopoverAnchor } from "@/components/ui/Popover";
 import {
   EventForm,
@@ -16,6 +17,7 @@ interface EventPopoverProps {
   mode: "create" | "edit";
   dateISO: string | null;
   event: TimelineEvent | null;
+  media: EventMedia[];
   categories: CategoryNode[];
   onCreate: (payload: EventFormPayload) => void;
   onUpdate: (id: number, payload: EventFormPayload) => void;
@@ -42,6 +44,7 @@ export function EventPopover({
   mode,
   dateISO,
   event,
+  media,
   categories,
   onCreate,
   onUpdate,
@@ -70,6 +73,7 @@ export function EventPopover({
             key={`edit-${event.id}`}
             mode="edit"
             categories={categories}
+            initialMedia={media}
             initial={
               {
                 title: event.title,
