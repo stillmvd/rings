@@ -12,6 +12,7 @@ import {
 import { getSignificanceMeta } from "@/lib/significance";
 import { todayISO } from "@/lib/dates";
 import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -147,11 +148,10 @@ export function EventForm({
         placeholder="Детали (необязательно)"
       />
 
-      <Input
+      <DatePicker
         label="Дата"
-        type="date"
         value={date}
-        onChange={(e) => setDate(e.target.value)}
+        onChange={setDate}
         error={dateError}
         min={TIMELINE_MIN_DATE}
         max={TIMELINE_MAX_DATE}

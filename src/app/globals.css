@@ -89,6 +89,56 @@
   --radius-card-lg: var(--tl-radius-card-lg);
 }
 
+/* === react-day-picker — подгонка под тему Timeline ======================== */
+
+.tl-calendar .rdp-root {
+  --rdp-accent-color: var(--tl-accent-500);
+  --rdp-accent-background-color: color-mix(in srgb, var(--tl-accent-500) 20%, transparent);
+  --rdp-today-color: var(--tl-accent-400);
+  --rdp-day-width: 38px;
+  --rdp-day-height: 38px;
+  --rdp-day_button-width: 36px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-border-radius: 0.625rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-nav_button-height: 2rem;
+  color: var(--tl-text);
+  margin: 0;
+}
+
+.tl-calendar .rdp-day_button:hover:not(:disabled) {
+  background-color: var(--tl-surface-2);
+}
+
+.tl-calendar .rdp-selected .rdp-day_button,
+.tl-calendar .rdp-selected .rdp-day_button:hover {
+  background-color: var(--tl-accent-500);
+  border-color: var(--tl-accent-500);
+  color: #fff;
+}
+
+.tl-calendar .rdp-chevron {
+  fill: var(--tl-text-muted);
+}
+
+.tl-calendar .rdp-button_next:hover .rdp-chevron,
+.tl-calendar .rdp-button_previous:hover .rdp-chevron {
+  fill: var(--tl-text);
+}
+
+.tl-calendar .rdp-month_caption {
+  font-size: 0.95rem;
+}
+
+.tl-calendar .rdp-weekday {
+  color: var(--tl-text-muted);
+}
+
+.tl-calendar .rdp-dropdown_root select {
+  color: var(--tl-text);
+  background-color: var(--tl-surface-1);
+}
+
 html,
 body {
   background: var(--tl-surface-0);
