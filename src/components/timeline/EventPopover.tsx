@@ -25,7 +25,7 @@ interface EventPopoverProps {
   onClose: () => void;
 }
 
-function splitCategory(
+export function splitCategory(
   cats: CategoryNode[],
   catId: number | null,
 ): { categoryId: number | null; subcategoryId: number | null } {
