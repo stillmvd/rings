@@ -10,8 +10,10 @@ import { EventDot } from "./EventDot";
 import type { TimelineEvent } from "@/db/queries/events";
 
 const CLUSTER_GAP_PX = 18;
+const MIN_BAR_PX = 14;
 
 type Cluster = { x: number; events: TimelineEvent[] };
+type Bar = { ev: TimelineEvent; x1: number; x2: number; tip: Cluster };
 
 type Props = {
   events: TimelineEvent[];
@@ -27,15 +29,29 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
   const rank = lodRank(lod);
   const [hovered, setHovered] = useState<Cluster | null>(null);
 
-  const clusters = useMemo<Cluster[]>(() => {
-    const visible = events
-      .filter((ev) => isVisibleAtLod(ev.significance, rank))
-      .map((ev) => ({ ev, x: msToX(isoToMs(ev.date), viewport) }))
-      .filter((it) => it.x >= -24 && it.x <= width + 24)
-      .sort((a, b) => a.x - b.x);
+  const { bars, clusters } = useMemo<{ bars: Bar[]; clusters: Cluster[] }>(() => {
+    const bars: Bar[] = [];
+    const points: Array<{ ev: TimelineEvent; x: number }> = [];
 
+    for (const ev of events) {
+      if (!isVisibleAtLod(ev.significance, rank)) continue;
+      const x1 = msToX(isoToMs(ev.date), viewport);
+      if (ev.end_date) {
+        const x2 = msToX(isoToMs(ev.end_date), viewport);
+        if (x2 - x1 >= MIN_BAR_PX) {
+          if (x2 >= -24 && x1 <= width + 24) {
+            const cx = Math.min(Math.max((x1 + x2) / 2, 8), Math.max(8, width - 8));
+            bars.push({ ev, x1, x2, tip: { x: cx, events: [ev] } });
+          }
+          continue;
+        }
+      }
+      if (x1 >= -24 && x1 <= width + 24) points.push({ ev, x: x1 });
+    }
+
+    points.sort((a, b) => a.x - b.x);
     const out: Array<Cluster & { sumX: number }> = [];
-    for (const { ev, x } of visible) {
+    for (const { ev, x } of points) {
       const last = out[out.length - 1];
       if (last && x - last.x <= CLUSTER_GAP_PX) {
         last.events.push(ev);
@@ -45,7 +61,7 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
         out.push({ x, sumX: x, events: [ev] });
       }
     }
-    return out.map(({ x, events: e }) => ({ x, events: e }));
+    return { bars, clusters: out.map(({ x, events: e }) => ({ x, events: e })) };
   }, [events, viewport, width, rank]);
 
   // Подсказка для пустого диапазона: считаем по времени, без LOD-фильтра.
@@ -55,7 +71,8 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
     const toMs = xToMs(width, viewport);
     const hasInRange = events.some((ev) => {
       const ms = isoToMs(ev.date);
-      return ms >= fromMs && ms <= toMs;
+      const endMs = ev.end_date ? isoToMs(ev.end_date) : ms;
+      return endMs >= fromMs && ms <= toMs;
     });
     if (hasInRange) return null;
     return events.length === 0
@@ -65,6 +82,43 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <AnimatePresence initial={false}>
+        {bars.map((bar) => {
+          const sig = getSignificanceMeta(bar.ev.significance);
+          const color = bar.ev.category_color ?? sig.color;
+          const barH = Math.max(6, Math.round(sig.dotRadius * 1.5));
+          return (
+            <motion.div
+              key={`bar-${bar.ev.id}`}
+              className="pointer-events-auto absolute cursor-pointer rounded-full"
+              style={{
+                left: bar.x1,
+                top: axisY,
+                y: "-50%",
+                width: bar.x2 - bar.x1,
+                height: barH,
+                background: color,
+                boxShadow: sig.ring
+                  ? `0 0 0 2px var(--tl-surface-0), 0 0 0 3px ${sig.ringColor ?? color}`
+                  : "0 0 0 2px var(--tl-surface-0)",
+              }}
+              initial={{ opacity: 0, scaleY: 0.4 }}
+              animate={{ opacity: 1, scaleY: 1 }}
+              exit={{ opacity: 0, scaleY: 0.4 }}
+              transition={{ duration: 0.18, ease: "easeOut" as const }}
+              onMouseEnter={() => setHovered(bar.tip)}
+              onMouseLeave={() => setHovered((h) => (h === bar.tip ? null : h))}
+              onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+              onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                onEventClick?.(bar.ev, { x: e.clientX, y: r.top + r.height / 2 });
+              }}
+            />
+          );
+        })}
+      </AnimatePresence>
+
       <AnimatePresence initial={false}>
         {clusters.map((cluster) => {
           const key = cluster.events[0].id;
@@ -153,7 +207,11 @@ export function EventLayer({ events, viewport, width, height, lod, onEventClick 
                 <div className="text-sm font-semibold text-app-text">
                   {hovered.events[0].title}
                 </div>
-                <div className="text-xs text-muted">{formatFullRu(hovered.events[0].date)}</div>
+                <div className="text-xs text-muted">
+                  {hovered.events[0].end_date
+                    ? `${formatDayMonthRu(hovered.events[0].date)} — ${formatFullRu(hovered.events[0].end_date)}`
+                    : formatFullRu(hovered.events[0].date)}
+                </div>
               </>
             ) : (
               <>

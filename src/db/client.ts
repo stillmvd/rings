@@ -34,8 +34,19 @@ function createDb(): Database.Database {
   return db;
 }
 
-function migrate(_db: Database.Database): void {
-  // Миграции по мере эволюции схемы (паттерн MyBudget: ALTER TABLE под guard hasColumn).
+function migrate(db: Database.Database): void {
+  migrateEventEndDate(db);
+}
+
+function migrateEventEndDate(db: Database.Database): void {
+  if (!hasColumn(db, "events", "end_date")) {
+    db.exec("ALTER TABLE events ADD COLUMN end_date TEXT");
+  }
+}
+
+function hasColumn(db: Database.Database, table: string, column: string): boolean {
+  const rows = db.prepare<[], { name: string }>(`PRAGMA table_info(${table})`).all();
+  return rows.some((r) => r.name === column);
 }
 
 export function getDb(): Database.Database {

@@ -10,6 +10,7 @@ type EventActionInput = {
   title: string;
   description: string;
   date: string;
+  endDate: string | null;
   significance: number;
   categoryId: number | null;
 };
@@ -19,6 +20,14 @@ function validate(input: EventActionInput): string | null {
   if (!isValidISODate(input.date)) return "Некорректная дата";
   if (input.date < TIMELINE_MIN_DATE || input.date > TIMELINE_MAX_DATE) {
     return "Дата вне диапазона таймлайна";
+  }
+  const endDate = input.endDate?.trim();
+  if (endDate) {
+    if (!isValidISODate(endDate)) return "Некорректная дата конца";
+    if (endDate < TIMELINE_MIN_DATE || endDate > TIMELINE_MAX_DATE) {
+      return "Дата конца вне диапазона таймлайна";
+    }
+    if (endDate < input.date) return "Дата конца раньше даты начала";
   }
   if (![1, 2, 3].includes(input.significance)) return "Неверная значимость";
   return null;
@@ -32,6 +41,7 @@ export async function createEventAction(input: EventActionInput): Promise<EventR
     title: input.title.trim(),
     description: input.description.trim() || null,
     date: input.date,
+    endDate: input.endDate?.trim() || null,
     significance: input.significance,
     categoryId: input.categoryId,
   });
@@ -50,6 +60,7 @@ export async function updateEventAction(
     title: input.title.trim(),
     description: input.description.trim() || null,
     date: input.date,
+    endDate: input.endDate?.trim() || null,
     significance: input.significance,
     categoryId: input.categoryId,
   });

@@ -6,6 +6,7 @@ export type TimelineEvent = {
   title: string;
   description: string | null;
   date: string;
+  end_date: string | null;
   significance: number;
   category_id: number | null;
   category_name: string | null;
@@ -17,6 +18,7 @@ export type EventInput = {
   title: string;
   description: string | null;
   date: string;
+  endDate: string | null;
   significance: number;
   categoryId: number | null;
 };
@@ -26,6 +28,7 @@ const SELECT = `
          e.title,
          e.description,
          e.date,
+         e.end_date,
          e.significance,
          e.category_id,
          c.name  AS category_name,
@@ -52,10 +55,17 @@ export function getEvent(id: number): TimelineEvent | null {
 export function createEvent(input: EventInput): number {
   const res = getDb()
     .prepare(
-      `INSERT INTO events(title, description, date, significance, category_id)
-       VALUES(?, ?, ?, ?, ?)`,
+      `INSERT INTO events(title, description, date, end_date, significance, category_id)
+       VALUES(?, ?, ?, ?, ?, ?)`,
     )
-    .run(input.title, input.description, input.date, input.significance, input.categoryId);
+    .run(
+      input.title,
+      input.description,
+      input.date,
+      input.endDate,
+      input.significance,
+      input.categoryId,
+    );
   return Number(res.lastInsertRowid);
 }
 
@@ -63,11 +73,19 @@ export function updateEvent(id: number, input: EventInput): void {
   getDb()
     .prepare(
       `UPDATE events
-       SET title = ?, description = ?, date = ?, significance = ?, category_id = ?,
+       SET title = ?, description = ?, date = ?, end_date = ?, significance = ?, category_id = ?,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
     )
-    .run(input.title, input.description, input.date, input.significance, input.categoryId, id);
+    .run(
+      input.title,
+      input.description,
+      input.date,
+      input.endDate,
+      input.significance,
+      input.categoryId,
+      id,
+    );
 }
 
 export function deleteEvent(id: number): void {

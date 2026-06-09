@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   description TEXT,
-  date TEXT NOT NULL,                              -- YYYY-MM-DD
+  date TEXT NOT NULL,                              -- YYYY-MM-DD (начало)
+  end_date TEXT,                                   -- YYYY-MM-DD, NULL = точечное событие
   significance INTEGER NOT NULL DEFAULT 1 CHECK(significance IN (1, 2, 3)),
   category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

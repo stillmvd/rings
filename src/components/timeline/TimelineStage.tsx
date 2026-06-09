@@ -75,6 +75,7 @@ export function TimelineStage({
       title: payload.title,
       description: payload.description || null,
       date: payload.date,
+      end_date: payload.endDate,
       significance: payload.significance,
       category_id: payload.categoryId,
       category_name: cat?.name ?? null,
@@ -87,6 +88,7 @@ export function TimelineStage({
     title: payload.title,
     description: payload.description,
     date: payload.date,
+    endDate: payload.endDate,
     significance: payload.significance,
     categoryId: payload.categoryId,
   });

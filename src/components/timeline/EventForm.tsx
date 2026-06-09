@@ -22,6 +22,7 @@ export interface EventFormValues {
   title: string;
   description: string;
   date: string;
+  endDate: string | null;
   significance: Significance;
   categoryId: number | null;
   subcategoryId: number | null;
@@ -31,6 +32,7 @@ export interface EventFormPayload {
   title: string;
   description: string;
   date: string;
+  endDate: string | null;
   significance: Significance;
   categoryId: number | null;
 }
@@ -50,6 +52,11 @@ const sigSegments = SIGNIFICANCE_VALUES.map((v) => {
   return { value: String(v), label: meta.label, color: meta.color };
 });
 
+const kindSegments: { value: "point" | "period"; label: string }[] = [
+  { value: "point", label: "Момент" },
+  { value: "period", label: "Период" },
+];
+
 export function EventForm({
   categories,
   initial,
@@ -62,6 +69,10 @@ export function EventForm({
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [date, setDate] = useState(initial?.date ?? todayISO());
+  const [kind, setKind] = useState<"point" | "period">(
+    initial?.endDate != null ? "period" : "point",
+  );
+  const [endDate, setEndDate] = useState<string>(initial?.endDate ?? "");
   const [significance, setSignificance] = useState<Significance>(
     initial?.significance ?? 1,
   );
@@ -74,6 +85,12 @@ export function EventForm({
 
   const [titleError, setTitleError] = useState<string>();
   const [dateError, setDateError] = useState<string>();
+  const [endDateError, setEndDateError] = useState<string>();
+
+  function handleKindChange(next: "point" | "period") {
+    setKind(next);
+    if (next === "period" && !endDate) setEndDate(date);
+  }
 
   const selectedCategory = categories.find((c) => c.id === categoryId) ?? null;
   const subOptions: SelectOption[] = (selectedCategory?.children ?? []).map((c) => ({
@@ -119,12 +136,30 @@ export function EventForm({
       setDateError(undefined);
     }
 
+    if (kind === "period") {
+      if (!isValidISODate(endDate)) {
+        setEndDateError("Некорректная дата");
+        valid = false;
+      } else if (endDate < TIMELINE_MIN_DATE || endDate > TIMELINE_MAX_DATE) {
+        setEndDateError("Дата вне диапазона таймлайна");
+        valid = false;
+      } else if (endDate < date) {
+        setEndDateError("Конец раньше начала");
+        valid = false;
+      } else {
+        setEndDateError(undefined);
+      }
+    } else {
+      setEndDateError(undefined);
+    }
+
     if (!valid) return;
 
     onSubmit({
       title: title.trim(),
       description: description.trim(),
       date,
+      endDate: kind === "period" ? endDate : null,
       significance,
       categoryId: subcategoryId ?? categoryId,
     });
@@ -148,14 +183,32 @@ export function EventForm({
         placeholder="Детали (необязательно)"
       />
 
+      <SegmentedControl
+        label="Длительность"
+        segments={kindSegments}
+        value={kind}
+        onChange={handleKindChange}
+      />
+
       <DatePicker
-        label="Дата"
+        label={kind === "period" ? "Начало" : "Дата"}
         value={date}
         onChange={setDate}
         error={dateError}
         min={TIMELINE_MIN_DATE}
         max={TIMELINE_MAX_DATE}
       />
+
+      {kind === "period" && (
+        <DatePicker
+          label="Конец"
+          value={endDate}
+          onChange={setEndDate}
+          error={endDateError}
+          min={date}
+          max={TIMELINE_MAX_DATE}
+        />
+      )}
 
       <SegmentedControl
         label="Значимость"

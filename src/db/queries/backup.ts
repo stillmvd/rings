@@ -18,6 +18,7 @@ export type BackupEvent = {
   title: string;
   description: string | null;
   date: string;
+  end_date: string | null;
   significance: number;
   category_id: number | null;
   created_at: string;
@@ -56,8 +57,8 @@ export function importBackupData(data: BackupData): { categories: number; events
       for (const c of sorted) insCat.run(c);
 
       const insEvent = db.prepare(
-        `INSERT INTO events(id, title, description, date, significance, category_id, created_at, updated_at)
-         VALUES(@id, @title, @description, @date, @significance, @category_id, @created_at, @updated_at)`,
+        `INSERT INTO events(id, title, description, date, end_date, significance, category_id, created_at, updated_at)
+         VALUES(@id, @title, @description, @date, @end_date, @significance, @category_id, @created_at, @updated_at)`,
       );
       for (const e of data.events) insEvent.run(e);
 
@@ -81,7 +82,7 @@ export function getBackupData(): BackupData {
     .all();
   const events = db
     .prepare<[], BackupEvent>(
-      `SELECT id, title, description, date, significance, category_id, created_at, updated_at
+      `SELECT id, title, description, date, end_date, significance, category_id, created_at, updated_at
        FROM events ORDER BY id`,
     )
     .all();

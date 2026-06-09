@@ -75,6 +75,7 @@ export function EventPopover({
                 title: event.title,
                 description: event.description ?? "",
                 date: event.date,
+                endDate: event.end_date,
                 significance: event.significance as Significance,
                 ...splitCategory(categories, event.category_id),
               } satisfies Partial<EventFormValues>
