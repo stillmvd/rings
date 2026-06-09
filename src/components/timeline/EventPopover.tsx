@@ -49,7 +49,7 @@ export function EventPopover({
   onClose,
 }: EventPopoverProps) {
   return (
-    <Popover open={open} anchor={anchor} onClose={onClose} width={340}>
+    <Popover open={open} anchor={anchor} onClose={onClose} width={490}>
       {mode === "create" && dateISO && (
         <>
           <h3 className="mb-3 text-sm font-semibold text-app-text">Новое событие</h3>

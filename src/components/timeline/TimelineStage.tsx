@@ -182,6 +182,7 @@ export function TimelineStage({
   const lastX = useRef(0);
   const downX = useRef(0);
   const downY = useRef(0);
+  const popoverOpenAtDown = useRef(false);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     pointerActive.current = true;
@@ -189,6 +190,7 @@ export function TimelineStage({
     lastX.current = e.clientX;
     downX.current = e.clientX;
     downY.current = e.clientY;
+    popoverOpenAtDown.current = popover !== null;
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -217,6 +219,11 @@ export function TimelineStage({
     }
     e.currentTarget.style.cursor = "grab";
     if (wasDragging || size.width <= 0) return;
+
+    if (popoverOpenAtDown.current) {
+      setPopover(null);
+      return;
+    }
 
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
