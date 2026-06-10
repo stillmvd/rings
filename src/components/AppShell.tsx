@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Search, Settings } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
+import { CalendarView } from "@/components/calendar/CalendarView";
 import { EventDetails } from "@/components/gallery/EventDetails";
+import { EventPopover } from "@/components/timeline/EventPopover";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
+import type { PopoverAnchor } from "@/components/ui/Popover";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ModeToggle, type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
@@ -19,7 +22,8 @@ import type { CategoryNode } from "@/db/queries/categories";
 const MODE_KEY = "timeline.viewMode";
 const MODE_EVENT = "timeline:viewmode";
 
-const isMode = (v: string | null): v is ViewMode => v === "timeline" || v === "gallery";
+const isMode = (v: string | null): v is ViewMode =>
+  v === "timeline" || v === "gallery" || v === "calendar";
 
 // Режим хранится в localStorage. useSyncExternalStore вместо useState+useEffect —
 // чтобы не нарушать запрет на setState в эффекте (паттерн проекта).
@@ -60,7 +64,11 @@ export function AppShell({
   const [mode, setMode] = useViewMode();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   const [detail, setDetail] = useState<Detail | null>(null);
-  // Стейт фильтра поднят сюда — общий для обоих режимов (таймлайн и галерея).
+  // Create-поповер календаря (клик по пустому дню). На таймлайне свой попавер внутри Stage.
+  const [calCreate, setCalCreate] = useState<{ dateISO: string; anchor: PopoverAnchor } | null>(
+    null,
+  );
+  // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
   const [searchOpen, setSearchOpen] = useState(false);
   // Выбранный в поиске результат: таймлайн центрируется и подсвечивает событие.
@@ -113,12 +121,20 @@ export function AppShell({
           onUpdate={update}
           onDelete={remove}
         />
-      ) : (
+      ) : mode === "gallery" ? (
         <GalleryView
           events={liveEvents}
           filter={filter}
           onFilterChange={setFilter}
           onEventClick={openDetail}
+        />
+      ) : (
+        <CalendarView
+          events={liveEvents}
+          filter={filter}
+          onFilterChange={setFilter}
+          onEventClick={openDetail}
+          onCreateRequest={(dateISO, anchor) => setCalCreate({ dateISO, anchor })}
         />
       )}
 
@@ -169,6 +185,23 @@ export function AppShell({
           setDetail(null);
         }}
         onClose={() => setDetail(null)}
+      />
+
+      <EventPopover
+        open={calCreate !== null}
+        anchor={calCreate?.anchor ?? null}
+        mode="create"
+        dateISO={calCreate?.dateISO ?? null}
+        event={null}
+        media={[]}
+        categories={categories}
+        onCreate={(payload) => {
+          create(payload);
+          setCalCreate(null);
+        }}
+        onUpdate={() => {}}
+        onDelete={() => {}}
+        onClose={() => setCalCreate(null)}
       />
     </main>
   );
