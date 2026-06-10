@@ -184,8 +184,8 @@ export function CalendarView({
   );
 
   return (
-    <div className="flex h-full w-full items-start justify-center overflow-auto p-6">
-      <div className="tl-calendar tl-calendar-lg rounded-card border border-line bg-surface-1 p-5 shadow-2xl">
+    <div className="flex h-full w-full justify-center overflow-auto p-6">
+      <div className="tl-calendar tl-calendar-lg m-auto rounded-card border border-line bg-surface-1 p-5 shadow-2xl">
         <CalendarContext.Provider value={ctx}>
           <DayPicker
             month={month}
