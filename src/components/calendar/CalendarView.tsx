@@ -20,6 +20,8 @@ import { getSignificanceMeta } from "@/lib/significance";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import { BIRTH_DATE } from "@/lib/constants";
+import { holidayName } from "@/lib/holidays";
+import { getNonWorkingDaysAction } from "@/actions/calendar";
 import type { TimelineEvent } from "@/db/queries/events";
 
 const START_MONTH = parseISO(BIRTH_DATE);
@@ -98,6 +100,7 @@ type CalCtx = {
   onShift: (unit: "month" | "year", delta: number) => void;
   onToday: () => void;
   isTodayMonth: boolean;
+  dayKind: (iso: string, date: Date, disabled: boolean) => "" | "weekend" | "holiday";
 };
 
 const CalendarContext = createContext<CalCtx>({
@@ -109,6 +112,7 @@ const CalendarContext = createContext<CalCtx>({
   onShift: () => {},
   onToday: () => {},
   isTodayMonth: true,
+  dayKind: () => "",
 });
 
 function EventMarker({ event }: { event: TimelineEvent }) {
@@ -131,18 +135,22 @@ function EventMarker({ event }: { event: TimelineEvent }) {
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
 function DayCell({ day, modifiers, className, ...rest }: DayProps) {
-  const { dayIndex, onEventOpen, onCreateAt, onOverflowOpen } = useContext(CalendarContext);
+  const { dayIndex, onEventOpen, onCreateAt, onOverflowOpen, dayKind } =
+    useContext(CalendarContext);
   const dayEvents = modifiers.disabled ? [] : dayIndex.get(day.isoDate) ?? [];
   const shown = dayEvents.slice(0, MAX_CHIPS);
   const extra = dayEvents.length - shown.length;
+  const kind = dayKind(day.isoDate, day.date, !!modifiers.disabled);
+  const holiday = kind === "holiday" ? holidayName(day.isoDate) : null;
 
   return (
     <td {...(rest as HTMLAttributes<HTMLTableCellElement>)} className={`${className ?? ""} tl-cal-td`}>
       <div
         onClick={modifiers.disabled ? undefined : (e) => onCreateAt(day.isoDate, anchorFrom(e))}
+        title={holiday ?? undefined}
         className={`tl-cal-cell${modifiers.today ? " is-today" : ""}${
           modifiers.disabled ? " is-disabled" : ""
-        }`}
+        }${kind ? ` is-${kind}` : ""}`}
       >
         <span className="tl-cal-num">{day.date.getDate()}</span>
         {shown.length > 0 && (
@@ -297,6 +305,36 @@ export function CalendarView({
   );
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
 
+  // Нерабочие дни (праздники + переносы РФ) по годам; null — данных нет, fallback на сб/вс.
+  const displayYear = month.getFullYear();
+  const [nonWork, setNonWork] = useState<Map<number, Set<string> | null>>(() => new Map());
+  const loadedYears = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    if (loadedYears.current.has(displayYear)) return;
+    loadedYears.current.add(displayYear);
+    let cancelled = false;
+    getNonWorkingDaysAction(displayYear)
+      .then((iso) => {
+        if (cancelled) return;
+        setNonWork((prev) => new Map(prev).set(displayYear, iso ? new Set(iso) : null));
+      })
+      .catch(() => loadedYears.current.delete(displayYear));
+    return () => {
+      cancelled = true;
+    };
+  }, [displayYear]);
+
+  const dayKind = useCallback(
+    (iso: string, date: Date, disabled: boolean): "" | "weekend" | "holiday" => {
+      if (disabled) return "";
+      if (holidayName(iso)) return "holiday";
+      const set = nonWork.get(Number(iso.slice(0, 4)));
+      const nonWorking = set ? set.has(iso) : date.getDay() === 0 || date.getDay() === 6;
+      return nonWorking ? "weekend" : "";
+    },
+    [nonWork],
+  );
+
   const handleShift = useCallback(
     (unit: "month" | "year", delta: number) => {
       setMonth((m) => (unit === "month" ? stepMonth(today, m, delta) : shiftYear(today, m, delta)));
@@ -331,8 +369,9 @@ export function CalendarView({
       onShift: handleShift,
       onToday: handleToday,
       isTodayMonth: isSameMonth(month, today),
+      dayKind,
     }),
-    [dayIndex, onEventClick, onCreateRequest, month, handleShift, handleToday, today],
+    [dayIndex, onEventClick, onCreateRequest, month, handleShift, handleToday, today, dayKind],
   );
 
   return (

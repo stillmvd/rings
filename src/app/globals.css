@@ -292,6 +292,21 @@
   background: color-mix(in srgb, var(--tl-accent-500) 8%, var(--tl-surface-1));
 }
 
+/* Выходные (сб/вс, перенесённые) — приглушённый фон; праздники — красноватый акцент. */
+.tl-cal-cell.is-weekend:not(.is-today) {
+  background: color-mix(in srgb, var(--tl-text-muted) 8%, var(--tl-surface-1));
+}
+
+.tl-cal-cell.is-holiday:not(.is-today) {
+  background: color-mix(in srgb, var(--tl-danger) 9%, var(--tl-surface-1));
+  border-color: color-mix(in srgb, var(--tl-danger) 22%, var(--tl-line));
+}
+
+.tl-cal-cell.is-holiday:not(.is-today) .tl-cal-num {
+  color: var(--tl-danger);
+  font-weight: 600;
+}
+
 .tl-cal-cell:not(.is-disabled) {
   cursor: pointer;
 }
