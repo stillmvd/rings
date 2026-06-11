@@ -14,15 +14,17 @@ export function mediaItemSrc(item: MediaItem): string {
   return item.kind === "existing" ? `/media/${item.media.path}` : item.url;
 }
 
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+export function filterAcceptedImages(list: FileList | File[]): File[] {
+  return Array.from(list).filter((f) => ACCEPTED_IMAGE_TYPES.includes(f.type));
+}
+
 interface MediaUploaderProps {
   items: MediaItem[];
   onReorder: (items: MediaItem[]) => void;
   onPick: (files: File[]) => void;
   onRemove: (item: MediaItem) => void;
-}
-
-function onlyImages(list: FileList | File[]): File[] {
-  return Array.from(list).filter((f) => f.type.startsWith("image/"));
 }
 
 export function MediaUploader({ items, onReorder, onPick, onRemove }: MediaUploaderProps) {
@@ -35,7 +37,7 @@ export function MediaUploader({ items, onReorder, onPick, onRemove }: MediaUploa
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragOver(false);
-    const files = onlyImages(e.dataTransfer.files);
+    const files = filterAcceptedImages(e.dataTransfer.files);
     if (files.length) onPick(files);
   }
 
@@ -97,17 +99,17 @@ export function MediaUploader({ items, onReorder, onPick, onRemove }: MediaUploa
         }`}
       >
         <ImagePlus size={15} />
-        Перетащите фото или нажмите для выбора
+        Перетащите, вставьте (Ctrl+V) или нажмите
       </button>
 
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={ACCEPTED_IMAGE_TYPES.join(",")}
         multiple
         className="hidden"
         onChange={(e) => {
-          const files = onlyImages(e.target.files ?? []);
+          const files = filterAcceptedImages(e.target.files ?? []);
           if (files.length) onPick(files);
           e.target.value = "";
         }}

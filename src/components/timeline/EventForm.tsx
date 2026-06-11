@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CategoryNode } from "@/db/queries/categories";
 import type { EventMedia } from "@/db/queries/media";
-import { MediaUploader, type MediaItem } from "./MediaUploader";
+import { MediaUploader, filterAcceptedImages, type MediaItem } from "./MediaUploader";
 import {
   SIGNIFICANCE_VALUES,
   TIMELINE_MIN_DATE,
@@ -108,7 +108,7 @@ export function EventForm({
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
 
-  function handlePick(files: File[]) {
+  const handlePick = useCallback((files: File[]) => {
     setMediaItems((prev) => [
       ...prev,
       ...files.map((file) => {
@@ -117,7 +117,24 @@ export function EventForm({
         return { key: `p-${crypto.randomUUID()}`, kind: "pending" as const, file, url };
       }),
     ]);
-  }
+  }, []);
+
+  useEffect(() => {
+    function handlePaste(e: ClipboardEvent) {
+      if (!e.clipboardData) return;
+      const files = filterAcceptedImages(
+        Array.from(e.clipboardData.items)
+          .filter((it) => it.kind === "file")
+          .map((it) => it.getAsFile())
+          .filter((f): f is File => f !== null),
+      );
+      if (!files.length) return;
+      e.preventDefault();
+      handlePick(files);
+    }
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [handlePick]);
 
   function handleRemoveMedia(item: MediaItem) {
     if (item.kind === "pending") {
