@@ -1,15 +1,19 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type HTMLAttributes } from "react";
 import {
-  DayPicker,
-  Dropdown as RdpDropdown,
-  type DayProps,
-  type DropdownProps,
-} from "react-day-picker";
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type HTMLAttributes,
+} from "react";
+import { DayPicker, type DayProps, type MonthCaptionProps } from "react-day-picker";
 import { ru } from "date-fns/locale";
-import { parseISO, eachDayOfInterval, format } from "date-fns";
-import { MoveHorizontal } from "lucide-react";
+import { parseISO, eachDayOfInterval, format, startOfMonth, isSameMonth } from "date-fns";
+import { MoveHorizontal, ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
 import { Popover, type PopoverAnchor } from "@/components/ui/Popover";
 import { getSignificanceMeta } from "@/lib/significance";
@@ -20,6 +24,32 @@ import type { TimelineEvent } from "@/db/queries/events";
 
 const START_MONTH = parseISO(BIRTH_DATE);
 const MAX_CHIPS = 3;
+
+// Допустимый диапазон месяцев (0–11) для конкретного года:
+// в год рождения снизу режет месяц рождения, в текущий год сверху — текущий месяц.
+function monthBounds(today: Date, year: number): { lo: number; hi: number } {
+  const lo = year === START_MONTH.getFullYear() ? START_MONTH.getMonth() : 0;
+  const hi = year === today.getFullYear() ? today.getMonth() : 11;
+  return { lo, hi };
+}
+
+// Линейный сдвиг месяца с переносом года (январь−1 → декабрь прошлого года); кламп по диапазону.
+function stepMonth(today: Date, current: Date, delta: number): Date {
+  const next = new Date(current.getFullYear(), current.getMonth() + delta, 1);
+  const lo = new Date(START_MONTH.getFullYear(), START_MONTH.getMonth(), 1);
+  const hi = new Date(today.getFullYear(), today.getMonth(), 1);
+  return next < lo ? lo : next > hi ? hi : next;
+}
+
+// Сдвиг года с клампом по диапазону; месяц подтягивается в границы нового года.
+function shiftYear(today: Date, current: Date, delta: number): Date {
+  const minY = START_MONTH.getFullYear();
+  const maxY = today.getFullYear();
+  const year = Math.min(Math.max(current.getFullYear() + delta, minY), maxY);
+  const { lo, hi } = monthBounds(today, year);
+  const m = Math.min(Math.max(current.getMonth(), lo), hi);
+  return new Date(year, m, 1);
+}
 
 type DayIndex = Map<string, TimelineEvent[]>;
 
@@ -64,6 +94,10 @@ type CalCtx = {
   onEventOpen: (event: TimelineEvent) => void;
   onCreateAt: (iso: string, anchor: PopoverAnchor) => void;
   onOverflowOpen: (events: TimelineEvent[], anchor: PopoverAnchor) => void;
+  displayMonth: Date;
+  onShift: (unit: "month" | "year", delta: number) => void;
+  onToday: () => void;
+  isTodayMonth: boolean;
 };
 
 const CalendarContext = createContext<CalCtx>({
@@ -71,6 +105,10 @@ const CalendarContext = createContext<CalCtx>({
   onEventOpen: () => {},
   onCreateAt: () => {},
   onOverflowOpen: () => {},
+  displayMonth: new Date(0),
+  onShift: () => {},
+  onToday: () => {},
+  isTodayMonth: true,
 });
 
 function EventMarker({ event }: { event: TimelineEvent }) {
@@ -147,12 +185,98 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
   );
 }
 
-// Нативные select'ы dropdown'а без name/id триггерят a11y-issue — проставляем name.
-function NamedDropdown(props: DropdownProps) {
-  return <RdpDropdown {...props} name={(props["aria-label"] as string) || "rdp-dropdown"} />;
+// Поле «месяц»/«год»: колесо мыши = ±1 (вверх — назад, вниз — вперёд), шевроны кликабельны.
+function WheelField({
+  label,
+  ariaLabel,
+  isMonth,
+  onShift,
+}: {
+  label: string;
+  ariaLabel: string;
+  isMonth?: boolean;
+  onShift: (delta: number) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const shiftRef = useRef(onShift);
+
+  useEffect(() => {
+    shiftRef.current = onShift;
+  });
+
+  // Нативный non-passive listener: React-овый onWheel passive, preventDefault в нём не работает.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      shiftRef.current(e.deltaY > 0 ? 1 : -1);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`tl-cal-wheel${isMonth ? " is-month" : ""}`}
+      role="spinbutton"
+      aria-label={ariaLabel}
+      title="Прокрутите колёсиком"
+    >
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Назад"
+        className="tl-cal-wheel-chev"
+        onClick={() => onShift(-1)}
+      >
+        <ChevronUp size={13} />
+      </button>
+      <span className="tl-cal-wheel-val">{label}</span>
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Вперёд"
+        className="tl-cal-wheel-chev"
+        onClick={() => onShift(1)}
+      >
+        <ChevronDown size={13} />
+      </button>
+    </div>
+  );
 }
 
-const COMPONENTS = { Day: DayCell, Dropdown: NamedDropdown };
+function MonthCaption({ calendarMonth, displayIndex, ...rest }: MonthCaptionProps) {
+  const { displayMonth, onShift, onToday, isTodayMonth } = useContext(CalendarContext);
+  void calendarMonth;
+  void displayIndex;
+  return (
+    <div {...rest} className={`${rest.className ?? ""} tl-cal-caption`}>
+      <div className="tl-cal-caption-fields">
+        <WheelField
+          isMonth
+          label={format(displayMonth, "LLLL", { locale: ru })}
+          ariaLabel="Месяц"
+          onShift={(d) => onShift("month", d)}
+        />
+        <WheelField
+          label={format(displayMonth, "yyyy")}
+          ariaLabel="Год"
+          onShift={(d) => onShift("year", d)}
+        />
+      </div>
+      {!isTodayMonth && (
+        <button type="button" className="tl-cal-today" onClick={onToday}>
+          <CalendarDays size={15} />
+          Сегодня
+        </button>
+      )}
+    </div>
+  );
+}
+
+const COMPONENTS = { Day: DayCell, MonthCaption };
 
 export function CalendarView({
   events,
@@ -173,25 +297,56 @@ export function CalendarView({
   );
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
 
+  const handleShift = useCallback(
+    (unit: "month" | "year", delta: number) => {
+      setMonth((m) => (unit === "month" ? stepMonth(today, m, delta) : shiftYear(today, m, delta)));
+    },
+    [today],
+  );
+
+  const handleToday = useCallback(() => setMonth(startOfMonth(today)), [today]);
+
+  // Колесо над сеткой дней (не над шапкой) листает месяцы линейно: вверх — раньше, вниз — позже.
+  const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const target = e.target as Element | null;
+      if (!target?.closest(".rdp-month_grid")) return;
+      e.preventDefault();
+      handleShift("month", e.deltaY > 0 ? 1 : -1);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [handleShift]);
+
   const ctx = useMemo<CalCtx>(
     () => ({
       dayIndex,
       onEventOpen: onEventClick,
       onCreateAt: onCreateRequest,
       onOverflowOpen: (evs, anchor) => setDayList({ events: evs, anchor }),
+      displayMonth: month,
+      onShift: handleShift,
+      onToday: handleToday,
+      isTodayMonth: isSameMonth(month, today),
     }),
-    [dayIndex, onEventClick, onCreateRequest],
+    [dayIndex, onEventClick, onCreateRequest, month, handleShift, handleToday, today],
   );
 
   return (
     <div className="flex h-full w-full justify-center overflow-auto p-6">
-      <div className="tl-calendar tl-calendar-lg m-auto rounded-card border border-line bg-surface-1 p-5 shadow-2xl">
+      <div
+        ref={cardRef}
+        className="tl-calendar tl-calendar-lg m-auto rounded-card border border-line bg-surface-1 p-5 shadow-2xl"
+      >
         <CalendarContext.Provider value={ctx}>
           <DayPicker
             month={month}
             onMonthChange={setMonth}
             locale={ru}
-            captionLayout="dropdown"
+            captionLayout="label"
             startMonth={START_MONTH}
             endMonth={today}
             disabled={[{ before: START_MONTH }, { after: today }]}

@@ -126,17 +126,106 @@
   fill: var(--tl-text);
 }
 
-.tl-calendar .rdp-month_caption {
-  font-size: 0.95rem;
-}
-
 .tl-calendar .rdp-weekday {
   color: var(--tl-text-muted);
 }
 
-.tl-calendar .rdp-dropdown_root select {
+.tl-calendar .tl-cal-caption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: auto;
+  min-height: var(--rdp-nav-height);
+  font-size: 0.95rem;
+  /* Caption лежит поверх стрелок Nav — пропускаем клики сквозь пустые зоны к стрелкам. */
+  pointer-events: none;
+}
+
+.tl-cal-caption-fields,
+.tl-cal-today {
+  pointer-events: auto;
+}
+
+.tl-cal-caption-fields {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.tl-cal-wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 0.1rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  cursor: ns-resize;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.tl-cal-wheel:hover {
+  background: var(--tl-surface-2);
+  border-color: var(--tl-line);
+}
+
+.tl-cal-wheel.is-month {
+  text-transform: capitalize;
+}
+
+.tl-cal-wheel-val {
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-cal-wheel-chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: 13px;
+  color: var(--tl-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.tl-cal-wheel:hover .tl-cal-wheel-chev {
+  opacity: 0.55;
+}
+
+.tl-cal-wheel-chev:hover {
+  opacity: 1;
+  color: var(--tl-accent-500);
+}
+
+.tl-cal-today {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--tl-radius-pill);
+  border: 1px solid var(--tl-line);
+  background: var(--tl-surface-1);
+  color: var(--tl-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tl-cal-today:hover {
+  background: var(--tl-surface-2);
   color: var(--tl-text);
-  background-color: var(--tl-surface-1);
+  border-color: var(--tl-accent-500);
 }
 
 /* === Крупная сетка месяца (режим «Календарь») ============================ */
@@ -152,10 +241,19 @@
   font-size: 1rem;
 }
 
-.tl-calendar-lg .rdp-month_caption {
+.tl-calendar-lg .tl-cal-caption {
   font-size: 1.15rem;
   font-weight: 600;
-  padding: 0 0.25rem 0.5rem;
+  padding: 0 0.25rem 0.6rem;
+}
+
+.tl-calendar-lg .tl-cal-today {
+  font-size: 0.85rem;
+}
+
+/* Резерв под максимум недель (6) — высота карточки не зависит от месяца, шапка не прыгает. */
+.tl-calendar-lg .rdp-month {
+  min-height: calc(var(--rdp-day-height) * 6 + 7rem);
 }
 
 .tl-calendar-lg .rdp-weekday {
@@ -164,11 +262,6 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding-bottom: 0.5rem;
-}
-
-.tl-calendar-lg .rdp-dropdown_root select {
-  font-size: 1rem;
-  font-weight: 600;
 }
 
 /* Кастомная ячейка дня (components.Day): td-обёртка + flex-контент. */
