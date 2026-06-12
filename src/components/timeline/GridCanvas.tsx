@@ -82,12 +82,22 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
 
   if (lod === "years") {
     ctx.font = "600 13px system-ui, sans-serif";
+    // Прореживание: при сильном отдалении годовые метки наезжают — показываем
+    // подписи и сильные деления только кратные шагу, промежуточные тики скрываем.
+    const pxPerYear = viewport.pxPerDay * 365.25;
+    const step = pxPerYear >= 46 ? 1 : pxPerYear >= 22 ? 5 : pxPerYear >= 11 ? 10 : pxPerYear >= 5 ? 25 : 50;
+    const minorTicks = pxPerYear >= 11;
     for (const ms of eachYearStart(fromMs, toMs)) {
+      const year = Number(formatYear(msToISO(ms)));
+      const labeled = year % step === 0;
+      if (!labeled && !minorTicks) continue;
       ctx.globalAlpha = alpha(ms);
-      const x = drawTick(d, ms, 10, true);
-      ctx.fillStyle = colors.text;
-      ctx.textAlign = "left";
-      ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 18);
+      const x = drawTick(d, ms, labeled ? 10 : 6, labeled);
+      if (labeled) {
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = "left";
+        ctx.fillText(String(year), x + 5, axisY - 18);
+      }
     }
   } else if (lod === "months") {
     for (const ms of eachMonthStart(fromMs, toMs)) {

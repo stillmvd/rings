@@ -12,6 +12,9 @@ import type { TimelineEvent } from "@/db/queries/events";
 
 const CLUSTER_GAP_PX = 18;
 const MIN_BAR_PX = 14;
+// Половина макс. ширины тултипа (max-w-56=224) + запас: держим центр в пределах,
+// чтобы у краёв тултип не вылезал и не сужался в узкую колонку.
+const TOOLTIP_HALF_PX = 120;
 
 type Cluster = { x: number; events: TimelineEvent[] };
 type Bar = { ev: TimelineEvent; x1: number; x2: number; tip: Cluster };
@@ -239,8 +242,14 @@ export function EventLayer({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute z-20 max-w-56 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3 py-2 shadow-lg"
-            style={{ left: hovered.x, top: axisY - 16 }}
+            className="pointer-events-none absolute z-20 w-max max-w-56 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3 py-2 shadow-lg"
+            style={{
+              left: Math.min(
+                Math.max(hovered.x, TOOLTIP_HALF_PX),
+                Math.max(TOOLTIP_HALF_PX, width - TOOLTIP_HALF_PX),
+              ),
+              top: axisY - 16,
+            }}
           >
             {hovered.events.length === 1 ? (
               <>
