@@ -91,17 +91,27 @@ export function DateScrubber({
       onPointerCancel={onPointerUp}
       className="absolute bottom-8 right-1 top-24 z-20 w-6 cursor-ns-resize touch-none"
     >
-      <div className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-line" />
       <div
-        className={`absolute left-1/2 h-8 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors ${
-          active ? "bg-app-text" : "bg-muted/60"
-        }`}
-        style={{ top: `${frac * 100}%` }}
+        className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2"
+        style={{ background: "var(--md-sys-color-outline-variant)" }}
+      />
+      <div
+        className="absolute left-1/2 h-8 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors"
+        style={{
+          top: `${frac * 100}%`,
+          background: active
+            ? "var(--md-sys-color-primary)"
+            : "color-mix(in srgb, var(--md-sys-color-on-surface-variant) 60%, transparent)",
+        }}
       />
       {active && label && (
         <div
-          className="pointer-events-none absolute right-7 -translate-y-1/2 whitespace-nowrap rounded-full border border-line bg-surface-3 px-3 py-1 text-sm font-medium text-app-text shadow-lg"
-          style={{ top: `${frac * 100}%` }}
+          className="pointer-events-none absolute right-7 -translate-y-1/2 whitespace-nowrap rounded-lg px-3 py-1 text-sm font-medium shadow-lg"
+          style={{
+            top: `${frac * 100}%`,
+            background: "var(--md-sys-color-inverse-surface)",
+            color: "var(--md-sys-color-inverse-on-surface)",
+          }}
         >
           {label}
         </div>

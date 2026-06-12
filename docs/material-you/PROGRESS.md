@@ -11,8 +11,8 @@
 | Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ✅ ГОТОВО |
 | Ф3 | Формы и диалоги (Side Sheet, dialogs) | ✅ ГОТОВО |
 | Ф4 | Canvas под M3 | ✅ ГОТОВО |
-| Ф5 | Галерея под M3 | ⏳ (следующая) |
-| Ф6 | Календарь под M3 | ⏳ |
+| Ф5 | Галерея под M3 | ✅ ГОТОВО |
+| Ф6 | Календарь под M3 | ⏳ (следующая) |
 | Ф7 | Motion, polish, seed-пикер | ⏳ |
 
 ## Готово (инфраструктура)
@@ -98,8 +98,15 @@
 
 **✅ Проверено в браузере (prod, 1920×1080, тёмная + светлая темы), консоль чистая.** Подтверждено на тестовых событиях: точки sig-1/2/3 (гармонизированные к seed цвета), кластер со счётчиком (тёмный onColor на amber-фоне), крупные sig-3 с кольцами и иконками (жёлтая категория→тёмная звезда, синяя→белое сердце — авто-контраст), период-полоса, маркер «сегодня» = розовый tertiary (отличается от фиолетового primary), вуаль «вне жизни», StickyContext-плашка. StickyContext/TimelineControls оставлены на Tailwind-мост-утилитах (уже M3, консистентно с остальным DOM). Тестовые события/категории и временный скрипт удалены (БД чистая).
 
-### Следующий шаг — Ф5 (Галерея под M3)
-Карточки (кастомный M3 card: surface-container + elevation + shape), лента, date-scrubber, state layers. Цвет значимости в галерее уже M3 (единый `significance.ts` из Ф4) — остаётся layout/карточки. Подробности — ROADMAP Ф5.
+### ✅ Ф5 закрыта. Что сделано:
+- **`gallery/EventCard.tsx`** → M3 **Elevated card**: `surface-container-low` + текст `on-surface`/`on-surface-variant`; тень elevation level 1, при hover → level 2 (`onMouseEnter/Leave`, тени через `color-mix(shadow 30/15%)`). CSS **state-layer** (отдельный `span` absolute inset-0, `on-surface` 8% при `group-hover`) — без md-ripple, консистентно с фазами. Радиус `corner-medium` (12px). **Плейсхолдер без обложки**: фон = `category_color` (или `sig.color`), иконка контрастна — `onColorFor(category_color)` по YIQ либо готовый `sig.onColor` (паттерн Ф4). Значок категории в углу — тот же авто-контраст + лёгкая тень. Убран `scale-105` зум обложки (по решению — только state-layer).
+- **`gallery/GalleryView.tsx`** → sticky-заголовки месяцев на прямые M3-токены (`on-surface`, фон `color-mix(surface 80%)` + backdrop-blur); empty-state `on-surface-variant`, ссылка «Сбросить фильтры» → `primary`.
+- **`gallery/DateScrubber.tsx`** → линия `outline-variant`, thumb active=`primary`/idle=`on-surface-variant 60%`; всплывающая метка месяца → **inverse-surface tooltip** (`inverse-surface`/`inverse-on-surface`, rounded-lg, без бордера). Логика скролла/перетаскивания не тронута — только цвета.
+- **Решения пользователя (AskUserQuestion):** Elevated card; только CSS state-layer (без зума фото); плейсхолдер = цвет категории + авто-контраст; scrubber-метка = inverse-surface tooltip.
+- ✅ tsc/lint/build зелёные. **Проверено в браузере (prod, 1920×1080, тёмная + светлая темы), консоль чистая.** Подтверждено на тестовых событиях (sig 2–3, с/без категории, период): Elevated-карточки с тенями, hover (state-layer + рост тени), авто-контраст плейсхолдеров (жёлтая кат.→тёмная иконка, синяя→белая, sig-2 light→тёмно-зелёный+белая), sig-1 не попадает в галерею, sticky-заголовки, date-scrubber (primary-thumb + inverse-surface tooltip «Апрель 2026», перетаскивание прокручивает). Тестовые данные удалены (БД чистая: 0 событий).
+
+### Следующий шаг — Ф6 (Календарь под M3)
+Переписать `.tl-cal-*` на M3-токены; DayCell, chips событий, today/выходные/праздники (error/tertiary). Цвет значимости уже M3 (единый `significance.ts`). Подробности — ROADMAP Ф6.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -141,6 +148,7 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 ---
 
 ## Журнал
+- Сессия 5: закрыта **Ф5** (Галерея под M3). `gallery/EventCard` → M3 Elevated card (surface-container-low + elevation 1→2 hover + CSS state-layer 8%, без зума фото), плейсхолдер без обложки = цвет категории/значимости + авто-контраст иконки (`onColorFor` YIQ / `sig.onColor`). `GalleryView` — sticky-заголовки/empty-state на прямые M3-токены. `DateScrubber` — линия/thumb на M3 (primary), метка месяца → inverse-surface tooltip. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light, тестовые события sig 2-3 с/без категории и период), консоль чистая, БД очищена. Коммит Ф5.
 - Сессия 4: закрыта **Ф4** (Canvas под M3). `GridCanvas.readColors` → прямые M3 sys-роли (outline/on-surface/...), маркер «сегодня» = tertiary, ДР-пунктир = outline, вуаль «вне жизни» = surface-variant. Единый `significance.ts` → `var(--md-sig-N)` + поле `onColor` + ring sig-3 на `--md-sig-3-on-container` (затронуло все режимы). Добавлен `onColorFor` (авто-контраст по YIQ) для контента точек с произвольным category_color; EventDot/EventLayer boxShadow → surface, счётчик кластера → meta.onColor. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light), консоль чистая. Коммит Ф4.
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
 - Сессия 3: закрыта **Ф3** (Формы и диалоги). По решениям пользователя: все формы/просмотр события → единый правый **modal SideSheet** (380px), настройки → **большой центральный md-dialog**. Создан `m3/SideSheet` + `m3/Dialog` + `timeline/EventSheet` (объединил EventPopover+EventDetails, удалены оба). AppShell поднял единый sheet-стейт, TimelineStage очищен (форма ушла наверх), NavigationRail.Настройки → onSettings-диалог, вложенные диалоги категорий/импорта перекрашены под M3 + z-[88]. DatePicker/`.tl-calendar` под прямые M3-токены. tsc/lint/build зелёные, проверено в браузере (prod). Коммит Ф3.

@@ -55,13 +55,17 @@ export function GalleryView({
   if (groups.length === 0) {
     const filterOn = isFilterActive(filter);
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-muted">
+      <div
+        className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center"
+        style={{ color: "var(--md-sys-color-on-surface-variant)" }}
+      >
         {filterOn ? "Ничего не найдено по фильтру." : "Нет важных событий для галереи."}
         {filterOn && onFilterChange && (
           <button
             type="button"
             onClick={() => onFilterChange(EMPTY_FILTER)}
-            className="text-sm text-app-text underline-offset-4 transition-colors hover:underline"
+            className="text-sm underline-offset-4 transition-colors hover:underline"
+            style={{ color: "var(--md-sys-color-primary)" }}
           >
             Сбросить фильтры
           </button>
@@ -79,7 +83,14 @@ export function GalleryView({
         <div className="mx-auto max-w-6xl">
           {groups.map((group) => (
             <section key={group.key} data-scrubber-key={group.key} className="mb-10">
-              <h2 className="sticky top-0 z-10 -mx-2 mb-4 bg-surface-0/80 px-2 py-2 text-lg font-semibold text-app-text backdrop-blur">
+              <h2
+                className="sticky top-0 z-10 -mx-2 mb-4 px-2 py-2 text-lg font-semibold backdrop-blur"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--md-sys-color-surface) 80%, transparent)",
+                  color: "var(--md-sys-color-on-surface)",
+                }}
+              >
                 {group.label}
               </h2>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 [contain-intrinsic-size:auto_400px] [content-visibility:auto]">

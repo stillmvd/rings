@@ -54,8 +54,8 @@
 - [ ] StickyContext, метки, недоступные зоны под M3
 - **Готово когда:** canvas в M3-палитре, реагирует на seed/тему.
 
-### Ф5 — Галерея под M3
-- [ ] Карточки (кастомный M3 card: surface-container + elevation + shape), лента, date-scrubber, state layers
+### Ф5 — Галерея под M3 ✅
+- [x] Карточки (M3 Elevated card: surface-container-low + elevation 1→2 + corner-medium), date-scrubber, CSS state layers; плейсхолдер = цвет категории/значимости + авто-контраст
 - **Готово когда:** галерея в M3.
 
 ### Ф6 — Календарь под M3
