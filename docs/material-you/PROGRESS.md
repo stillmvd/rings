@@ -6,8 +6,8 @@
 
 | Фаза | Название | Статус |
 |------|----------|--------|
-| Ф0 | Фундамент M3 (токены, dynamic color, регистрация) | 🔄 В РАБОТЕ (начат) |
-| Ф1 | UI-примитивы → md-* | ⏳ |
+| Ф0 | Фундамент M3 (токены, dynamic color, регистрация) | ✅ ГОТОВО |
+| Ф1 | UI-примитивы → md-* | ⏳ (следующая) |
 | Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ⏳ |
 | Ф3 | Формы и диалоги (Side Sheet, dialogs) | ⏳ |
 | Ф4 | Canvas под M3 | ⏳ |
@@ -37,15 +37,23 @@
 ### Прочитать для контекста
 `docs/material-you/ROADMAP.md` (план+решения), `RESEARCH-SUMMARY.md`, `CURRENT-UI-INVENTORY.md`. Детали — в `research/01..05`.
 
-### Следующий шаг — закончить Ф0. Осталось:
-1. **`src/lib/m3/dynamic-color.ts`** — генератор токенов (API ниже, всё сверено).
-2. **Применение токенов** в layout: инжект `<style>` с light/dark наборами `--md-sys-color-*` под `[data-theme]`. Дефолт seed `#6750A4`. Чтение сохранённого seed (пока можно хардкод-дефолт, пикер — Ф7).
-3. **`src/app/globals.css`** — добавить слой M3: import `@material/web/typography/md-typescale-styles.css` (или через JS в registry), базовые `--md-sys-shape-corner-*`, `--md-sys-state-*`, `color-scheme`. Мост `--tl-*` → `--md-sys-*` (старый UI должен продолжать работать!).
-4. **`src/components/m3/MdRegistry.tsx`** (`'use client'`) — пока пустой список импортов (наполняем в Ф1+) + FOUC CSS `md-*:not(:defined){visibility:hidden}`. Смонтировать в `layout.tsx`.
-5. **`src/types/material-web.d.ts`** — JSX-типы для `md-*` (augmentation `JSX.IntrinsicElements`).
-6. **Roboto Flex** через `next/font` → связать с `--md-ref-typeface-brand/plain` (заменить Inter в globals.css `font-family`).
-7. **next-themes** → `attribute="data-theme"` (проверить `providers.tsx`), связать dark-набор токенов.
-8. Прогон `npx tsc --noEmit`, `pnpm lint`, `pnpm build`. Коммит Ф0.
+### ✅ Ф0 закрыта. Что сделано:
+1. **`src/lib/m3/dynamic-color.ts`** — `themeStyleSheet(seed)` / `buildThemeVars(seed, isDark)`: ~49 sys-ролей (`allColors`, фильтр `*_palette_key_color`) + 3 sig customColors (`--md-sig-N{,-on,-container,-on-container}`). `DEFAULT_SEED = #6750A4`.
+2. **`layout.tsx`** — инжект `<style id="md-theme">` с light(`:root`,`[data-theme=light]`)/dark наборами; seed из `getSetting("theme.seed")` ?? дефолт.
+3. **`globals.css`** — M3-слой: `color-scheme`, `--md-sys-shape-corner-*`, `--md-sys-state-*`, `--md-sys-motion-*`, `--md-ref-typeface-*`; FOUC `:not(:defined){visibility:hidden}`; **мост** `--tl-*` → `--md-sys-*` (поверхности/текст/линия прямые; accent 50–900 через `color-mix(primary…)`; sig → `--md-sig-*`; danger → error). Tailwind utilities (`@theme inline`) подхватывают мост автоматически.
+4. **`src/components/m3/MdRegistry.tsx`** (`'use client'`) — typescale CSS import; список md-* импортов пуст (наполняем в Ф1+); смонтирован в `layout`.
+5. **`src/types/material-web.d.ts`** — JSX-типы md-* (широкий `MdElement`, augmentation `react`→`JSX.IntrinsicElements`).
+6. **Roboto Flex** через `next/font` (`subsets: latin+cyrillic`, `--font-roboto-flex`) → `--md-ref-typeface-*` и `body font-family` (Inter убран).
+7. **next-themes** → `attribute="data-theme"` в `providers.tsx`.
+8. ✅ `tsc --noEmit`, `pnpm lint`, `pnpm build` — зелёные. material-color-utilities собирается через Next/Turbopack без проблем.
+
+### Следующий шаг — Ф1 (UI-примитивы → md-*)
+React-обёртки md-* (button-варианты, text-field, select, switch, checkbox/radio, slider, chips, icon-button) с типами/событиями/refs; миграция ui/Button, Input, Textarea, Select, SegmentedControl, Toast→M3 Snackbar. Регистрация компонентов — добавлять импорты в `MdRegistry.tsx`. Подробности — ROADMAP Ф1.
+
+**Заметки для Ф1+:**
+- `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
+- Build warning: несколько lockfile (worktree + корень) → Next выбрал корневой как workspace root. Безвредно; при желании задать `outputFileTracingRoot` в `next.config.ts`.
+- Мост `--tl-*` использует равную специфичность + порядок (мост-блок идёт ПОСЛЕ легаси-палитры). При добавлении правил палитры не нарушать порядок.
 
 ### ✅ Сверенный API `@material/material-color-utilities@0.4.0` (для dynamic-color.ts)
 ```ts
@@ -83,3 +91,4 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 
 ## Журнал
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
+- Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0.

@@ -7,7 +7,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
-      attribute="class"
+      attribute="data-theme"
       defaultTheme="dark"
       enableSystem
       disableTransitionOnChange={false}
