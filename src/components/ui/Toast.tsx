@@ -80,14 +80,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="pointer-events-auto flex items-center gap-2.5 rounded-2xl border border-line bg-surface-2 px-4 py-3 text-sm text-app-text shadow-lg backdrop-blur"
+                    className="pointer-events-auto flex items-center gap-2.5 rounded-xl bg-[var(--md-sys-color-inverse-surface)] px-4 py-3 text-sm text-[var(--md-sys-color-inverse-on-surface)] shadow-lg"
                   >
                     <Icon size={18} style={{ color: meta[t.type].color }} />
                     <span className="max-w-xs">{t.message}</span>
                     <button
                       type="button"
                       onClick={() => dismiss(t.id)}
-                      className="ml-1 text-muted transition-colors hover:text-app-text"
+                      className="ml-1 text-[var(--md-sys-color-inverse-on-surface)]/70 transition-colors hover:text-[var(--md-sys-color-inverse-on-surface)]"
                     >
                       <X size={16} />
                     </button>

@@ -69,7 +69,7 @@ export function CategoryForm({
       <Input
         label="Название"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={setName}
         error={nameError}
         autoFocus
         placeholder="Название категории"

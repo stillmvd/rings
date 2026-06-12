@@ -1,36 +1,47 @@
 "use client";
 
-import { forwardRef, useId } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps {
   label?: string;
   error?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+  disabled?: boolean;
+  className?: string;
+  id?: string;
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { label, error, className = "", id, rows = 3, ...props },
+type MdField = HTMLElement & { value: string };
+
+export const Textarea = forwardRef<HTMLElement, TextareaProps>(function Textarea(
+  { label, error, value, onChange, placeholder, rows = 3, disabled, className = "", id },
   ref,
 ) {
-  const autoId = useId();
-  const textareaId = id ?? autoId;
+  const innerRef = useRef<MdField>(null);
+  useImperativeHandle(ref, () => innerRef.current as HTMLElement);
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (el && el.value !== value) el.value = value;
+  }, [value]);
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {label && (
-        <label htmlFor={textareaId} className="text-sm font-medium text-muted">
-          {label}
-        </label>
-      )}
-      <textarea
-        ref={ref}
-        id={textareaId}
-        rows={rows}
-        className={`resize-none rounded-xl border bg-surface-1 px-3 py-2 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-accent-500 ${
-          error ? "border-tl-danger" : "border-line"
-        } ${className}`}
-        {...props}
-      />
-      {error && <span className="text-xs text-tl-danger">{error}</span>}
-    </div>
+    <md-outlined-text-field
+      ref={innerRef}
+      id={id}
+      type="textarea"
+      rows={rows}
+      className={className}
+      style={{ width: "100%" }}
+      label={label}
+      placeholder={placeholder}
+      disabled={disabled}
+      error={Boolean(error)}
+      error-text={error ?? ""}
+      onInput={(e) => onChange((e.target as MdField).value)}
+    />
   );
 });

@@ -7,8 +7,8 @@
 | Фаза | Название | Статус |
 |------|----------|--------|
 | Ф0 | Фундамент M3 (токены, dynamic color, регистрация) | ✅ ГОТОВО |
-| Ф1 | UI-примитивы → md-* | ⏳ (следующая) |
-| Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ⏳ |
+| Ф1 | UI-примитивы → md-* | ✅ ГОТОВО |
+| Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ⏳ (следующая) |
 | Ф3 | Формы и диалоги (Side Sheet, dialogs) | ⏳ |
 | Ф4 | Canvas под M3 | ⏳ |
 | Ф5 | Галерея под M3 | ⏳ |
@@ -47,8 +47,20 @@
 7. **next-themes** → `attribute="data-theme"` в `providers.tsx`.
 8. ✅ `tsc --noEmit`, `pnpm lint`, `pnpm build` — зелёные. material-color-utilities собирается через Next/Turbopack без проблем.
 
-### Следующий шаг — Ф1 (UI-примитивы → md-*)
-React-обёртки md-* (button-варианты, text-field, select, switch, checkbox/radio, slider, chips, icon-button) с типами/событиями/refs; миграция ui/Button, Input, Textarea, Select, SegmentedControl, Toast→M3 Snackbar. Регистрация компонентов — добавлять импорты в `MdRegistry.tsx`. Подробности — ROADMAP Ф1.
+### ✅ Ф1 закрыта. Что сделано:
+- **MdRegistry** переведён на SSR-safe регистрацию: `useEffect` + покомпонентный `import()` (статический side-effect import компонентов падает на сервере — `customElements` нет). typescale CSS остаётся статическим import.
+- **ui/Button** → `md-filled-button`/`md-filled-tonal-button`/`md-text-button` (primary/secondary/ghost); danger — `md-filled-button` + error-токены; размеры sm/md/lg через `--md-*-button-container-height`. API (variant/size/type/onClick/disabled/children) сохранён.
+- **ui/Input + ui/Textarea** → `md-outlined-text-field` (textarea — `type="textarea"`). Controlled через ref-sync `el.value` (research-паттерн, без hydration-проблем), `onInput`→`onChange(value)`. **API изменён**: `onChange` теперь `(value: string)=>void` (было событие) — обновлены вызовы.
+- **ui/Select** → `md-outlined-select` + `md-select-option` (иконки категорий в `slot="start"`, цвета inline). API (options/value/onChange) сохранён.
+- **ui/SegmentedControl** → `md-chip-set` + `md-filter-chip` (single-select; в @material/web нет segmented buttons). API сохранён; цвет значимости — точкой в `slot="icon"`.
+- **ui/Toast** → перекрашен под M3 Snackbar (inverse-surface/inverse-on-surface), API `useToast`/`ToastProvider` без изменений.
+- Обновлены вызовы: EventForm (Input/Textarea), CategoryForm (Input). Исправлены state-opacity Ф0 → 0.12 (focus/pressed, по M3-спеке).
+- ✅ tsc/lint/build зелёные. md-* грузятся отдельными чанками после гидрации (First Load JS не вырос).
+
+**⚠️ Не проверено визуально/в рантайме** (выбрали «Ф1 целиком» без dev-прогона). Перед/в начале Ф2 стоит прогнать `pnpm dev` и проверить: сабмит формы события (md-button type=submit), controlled-инпуты, выбор категории (md-select), чипы значимости/длительности, тосты. Возможные точки внимания: FOUC до регистрации, поведение filter-chip как single-select.
+
+### Следующий шаг — Ф2 (Навигационная оболочка)
+Кастомный NavigationRail (режимы + Настройки, active indicator, ripple, ARIA), TopAppBar (поиск, контролы режима), `md-fab` (создание события), перестройка AppShell (rail + content + slot для sheet), адаптив по window size classes. Подробности — ROADMAP Ф2.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -91,4 +103,4 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 
 ## Журнал
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
-- Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0.
+- Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0. Затем закрыта **Ф1** (примитивы ui/* → md-*: Button, Input/Textarea, Select, SegmentedControl→chips, Toast→Snackbar). tsc/lint/build зелёные. Коммит Ф1. Рантайм визуально не проверялся.

@@ -1,35 +1,54 @@
 "use client";
 
-import { forwardRef, useId } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps {
   label?: string;
   error?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: string;
+  autoFocus?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  id?: string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, className = "", id, ...props },
+type MdField = HTMLElement & { value: string };
+
+export const Input = forwardRef<HTMLElement, InputProps>(function Input(
+  { label, error, value, onChange, placeholder, type = "text", autoFocus, required, disabled, className = "", id },
   ref,
 ) {
-  const autoId = useId();
-  const inputId = id ?? autoId;
+  const innerRef = useRef<MdField>(null);
+  useImperativeHandle(ref, () => innerRef.current as HTMLElement);
+
+  // md-text-field — не нативный input: значение задаётся как DOM-свойство.
+  useEffect(() => {
+    const el = innerRef.current;
+    if (el && el.value !== value) el.value = value;
+  }, [value]);
+
+  useEffect(() => {
+    if (autoFocus) innerRef.current?.focus();
+  }, [autoFocus]);
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-muted">
-          {label}
-        </label>
-      )}
-      <input
-        ref={ref}
-        id={inputId}
-        className={`h-10 rounded-xl border bg-surface-1 px-3 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-accent-500 ${
-          error ? "border-tl-danger" : "border-line"
-        } ${className}`}
-        {...props}
-      />
-      {error && <span className="text-xs text-tl-danger">{error}</span>}
-    </div>
+    <md-outlined-text-field
+      ref={innerRef}
+      id={id}
+      className={className}
+      style={{ width: "100%" }}
+      label={label}
+      placeholder={placeholder}
+      type={type}
+      required={required}
+      disabled={disabled}
+      error={Boolean(error)}
+      error-text={error ?? ""}
+      onInput={(e) => onChange((e.target as MdField).value)}
+    />
   );
 });

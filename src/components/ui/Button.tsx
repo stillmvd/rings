@@ -1,39 +1,45 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, type CSSProperties, type HTMLAttributes } from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLAttributes<HTMLElement>, "color"> {
   variant?: Variant;
   size?: Size;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 }
 
-const variants: Record<Variant, string> = {
-  primary: "bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700",
-  secondary: "bg-surface-3 text-app-text hover:bg-surface-4",
-  ghost: "bg-transparent text-app-text hover:bg-surface-2",
-  danger: "bg-tl-danger text-white hover:opacity-90",
-};
+const HEIGHTS: Record<Size, string> = { sm: "32px", md: "40px", lg: "48px" };
 
-const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
-};
+const dangerTokens: CSSProperties = {
+  "--md-filled-button-container-color": "var(--md-sys-color-error)",
+  "--md-filled-button-label-text-color": "var(--md-sys-color-on-error)",
+  "--md-filled-button-icon-color": "var(--md-sys-color-on-error)",
+} as CSSProperties;
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", type = "button", className = "", ...props },
+export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
+  { variant = "primary", size = "md", type = "button", className = "", children, style, ...rest },
   ref,
 ) {
-  return (
-    <button
-      ref={ref}
-      // eslint-disable-next-line react/button-has-type
-      type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded-pill font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent-400 disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
-      {...props}
-    />
+  const h = HEIGHTS[size];
+  const mergedStyle = {
+    "--md-filled-button-container-height": h,
+    "--md-filled-tonal-button-container-height": h,
+    "--md-text-button-container-height": h,
+    ...(variant === "danger" ? dangerTokens : null),
+    ...style,
+  } as CSSProperties;
+
+  const inner = (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>{children}</span>
   );
+  const common = { ref, type, className, style: mergedStyle, ...rest };
+
+  if (variant === "ghost") return <md-text-button {...common}>{inner}</md-text-button>;
+  if (variant === "secondary")
+    return <md-filled-tonal-button {...common}>{inner}</md-filled-tonal-button>;
+  return <md-filled-button {...common}>{inner}</md-filled-button>;
 });

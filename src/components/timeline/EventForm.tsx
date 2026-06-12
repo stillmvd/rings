@@ -238,7 +238,7 @@ export function EventForm({
       <Input
         label="Название"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={setTitle}
         error={titleError}
         autoFocus
         placeholder="Что произошло?"
@@ -247,7 +247,7 @@ export function EventForm({
       <Textarea
         label="Описание"
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={setDescription}
         placeholder="Детали (необязательно)"
       />
 
