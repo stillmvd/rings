@@ -57,7 +57,9 @@
 - Обновлены вызовы: EventForm (Input/Textarea), CategoryForm (Input). Исправлены state-opacity Ф0 → 0.12 (focus/pressed, по M3-спеке).
 - ✅ tsc/lint/build зелёные. md-* грузятся отдельными чанками после гидрации (First Load JS не вырос).
 
-**⚠️ Не проверено визуально/в рантайме** (выбрали «Ф1 целиком» без dev-прогона). Перед/в начале Ф2 стоит прогнать `pnpm dev` и проверить: сабмит формы события (md-button type=submit), controlled-инпуты, выбор категории (md-select), чипы значимости/длительности, тосты. Возможные точки внимания: FOUC до регистрации, поведение filter-chip как single-select.
+**✅ Проверено в браузере (desktop 1920×1080)**, консоль чистая (только Lit dev-mode). Подтверждено: M3-палитра/seed, кнопки (filled/tonal/text), controlled md-text-field (value подгружается), md-select с иконками/цветами категорий + дропдаун, filter-chips как single-select (галочки + цветные точки значимости), логика «Период» (поле «Конец»), **сабмит формы** (md-button type=submit создаёт событие), поиск. Тестовое событие создано и удалено (БД чистая).
+
+**🐞 Найден и исправлен баг (Tailwind × Material Web):** Tailwind Preflight (`*{padding:0;margin:0}`) перебивает `:host`-стили web components — для **normal**-правил внешнее дерево побеждает `:host`, поэтому у md-кнопок обнулялся host-padding и лейбл обрезался («Создать»→«Создат»). Фикс в `ui/Button.tsx`: возвращаем M3-модель отступов inline-стилем (inline побеждает Tailwind как outer-author с высшим приоритетом) — `padding-block: (высота−20px)/2`, `padding-inline` 24px (filled/tonal) / 12px (text). **Важно для Ф2:** новые md-* (md-fab, md-icon-button, NavigationRail) столкнутся с тем же конфликтом — закладывать восстановление host-модели сразу.
 
 ### Следующий шаг — Ф2 (Навигационная оболочка)
 Кастомный NavigationRail (режимы + Настройки, active indicator, ripple, ARIA), TopAppBar (поиск, контролы режима), `md-fab` (создание события), перестройка AppShell (rail + content + slot для sheet), адаптив по window size classes. Подробности — ROADMAP Ф2.
