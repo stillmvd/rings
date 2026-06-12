@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
-import { Search, Settings } from "lucide-react";
+import { Search } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { EventDetails } from "@/components/gallery/EventDetails";
 import { EventPopover } from "@/components/timeline/EventPopover";
 import { SearchPanel } from "@/components/search/SearchPanel";
+import { NavigationRail } from "@/components/m3/NavigationRail";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
 import type { PopoverAnchor } from "@/components/ui/Popover";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { ModeToggle, type ViewMode } from "@/components/ui/ModeToggle";
+import { type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
+import { todayISO } from "@/lib/dates";
 import { EMPTY_FILTER, type EventFilter } from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { EventMedia } from "@/db/queries/media";
@@ -64,10 +65,12 @@ export function AppShell({
   const [mode, setMode] = useViewMode();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   const [detail, setDetail] = useState<Detail | null>(null);
-  // Create-поповер календаря (клик по пустому дню). На таймлайне свой попавер внутри Stage.
-  const [calCreate, setCalCreate] = useState<{ dateISO: string; anchor: PopoverAnchor } | null>(
-    null,
-  );
+  // Create-поповер: общий для FAB (дата = сегодня) и календаря (клик по пустому дню).
+  // На таймлайне свой попавер внутри Stage (клик по оси).
+  const [createPopover, setCreatePopover] = useState<{
+    dateISO: string;
+    anchor: PopoverAnchor;
+  } | null>(null);
   // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -109,55 +112,55 @@ export function AppShell({
   };
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-surface-0 text-app-text">
-      {mode === "timeline" ? (
-        <TimelineStage
-          events={liveEvents}
-          categories={categories}
-          filter={filter}
-          onFilterChange={setFilter}
-          focus={focus}
-          onCreate={create}
-          onUpdate={update}
-          onDelete={remove}
-        />
-      ) : mode === "gallery" ? (
-        <GalleryView
-          events={liveEvents}
-          filter={filter}
-          onFilterChange={setFilter}
-          onEventClick={openDetail}
-        />
-      ) : (
-        <CalendarView
-          events={liveEvents}
-          filter={filter}
-          onFilterChange={setFilter}
-          onEventClick={openDetail}
-          onCreateRequest={(dateISO, anchor) => setCalCreate({ dateISO, anchor })}
-        />
-      )}
+    <div className="flex h-screen w-screen overflow-hidden bg-surface-0 text-app-text">
+      <NavigationRail
+        mode={mode}
+        onMode={setMode}
+        onCreate={(anchor) => setCreatePopover({ dateISO: todayISO(), anchor })}
+      />
 
-      <div className="fixed right-4 top-4 z-30 flex items-center gap-2">
-        <button
-          type="button"
-          aria-label="Поиск"
-          title="Поиск (/)"
-          onClick={() => setSearchOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text"
-        >
-          <Search size={18} />
-        </button>
-        <ModeToggle value={mode} onChange={setMode} />
-        <ThemeToggle />
-        <Link
-          href="/settings"
-          aria-label="Настройки"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text"
-        >
-          <Settings size={18} />
-        </Link>
-      </div>
+      <main className="relative flex-1 overflow-hidden">
+        {mode === "timeline" ? (
+          <TimelineStage
+            events={liveEvents}
+            categories={categories}
+            filter={filter}
+            onFilterChange={setFilter}
+            focus={focus}
+            onCreate={create}
+            onUpdate={update}
+            onDelete={remove}
+          />
+        ) : mode === "gallery" ? (
+          <GalleryView
+            events={liveEvents}
+            filter={filter}
+            onFilterChange={setFilter}
+            onEventClick={openDetail}
+          />
+        ) : (
+          <CalendarView
+            events={liveEvents}
+            filter={filter}
+            onFilterChange={setFilter}
+            onEventClick={openDetail}
+            onCreateRequest={(dateISO, anchor) => setCreatePopover({ dateISO, anchor })}
+          />
+        )}
+
+        <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Поиск"
+            title="Поиск (/)"
+            onClick={() => setSearchOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text"
+          >
+            <Search size={18} />
+          </button>
+          <ThemeToggle />
+        </div>
+      </main>
 
       <SearchPanel
         open={searchOpen}
@@ -188,21 +191,21 @@ export function AppShell({
       />
 
       <EventPopover
-        open={calCreate !== null}
-        anchor={calCreate?.anchor ?? null}
+        open={createPopover !== null}
+        anchor={createPopover?.anchor ?? null}
         mode="create"
-        dateISO={calCreate?.dateISO ?? null}
+        dateISO={createPopover?.dateISO ?? null}
         event={null}
         media={[]}
         categories={categories}
         onCreate={(payload) => {
           create(payload);
-          setCalCreate(null);
+          setCreatePopover(null);
         }}
         onUpdate={() => {}}
         onDelete={() => {}}
-        onClose={() => setCalCreate(null)}
+        onClose={() => setCreatePopover(null)}
       />
-    </main>
+    </div>
   );
 }

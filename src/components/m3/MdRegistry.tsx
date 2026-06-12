@@ -17,6 +17,7 @@ export function MdRegistry() {
       import("@material/web/select/select-option.js"),
       import("@material/web/chips/chip-set.js"),
       import("@material/web/chips/filter-chip.js"),
+      import("@material/web/fab/fab.js"),
     ]).catch(() => {});
   }, []);
 

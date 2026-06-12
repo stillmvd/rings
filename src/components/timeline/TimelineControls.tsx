@@ -55,12 +55,12 @@ export function TimelineControls({
 
   return (
     <>
-      <div className="pointer-events-none fixed bottom-4 left-4 z-30 flex items-center gap-2 rounded-xl border border-line bg-surface-1/80 px-3 py-1.5 text-xs backdrop-blur">
+      <div className="pointer-events-none absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-xl border border-line bg-surface-1/80 px-3 py-1.5 text-xs backdrop-blur">
         <span className="font-medium text-app-text">{LOD_LABEL[lod]}</span>
         {dateLabel && <span className="text-muted">{dateLabel}</span>}
       </div>
       <div
-        className="fixed bottom-4 right-4 z-30 flex items-center gap-2"
+        className="absolute bottom-4 right-4 z-30 flex items-center gap-2"
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
       >

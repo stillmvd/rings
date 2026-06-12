@@ -8,8 +8,8 @@
 |------|----------|--------|
 | Ф0 | Фундамент M3 (токены, dynamic color, регистрация) | ✅ ГОТОВО |
 | Ф1 | UI-примитивы → md-* | ✅ ГОТОВО |
-| Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ⏳ (следующая) |
-| Ф3 | Формы и диалоги (Side Sheet, dialogs) | ⏳ |
+| Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ✅ ГОТОВО |
+| Ф3 | Формы и диалоги (Side Sheet, dialogs) | ⏳ (следующая) |
 | Ф4 | Canvas под M3 | ⏳ |
 | Ф5 | Галерея под M3 | ⏳ |
 | Ф6 | Календарь под M3 | ⏳ |
@@ -61,8 +61,19 @@
 
 **🐞 Найден и исправлен баг (Tailwind × Material Web):** Tailwind Preflight (`*{padding:0;margin:0}`) перебивает `:host`-стили web components — для **normal**-правил внешнее дерево побеждает `:host`, поэтому у md-кнопок обнулялся host-padding и лейбл обрезался («Создать»→«Создат»). Фикс в `ui/Button.tsx`: возвращаем M3-модель отступов inline-стилем (inline побеждает Tailwind как outer-author с высшим приоритетом) — `padding-block: (высота−20px)/2`, `padding-inline` 24px (filled/tonal) / 12px (text). **Важно для Ф2:** новые md-* (md-fab, md-icon-button, NavigationRail) столкнутся с тем же конфликтом — закладывать восстановление host-модели сразу.
 
-### Следующий шаг — Ф2 (Навигационная оболочка)
-Кастомный NavigationRail (режимы + Настройки, active indicator, ripple, ARIA), TopAppBar (поиск, контролы режима), `md-fab` (создание события), перестройка AppShell (rail + content + slot для sheet), адаптив по window size classes. Подробности — ROADMAP Ф2.
+### ✅ Ф2 закрыта (desktop). Что сделано:
+- **`m3/NavigationRail.tsx`** — кастомный rail 80px слева (surface): md-fab «Создать событие» в шапке, destinations Таймлайн/Галерея/Календарь (active indicator = secondary-container pill + on-secondary-container, hover state-layer 8%, ARIA `aria-current="page"`, `nav[aria-label]`), Настройки (link) внизу. lucide-иконки (не md-icon), без md-ripple (CSS state-layer — надёжнее, M3-вид сохранён).
+- **Верхняя панель** — по решению пользователя **плавающий ряд** (поиск + ThemeToggle) поверх контента справа-сверху, canvas остаётся полноэкранным (не сплошной TopAppBar).
+- **md-fab** (primary/medium, `<Plus slot="icon">`) — создаёт событие в любом режиме через общий create-поповер (`createPopover`, дата = `todayISO()`). Раньше calCreate был только для календаря — обобщён.
+- **AppShell перестроен**: `flex` (rail + `<main relative flex-1>` с контентом). Режимы переключаются через rail (localStorage/useViewMode без изменений). md-fab НЕ сломан Tailwind-ом (проверено).
+- **Решения пользователя:** desktop-only (адаптив отложен), плавающий top-row, FAB в шапке rail.
+
+**✅ Проверено в браузере (1920×1080), консоль чистая:** rail + active indicator, переключение всех 3 режимов, FAB→форма с датой «сегодня», коллизий нет.
+
+**🐞 Найден и исправлен:** `TimelineControls` использовал `fixed bottom-4 left-4` (к вьюпорту) → «Месяцы»-индикатор налезал на rail (0–80px). Фикс: `fixed` → `absolute` (контролы внутри `relative`-контейнера stage, позиционируются относительно области контента, правее rail). EventDetails/SearchPanel `fixed inset-0` — намеренные модалки-оверлеи, не трогал.
+
+### Следующий шаг — Ф3 (Формы и диалоги)
+Кастомный SideSheet (360dp) для EventForm (замена EventPopover), EventDetails → md-dialog/sheet, категории/настройки → md-dialog, DatePicker под M3-токены. Подробности — ROADMAP Ф3 / research/04 §8 (Side Sheet). **Примечание:** create-поповер FAB сейчас якорится к FAB слева — на Ф3 заменить на правый SideSheet.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -105,4 +116,4 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 
 ## Журнал
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
-- Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0. Затем закрыта **Ф1** (примитивы ui/* → md-*: Button, Input/Textarea, Select, SegmentedControl→chips, Toast→Snackbar). tsc/lint/build зелёные. Коммит Ф1. Рантайм визуально не проверялся.
+- Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0. Затем закрыта **Ф1** (примитивы ui/* → md-*: Button, Input/Textarea, Select, SegmentedControl→chips, Toast→Snackbar). tsc/lint/build зелёные. Коммит Ф1. Визуально проверена в браузере, найден+пофикшен баг padding кнопок (Tailwind Preflight). Затем закрыта **Ф2** (NavigationRail + плавающий top-row + md-fab, перестройка AppShell). Проверено в браузере, пофикшена коллизия TimelineControls с rail. Все коммиты пофазно.
