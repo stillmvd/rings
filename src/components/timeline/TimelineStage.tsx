@@ -4,39 +4,29 @@ import { useEffect, useRef, useState } from "react";
 import { GridCanvas } from "./GridCanvas";
 import { StickyContext } from "./StickyContext";
 import { EventLayer } from "./EventLayer";
-import { EventPopover } from "./EventPopover";
 import { TimelineControls } from "./TimelineControls";
 import { useViewport } from "./useViewport";
 import { xToMs } from "@/lib/projection";
 import { msToISO, isoToMs } from "@/lib/dates";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
-import { listMediaAction } from "@/actions/media";
 import type { TimelineEvent } from "@/db/queries/events";
-import type { EventMedia } from "@/db/queries/media";
-import type { CategoryNode } from "@/db/queries/categories";
-import type { PopoverAnchor } from "@/components/ui/Popover";
 import type { EventFilter } from "@/lib/filter";
-import type { EventFormPayload } from "./EventForm";
 
 const CLICK_THRESHOLD_PX = 4;
 
 export function TimelineStage({
   events,
-  categories,
   filter,
   focus,
-  onCreate,
-  onUpdate,
-  onDelete,
+  onCreateAt,
+  onEventEdit,
 }: {
   events: TimelineEvent[];
-  categories: CategoryNode[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   focus?: { event: TimelineEvent; token: number } | null;
-  onCreate: (payload: EventFormPayload) => void;
-  onUpdate: (id: number, payload: EventFormPayload) => void;
-  onDelete: (id: number) => void;
+  onCreateAt: (dateISO: string) => void;
+  onEventEdit: (event: TimelineEvent) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -44,34 +34,8 @@ export function TimelineStage({
     size.width,
   );
 
-  type PopoverState =
-    | { mode: "create"; anchor: PopoverAnchor; date: string }
-    | { mode: "edit"; anchor: PopoverAnchor; event: TimelineEvent; media: EventMedia[] };
-
-  const [popover, setPopover] = useState<PopoverState | null>(null);
-
-  const handleCreate = (payload: EventFormPayload) => {
-    setPopover(null);
-    onCreate(payload);
-  };
-
-  const handleUpdate = (id: number, payload: EventFormPayload) => {
-    setPopover(null);
-    onUpdate(id, payload);
-  };
-
-  const handleDelete = (id: number) => {
-    setPopover(null);
-    onDelete(id);
-  };
-
-  const handleEventClick = (event: TimelineEvent, anchor: PopoverAnchor) => {
-    // Грузим фото ДО открытия — форма берёт initialMedia в useState-инициализаторе
-    // один раз при монтировании, поэтому media должны быть готовы заранее.
-    listMediaAction(event.id)
-      .then((media) => setPopover({ mode: "edit", anchor, event, media }))
-      .catch(() => setPopover({ mode: "edit", anchor, event, media: [] }));
-  };
+  // Клик по точке открывает форму редактирования в общем правом SideSheet (AppShell).
+  const handleEventClick = (event: TimelineEvent) => onEventEdit(event);
 
   // Размеры контейнера.
   useEffect(() => {
@@ -136,7 +100,6 @@ export function TimelineStage({
   const lastX = useRef(0);
   const downX = useRef(0);
   const downY = useRef(0);
-  const popoverOpenAtDown = useRef(false);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     pointerActive.current = true;
@@ -144,7 +107,6 @@ export function TimelineStage({
     lastX.current = e.clientX;
     downX.current = e.clientX;
     downY.current = e.clientY;
-    popoverOpenAtDown.current = popover !== null;
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -174,22 +136,13 @@ export function TimelineStage({
     e.currentTarget.style.cursor = "grab";
     if (wasDragging || size.width <= 0) return;
 
-    if (popoverOpenAtDown.current) {
-      setPopover(null);
-      return;
-    }
-
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     let date = msToISO(xToMs(offsetX, viewport));
     if (date < TIMELINE_MIN_DATE) date = TIMELINE_MIN_DATE;
     if (date > TIMELINE_MAX_DATE) date = TIMELINE_MAX_DATE;
 
-    setPopover({
-      mode: "create",
-      anchor: { x: e.clientX, y: rect.top + rect.height / 2 },
-      date,
-    });
+    onCreateAt(date);
   };
 
   const onPointerCancel = () => {
@@ -226,19 +179,6 @@ export function TimelineStage({
         onZoomIn={() => zoomStep(1)}
         onZoomOut={() => zoomStep(-1)}
         onToday={centerToday}
-      />
-      <EventPopover
-        open={popover !== null}
-        anchor={popover?.anchor ?? null}
-        mode={popover?.mode ?? "create"}
-        dateISO={popover?.mode === "create" ? popover.date : null}
-        event={popover?.mode === "edit" ? popover.event : null}
-        media={popover?.mode === "edit" ? popover.media : []}
-        categories={categories}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-        onClose={() => setPopover(null)}
       />
     </div>
   );

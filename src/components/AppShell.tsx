@@ -5,19 +5,17 @@ import { Search } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { CalendarView } from "@/components/calendar/CalendarView";
-import { EventDetails } from "@/components/gallery/EventDetails";
-import { EventPopover } from "@/components/timeline/EventPopover";
+import { EventSheet, type EventSheetState } from "@/components/timeline/EventSheet";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { NavigationRail } from "@/components/m3/NavigationRail";
+import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
-import type { PopoverAnchor } from "@/components/ui/Popover";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
 import { todayISO } from "@/lib/dates";
 import { EMPTY_FILTER, type EventFilter } from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
-import type { EventMedia } from "@/db/queries/media";
 import type { CategoryNode } from "@/db/queries/categories";
 
 const MODE_KEY = "timeline.viewMode";
@@ -53,8 +51,6 @@ function useViewMode(): [ViewMode, (mode: ViewMode) => void] {
   return [mode, setMode];
 }
 
-type Detail = { event: TimelineEvent; media: EventMedia[]; editing: boolean };
-
 export function AppShell({
   events,
   categories,
@@ -64,13 +60,9 @@ export function AppShell({
 }) {
   const [mode, setMode] = useViewMode();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
-  const [detail, setDetail] = useState<Detail | null>(null);
-  // Create-поповер: общий для FAB (дата = сегодня) и календаря (клик по пустому дню).
-  // На таймлайне свой попавер внутри Stage (клик по оси).
-  const [createPopover, setCreatePopover] = useState<{
-    dateISO: string;
-    anchor: PopoverAnchor;
-  } | null>(null);
+  // Единый правый SideSheet для всех сценариев формы/просмотра события.
+  const [sheet, setSheet] = useState<EventSheetState | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -104,47 +96,54 @@ export function AppShell({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Грузим фото ДО открытия — форма редактирования берёт initialMedia один раз.
-  const openDetail = (event: TimelineEvent) => {
+  // Грузим фото ДО открытия — форма/просмотр берут media один раз при монтировании.
+  const openView = (event: TimelineEvent) => {
     listMediaAction(event.id)
-      .then((media) => setDetail({ event, media, editing: false }))
-      .catch(() => setDetail({ event, media: [], editing: false }));
+      .then((media) => setSheet({ mode: "view", event, media }))
+      .catch(() => setSheet({ mode: "view", event, media: [] }));
   };
+  const openEdit = (event: TimelineEvent) => {
+    listMediaAction(event.id)
+      .then((media) => setSheet({ mode: "edit", event, media }))
+      .catch(() => setSheet({ mode: "edit", event, media: [] }));
+  };
+  const openCreate = (dateISO: string) => setSheet({ mode: "create", dateISO });
+  const startEdit = () =>
+    setSheet((s) => (s && s.mode === "view" ? { mode: "edit", event: s.event, media: s.media } : s));
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-surface-0 text-app-text">
       <NavigationRail
         mode={mode}
         onMode={setMode}
-        onCreate={(anchor) => setCreatePopover({ dateISO: todayISO(), anchor })}
+        onCreate={() => openCreate(todayISO())}
+        onSettings={() => setSettingsOpen(true)}
       />
 
       <main className="relative flex-1 overflow-hidden">
         {mode === "timeline" ? (
           <TimelineStage
             events={liveEvents}
-            categories={categories}
             filter={filter}
             onFilterChange={setFilter}
             focus={focus}
-            onCreate={create}
-            onUpdate={update}
-            onDelete={remove}
+            onCreateAt={openCreate}
+            onEventEdit={openEdit}
           />
         ) : mode === "gallery" ? (
           <GalleryView
             events={liveEvents}
             filter={filter}
             onFilterChange={setFilter}
-            onEventClick={openDetail}
+            onEventClick={openView}
           />
         ) : (
           <CalendarView
             events={liveEvents}
             filter={filter}
             onFilterChange={setFilter}
-            onEventClick={openDetail}
-            onCreateRequest={(dateISO, anchor) => setCreatePopover({ dateISO, anchor })}
+            onEventClick={openView}
+            onCreateRequest={(dateISO) => openCreate(dateISO)}
           />
         )}
 
@@ -172,39 +171,29 @@ export function AppShell({
         onClose={() => setSearchOpen(false)}
       />
 
-      <EventDetails
-        open={detail !== null}
-        event={detail?.event ?? null}
-        media={detail?.media ?? []}
-        editing={detail?.editing ?? false}
+      <EventSheet
+        state={sheet}
         categories={categories}
-        onSetEditing={(editing) => setDetail((d) => (d ? { ...d, editing } : d))}
+        onStartEdit={startEdit}
+        onCreate={(payload) => {
+          create(payload);
+          setSheet(null);
+        }}
         onUpdate={(id, payload) => {
           update(id, payload);
-          setDetail(null);
+          setSheet(null);
         }}
         onDelete={(id) => {
           remove(id);
-          setDetail(null);
+          setSheet(null);
         }}
-        onClose={() => setDetail(null)}
+        onClose={() => setSheet(null)}
       />
 
-      <EventPopover
-        open={createPopover !== null}
-        anchor={createPopover?.anchor ?? null}
-        mode="create"
-        dateISO={createPopover?.dateISO ?? null}
-        event={null}
-        media={[]}
+      <SettingsDialog
+        open={settingsOpen}
         categories={categories}
-        onCreate={(payload) => {
-          create(payload);
-          setCreatePopover(null);
-        }}
-        onUpdate={() => {}}
-        onDelete={() => {}}
-        onClose={() => setCreatePopover(null)}
+        onClose={() => setSettingsOpen(false)}
       />
     </div>
   );

@@ -9,8 +9,8 @@
 | Ф0 | Фундамент M3 (токены, dynamic color, регистрация) | ✅ ГОТОВО |
 | Ф1 | UI-примитивы → md-* | ✅ ГОТОВО |
 | Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ✅ ГОТОВО |
-| Ф3 | Формы и диалоги (Side Sheet, dialogs) | ⏳ (следующая) |
-| Ф4 | Canvas под M3 | ⏳ |
+| Ф3 | Формы и диалоги (Side Sheet, dialogs) | ✅ ГОТОВО |
+| Ф4 | Canvas под M3 | ⏳ (следующая) |
 | Ф5 | Галерея под M3 | ⏳ |
 | Ф6 | Календарь под M3 | ⏳ |
 | Ф7 | Motion, polish, seed-пикер | ⏳ |
@@ -72,8 +72,23 @@
 
 **🐞 Найден и исправлен:** `TimelineControls` использовал `fixed bottom-4 left-4` (к вьюпорту) → «Месяцы»-индикатор налезал на rail (0–80px). Фикс: `fixed` → `absolute` (контролы внутри `relative`-контейнера stage, позиционируются относительно области контента, правее rail). EventDetails/SearchPanel `fixed inset-0` — намеренные модалки-оверлеи, не трогал.
 
-### Следующий шаг — Ф3 (Формы и диалоги)
-Кастомный SideSheet (360dp) для EventForm (замена EventPopover), EventDetails → md-dialog/sheet, категории/настройки → md-dialog, DatePicker под M3-токены. Подробности — ROADMAP Ф3 / research/04 §8 (Side Sheet). **Примечание:** create-поповер FAB сейчас якорится к FAB слева — на Ф3 заменить на правый SideSheet.
+### ✅ Ф3 закрыта. Что сделано:
+- **`m3/SideSheet.tsx`** — кастомный modal side sheet справа (380px): scrim (`scrim` 32%), slide-in (motion x 100%→0, emphasized easing), `surface-container-high`, левые углы `rounded-l-2xl`, header (title + close на lucide-X со state-layer), скроллируемый body. createPortal + `useMounted` (SSR-safe), Esc/scrim-клик закрывают. z-[80/81] (ниже Lightbox z-90).
+- **`m3/Dialog.tsx`** — центральный M3-диалог: scrim + `surface-container-high`, corner `rounded-[28px]`, spring-анимация, опц. title/close, проп `z` для вложенности (база 80, вложенные 88).
+- **`timeline/EventSheet.tsx`** — **единый** компонент формы/просмотра события на базе SideSheet, заменил EventPopover + EventDetails. 3 режима: `create` (EventForm), `view` (фото edge-to-edge `-mx-6`, заголовок/дата/категория-chip/значимость, кнопки Удалить/Редактировать → `view→edit`), `edit` (EventForm). Lightbox для фото. `splitCategory` перенесён сюда.
+- **AppShell**: вместо `createPopover`+`detail` — единый стейт `sheet: EventSheetState | null`. Колбэки `openCreate(dateISO)` / `openView(event)` / `openEdit(event)` (грузят media через `listMediaAction`) / `startEdit`. FAB → create (todayISO), календарь create → create, gallery/calendar клик → view, таймлайн клик по точке → edit. + `settingsOpen` → `SettingsDialog`.
+- **TimelineStage**: убраны EventPopover, media-загрузка, popover-стейт, `popoverOpenAtDown`. Новые пропсы `onCreateAt(dateISO)` / `onEventEdit(event)`. Клик по оси → create, по точке → edit (форма в правом sheet AppShell). Modal-scrim sheet перехватывает фон, поэтому «клик-закрывает-поповер» больше не нужен.
+- **NavigationRail**: `onCreate()` без anchor; «Настройки» — `<button onClick={onSettings}>` вместо `<Link href="/settings">`.
+- **SettingsDialog**: настройки в большом центральном M3-диалоге (maxWidth 640) — Оформление (ThemeToggle) + CategoryManager + BackupPanel. Открывается из rail поверх AppShell (categories из серверного page → revalidate `/` обновляет).
+- **CategoryManager/BackupPanel**: вложенные Overlay-диалоги перекрашены под M3 (scrim 32%, `surface-container-high`, `rounded-[28px]`) и подняты на **z-[88]** (чтобы быть поверх settings-диалога z-81, но под Lightbox z-90).
+- **DatePicker + `.tl-calendar`**: триггер как M3-outlined (h-14, `rounded-[4px]`, border `outline`→focus `primary`, `surface-container-low`); дропдаун `surface-container-high` `rounded-2xl`; `.tl-calendar` `--rdp-*` привязаны к прямым `--md-sys-color-*`, день круглый (`corner-full`), selected = `primary`/`on-primary`.
+- **`/settings` страница оставлена** как fallback по прямому URL (rail теперь открывает диалог).
+- ✅ tsc/lint/build зелёные. **Проверено в браузере (prod `next start`, тёмная тема), консоль чистая:** FAB→SideSheet, DatePicker (M3 круглые дни, primary-selected, месяц/год), «Период»→2-й DatePicker, Настройки→большой диалог, вложенный диалог категории поверх (z-index ок), создание события, view (календарь→sheet), view→edit, удаление. Тестовое событие создано и удалено (БД чистая).
+
+**🐞 Dev-сервер (`next dev --turbopack`) падает на резолве Google-шрифта** (`@vercel/turbopack-next/internal/font/google/font` для Roboto Flex) — внутренняя проблема turbopack dev (вероятно нет сети для подгрузки). **Prod `build`+`start` работают штатно.** Также: смешивание dev (turbopack) и build артефактов в одном `.next` ломает `next start` (`routesManifest.dataRoutes is not iterable`) — лечится `rm -rf .next && pnpm build`. Для визуальной проверки использовать prod `pnpm start`.
+
+### Следующий шаг — Ф4 (Canvas под M3)
+`GridCanvas.readColors` → M3-роли (surface/outline/primary/on-surface); significance → 3 кастомные M3-роли (`--md-sig-*`); EventDot/EventLayer/кластеры — elevation/shape/state/on-colors; StickyContext/метки/недоступные зоны под M3. Подробности — ROADMAP Ф4.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -116,4 +131,5 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 
 ## Журнал
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
+- Сессия 3: закрыта **Ф3** (Формы и диалоги). По решениям пользователя: все формы/просмотр события → единый правый **modal SideSheet** (380px), настройки → **большой центральный md-dialog**. Создан `m3/SideSheet` + `m3/Dialog` + `timeline/EventSheet` (объединил EventPopover+EventDetails, удалены оба). AppShell поднял единый sheet-стейт, TimelineStage очищен (форма ушла наверх), NavigationRail.Настройки → onSettings-диалог, вложенные диалоги категорий/импорта перекрашены под M3 + z-[88]. DatePicker/`.tl-calendar` под прямые M3-токены. tsc/lint/build зелёные, проверено в браузере (prod). Коммит Ф3.
 - Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0. Затем закрыта **Ф1** (примитивы ui/* → md-*: Button, Input/Textarea, Select, SegmentedControl→chips, Toast→Snackbar). tsc/lint/build зелёные. Коммит Ф1. Визуально проверена в браузере, найден+пофикшен баг padding кнопок (Tailwind Preflight). Затем закрыта **Ф2** (NavigationRail + плавающий top-row + md-fab, перестройка AppShell). Проверено в браузере, пофикшена коллизия TimelineControls с rail. Все коммиты пофазно.

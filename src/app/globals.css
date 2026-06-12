@@ -167,29 +167,29 @@
 /* === react-day-picker — подгонка под тему Timeline ======================== */
 
 .tl-calendar .rdp-root {
-  --rdp-accent-color: var(--tl-accent-500);
-  --rdp-accent-background-color: color-mix(in srgb, var(--tl-accent-500) 20%, transparent);
-  --rdp-today-color: var(--tl-accent-400);
-  --rdp-day-width: 38px;
-  --rdp-day-height: 38px;
-  --rdp-day_button-width: 36px;
-  --rdp-day_button-height: 36px;
-  --rdp-day_button-border-radius: 0.625rem;
+  --rdp-accent-color: var(--md-sys-color-primary);
+  --rdp-accent-background-color: var(--md-sys-color-primary-container);
+  --rdp-today-color: var(--md-sys-color-primary);
+  --rdp-day-width: 40px;
+  --rdp-day-height: 40px;
+  --rdp-day_button-width: 40px;
+  --rdp-day_button-height: 40px;
+  --rdp-day_button-border-radius: var(--md-sys-shape-corner-full);
   --rdp-nav_button-width: 2rem;
   --rdp-nav_button-height: 2rem;
-  color: var(--tl-text);
+  color: var(--md-sys-color-on-surface);
   margin: 0;
 }
 
 .tl-calendar .rdp-day_button:hover:not(:disabled) {
-  background-color: var(--tl-surface-2);
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
 }
 
 .tl-calendar .rdp-selected .rdp-day_button,
 .tl-calendar .rdp-selected .rdp-day_button:hover {
-  background-color: var(--tl-accent-500);
-  border-color: var(--tl-accent-500);
-  color: #fff;
+  background-color: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
 }
 
 .tl-calendar .rdp-chevron {

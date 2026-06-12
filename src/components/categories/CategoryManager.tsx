@@ -241,7 +241,8 @@ function Overlay({ children, onClose }: { children: React.ReactNode; onClose: ()
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-[88] flex items-center justify-center p-4"
+      style={{ background: "color-mix(in srgb, var(--md-sys-color-scrim) 32%, transparent)" }}
       onMouseDown={onClose}
     >
       <motion.div
@@ -249,7 +250,11 @@ function Overlay({ children, onClose }: { children: React.ReactNode; onClose: ()
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.96, opacity: 0 }}
         transition={{ type: "spring", duration: 0.28, bounce: 0.18 }}
-        className="w-full max-w-md rounded-card border border-line bg-surface-1 p-5 shadow-2xl"
+        className="w-full max-w-md rounded-[28px] p-6 shadow-2xl"
+        style={{
+          background: "var(--md-sys-color-surface-container-high)",
+          color: "var(--md-sys-color-on-surface)",
+        }}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {children}

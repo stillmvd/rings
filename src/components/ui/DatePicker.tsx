@@ -73,7 +73,10 @@ export function DatePicker({ label, value, onChange, error, min, max, id }: Date
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={fieldId} className="text-sm font-medium text-muted">
+        <label
+          htmlFor={fieldId}
+          className="text-sm font-medium text-[var(--md-sys-color-on-surface-variant)]"
+        >
           {label}
         </label>
       )}
@@ -84,14 +87,16 @@ export function DatePicker({ label, value, onChange, error, min, max, id }: Date
           onClick={toggle}
           aria-haspopup="dialog"
           aria-expanded={open}
-          className={`flex h-10 w-full items-center justify-between gap-2 rounded-xl border bg-surface-1 px-3 text-left text-sm outline-none transition focus:border-accent-500 ${
-            error ? "border-tl-danger" : "border-line"
-          } ${selected ? "text-app-text" : "text-muted"}`}
+          className={`flex h-14 w-full items-center justify-between gap-2 rounded-[4px] border bg-[var(--md-sys-color-surface-container-low)] px-4 text-left text-sm outline-none transition-colors focus:border-[var(--md-sys-color-primary)] ${
+            error
+              ? "border-[var(--md-sys-color-error)]"
+              : "border-[var(--md-sys-color-outline)] hover:border-[var(--md-sys-color-on-surface)]"
+          } ${selected ? "text-[var(--md-sys-color-on-surface)]" : "text-[var(--md-sys-color-on-surface-variant)]"}`}
         >
           <span>
             {selected ? format(selected, "d MMMM yyyy", { locale: ru }) : "Выберите дату"}
           </span>
-          <CalendarDays size={16} className="text-muted" />
+          <CalendarDays size={16} className="text-[var(--md-sys-color-on-surface-variant)]" />
         </button>
 
         {open && (
@@ -99,7 +104,8 @@ export function DatePicker({ label, value, onChange, error, min, max, id }: Date
             role="dialog"
             className={`tl-calendar absolute left-0 z-50 ${
               flip ? "bottom-full mb-2" : "top-full mt-2"
-            } rounded-card border border-line bg-surface-1 p-2 shadow-2xl`}
+            } rounded-2xl p-2 shadow-2xl`}
+            style={{ background: "var(--md-sys-color-surface-container-high)" }}
           >
             <DayPicker
               mode="single"
@@ -116,7 +122,7 @@ export function DatePicker({ label, value, onChange, error, min, max, id }: Date
           </div>
         )}
       </div>
-      {error && <span className="text-xs text-tl-danger">{error}</span>}
+      {error && <span className="text-xs text-[var(--md-sys-color-error)]">{error}</span>}
     </div>
   );
 }

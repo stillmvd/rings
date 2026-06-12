@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Waypoints, LayoutGrid, CalendarDays, Settings, Plus, type LucideIcon } from "lucide-react";
 import type { ViewMode } from "@/components/ui/ModeToggle";
 
@@ -14,10 +13,12 @@ export function NavigationRail({
   mode,
   onMode,
   onCreate,
+  onSettings,
 }: {
   mode: ViewMode;
   onMode: (m: ViewMode) => void;
-  onCreate: (anchor: { x: number; y: number }) => void;
+  onCreate: () => void;
+  onSettings: () => void;
 }) {
   return (
     <nav
@@ -29,10 +30,7 @@ export function NavigationRail({
         size="medium"
         aria-label="Создать событие"
         style={{ marginBottom: "12px" }}
-        onClick={(e) => {
-          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          onCreate({ x: r.right, y: r.top + r.height / 2 });
-        }}
+        onClick={onCreate}
       >
         <Plus slot="icon" />
       </md-fab>
@@ -73,8 +71,9 @@ export function NavigationRail({
 
       <div className="flex-1" />
 
-      <Link
-        href="/settings"
+      <button
+        type="button"
+        onClick={onSettings}
         aria-label="Настройки"
         title="Настройки"
         className="group flex w-full flex-col items-center gap-1 py-1"
@@ -85,7 +84,7 @@ export function NavigationRail({
         <span className="text-[11px] leading-tight text-[var(--md-sys-color-on-surface-variant)]">
           Настройки
         </span>
-      </Link>
+      </button>
     </nav>
   );
 }
