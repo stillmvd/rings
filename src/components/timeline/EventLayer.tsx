@@ -125,8 +125,8 @@ export function EventLayer({
                 height: barH,
                 background: color,
                 boxShadow: sig.ring
-                  ? `0 0 0 2px var(--tl-surface-0), 0 0 0 3px ${sig.ringColor ?? color}`
-                  : "0 0 0 2px var(--tl-surface-0)",
+                  ? `0 0 0 2px var(--md-sys-color-surface), 0 0 0 3px ${sig.ringColor ?? color}`
+                  : "0 0 0 2px var(--md-sys-color-surface)",
               }}
               initial={{ opacity: 0, scaleY: 0.4 }}
               animate={{ opacity: 1, scaleY: 1 }}
@@ -191,8 +191,8 @@ export function EventLayer({
                 width: size,
                 height: size,
                 background: meta.color,
-                color: "#0a0a0b",
-                boxShadow: "0 0 0 2px var(--tl-surface-0)",
+                color: meta.onColor,
+                boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
               }}
             >
               {cluster.events.length}

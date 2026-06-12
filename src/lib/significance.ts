@@ -3,8 +3,10 @@ import type { Significance } from "./constants";
 export type SignificanceMeta = {
   level: Significance;
   label: string;
-  /** HEX-цвет точки (для Canvas; совпадает с токеном --tl-sig-N). */
+  /** Цвет точки — M3-роль значимости (--md-sig-N, гармонизирована к seed). Для DOM-стилей. */
   color: string;
+  /** Контрастный on-цвет для контента поверх color (--md-sig-N-on). */
+  onColor: string;
   /** Радиус точки в px при базовом масштабе. */
   dotRadius: number;
   /** Обводка для выделения самых важных событий. */
@@ -21,7 +23,8 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
   1: {
     level: 1,
     label: "Обычное",
-    color: "#64748b",
+    color: "var(--md-sig-1)",
+    onColor: "var(--md-sig-1-on)",
     dotRadius: 4,
     ring: false,
     ringColor: null,
@@ -30,7 +33,8 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
   2: {
     level: 2,
     label: "Важное",
-    color: "#c4f94a",
+    color: "var(--md-sig-2)",
+    onColor: "var(--md-sig-2-on)",
     dotRadius: 6,
     ring: false,
     ringColor: null,
@@ -39,10 +43,11 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
   3: {
     level: 3,
     label: "Самое важное",
-    color: "#f59e0b",
+    color: "var(--md-sig-3)",
+    onColor: "var(--md-sig-3-on)",
     dotRadius: 9,
     ring: true,
-    ringColor: "#fbbf24",
+    ringColor: "var(--md-sig-3-on-container)",
     minLodRank: 0,
   },
 };

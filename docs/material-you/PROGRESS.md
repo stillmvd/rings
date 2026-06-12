@@ -10,8 +10,8 @@
 | Ф1 | UI-примитивы → md-* | ✅ ГОТОВО |
 | Ф2 | Навигационная оболочка (Rail + TopBar + FAB) | ✅ ГОТОВО |
 | Ф3 | Формы и диалоги (Side Sheet, dialogs) | ✅ ГОТОВО |
-| Ф4 | Canvas под M3 | ⏳ (следующая) |
-| Ф5 | Галерея под M3 | ⏳ |
+| Ф4 | Canvas под M3 | ✅ ГОТОВО |
+| Ф5 | Галерея под M3 | ⏳ (следующая) |
 | Ф6 | Календарь под M3 | ⏳ |
 | Ф7 | Motion, polish, seed-пикер | ⏳ |
 
@@ -87,8 +87,18 @@
 
 **🐞 Dev-сервер (`next dev --turbopack`) падает на резолве Google-шрифта** (`@vercel/turbopack-next/internal/font/google/font` для Roboto Flex) — внутренняя проблема turbopack dev (вероятно нет сети для подгрузки). **Prod `build`+`start` работают штатно.** Также: смешивание dev (turbopack) и build артефактов в одном `.next` ломает `next start` (`routesManifest.dataRoutes is not iterable`) — лечится `rm -rf .next && pnpm build`. Для визуальной проверки использовать prod `pnpm start`.
 
-### Следующий шаг — Ф4 (Canvas под M3)
-`GridCanvas.readColors` → M3-роли (surface/outline/primary/on-surface); significance → 3 кастомные M3-роли (`--md-sig-*`); EventDot/EventLayer/кластеры — elevation/shape/state/on-colors; StickyContext/метки/недоступные зоны под M3. Подробности — ROADMAP Ф4.
+### ✅ Ф4 закрыта. Что сделано:
+- **`GridCanvas.readColors`** — прямое чтение M3 sys-ролей (без моста `--tl-*`): `line`→`outline-variant`, `lineStrong`→`outline` (сильные деления + пунктир ДР), `text`→`on-surface`, `muted`→`on-surface-variant`, `grayZone` (вуаль «вне жизни»)→`surface-variant`. Поле `accent`→`today`=`tertiary` (маркер «сегодня» отличается от primary-UI: FAB/rail). Canvas теперь реагирует на seed/тему напрямую.
+- **`lib/significance.ts`** — единый источник переведён на M3-токены: `color`→`var(--md-sig-N)` (гармонизированы к seed), новое поле `onColor`→`var(--md-sig-N-on)`, `ringColor` sig-3 → `var(--md-sig-3-on-container)`. Затронуло ВСЕ режимы сразу (таймлайн/галерея/календарь/поиск) — только цвет, layout не тронут.
+- **`lib/colors.ts`** — `onColorFor(hex)`: авто-контраст контента по YIQ-яркости (порог 140) для произвольного `category_color`.
+- **`EventDot`** — контент (иконка) контрастен фактическому фону: `onColorFor(category_color)` если задан, иначе `sig.onColor`. boxShadow-обводка → `var(--md-sys-color-surface)`.
+- **`EventLayer`** — boxShadow полос/точек → `surface`; счётчик кластера `color`→`meta.onColor` (фон=значимость), ring sig-3 через M3-токен.
+- **Решения пользователя (AskUserQuestion):** «сегодня»→tertiary (ДР-пунктир→outline); контент точек→авто-контраст по яркости; sig-3→кольцо M3-токеном; значимость→единый источник (все режимы сразу).
+
+**✅ Проверено в браузере (prod, 1920×1080, тёмная + светлая темы), консоль чистая.** Подтверждено на тестовых событиях: точки sig-1/2/3 (гармонизированные к seed цвета), кластер со счётчиком (тёмный onColor на amber-фоне), крупные sig-3 с кольцами и иконками (жёлтая категория→тёмная звезда, синяя→белое сердце — авто-контраст), период-полоса, маркер «сегодня» = розовый tertiary (отличается от фиолетового primary), вуаль «вне жизни», StickyContext-плашка. StickyContext/TimelineControls оставлены на Tailwind-мост-утилитах (уже M3, консистентно с остальным DOM). Тестовые события/категории и временный скрипт удалены (БД чистая).
+
+### Следующий шаг — Ф5 (Галерея под M3)
+Карточки (кастомный M3 card: surface-container + elevation + shape), лента, date-scrubber, state layers. Цвет значимости в галерее уже M3 (единый `significance.ts` из Ф4) — остаётся layout/карточки. Подробности — ROADMAP Ф5.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -130,6 +140,7 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 ---
 
 ## Журнал
+- Сессия 4: закрыта **Ф4** (Canvas под M3). `GridCanvas.readColors` → прямые M3 sys-роли (outline/on-surface/...), маркер «сегодня» = tertiary, ДР-пунктир = outline, вуаль «вне жизни» = surface-variant. Единый `significance.ts` → `var(--md-sig-N)` + поле `onColor` + ring sig-3 на `--md-sig-3-on-container` (затронуло все режимы). Добавлен `onColorFor` (авто-контраст по YIQ) для контента точек с произвольным category_color; EventDot/EventLayer boxShadow → surface, счётчик кластера → meta.onColor. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light), консоль чистая. Коммит Ф4.
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
 - Сессия 3: закрыта **Ф3** (Формы и диалоги). По решениям пользователя: все формы/просмотр события → единый правый **modal SideSheet** (380px), настройки → **большой центральный md-dialog**. Создан `m3/SideSheet` + `m3/Dialog` + `timeline/EventSheet` (объединил EventPopover+EventDetails, удалены оба). AppShell поднял единый sheet-стейт, TimelineStage очищен (форма ушла наверх), NavigationRail.Настройки → onSettings-диалог, вложенные диалоги категорий/импорта перекрашены под M3 + z-[88]. DatePicker/`.tl-calendar` под прямые M3-токены. tsc/lint/build зелёные, проверено в браузере (prod). Коммит Ф3.
 - Сессия 2: создан корневой `CLAUDE.md` (на него ссылался README). Закрыта **Ф0** целиком (dynamic-color, инжект токенов, M3-слой + мост в globals, MdRegistry, JSX-типы md-*, Roboto Flex, next-themes data-theme). tsc/lint/build зелёные. Коммит Ф0. Затем закрыта **Ф1** (примитивы ui/* → md-*: Button, Input/Textarea, Select, SegmentedControl→chips, Toast→Snackbar). tsc/lint/build зелёные. Коммит Ф1. Визуально проверена в браузере, найден+пофикшен баг padding кнопок (Tailwind Preflight). Затем закрыта **Ф2** (NavigationRail + плавающий top-row + md-fab, перестройка AppShell). Проверено в браузере, пофикшена коллизия TimelineControls с rail. Все коммиты пофазно.

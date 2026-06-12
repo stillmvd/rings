@@ -24,3 +24,17 @@ const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 export function isValidHexColor(value: string): boolean {
   return HEX_COLOR.test(value);
 }
+
+/**
+ * Контрастный цвет контента (текст/иконка) поверх произвольного hex-фона.
+ * YIQ-яркость с порогом 140: тёмный фон → белый контент, светлый → почти-чёрный.
+ * Для фона из M3-роли значимости используйте готовый --md-sig-N-on (он уже контрастен).
+ */
+export function onColorFor(hex: string): string {
+  if (!HEX_COLOR.test(hex)) return "#ffffff";
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 140 ? "#0a0a0b" : "#ffffff";
+}

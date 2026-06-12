@@ -28,20 +28,21 @@ type GridColors = {
   lineStrong: string;
   text: string;
   muted: string;
-  accent: string;
+  today: string;
   grayZone: string;
 };
 
+// Прямое чтение M3 sys-ролей (без моста --tl-*): canvas реагирует на seed и тему.
 function readColors(): GridColors {
   const s = getComputedStyle(document.documentElement);
   const v = (name: string, fallback: string) => s.getPropertyValue(name).trim() || fallback;
   return {
-    line: v("--tl-line", "#2a2a30"),
-    lineStrong: v("--tl-surface-4", "#34343b"),
-    text: v("--tl-text", "#f5f5f7"),
-    muted: v("--tl-text-muted", "#8a8a93"),
-    accent: v("--tl-accent-500", "#6366f1"),
-    grayZone: v("--tl-surface-2", "#1c1c20"),
+    line: v("--md-sys-color-outline-variant", "#49454f"),
+    lineStrong: v("--md-sys-color-outline", "#938f99"),
+    text: v("--md-sys-color-on-surface", "#e6e1e5"),
+    muted: v("--md-sys-color-on-surface-variant", "#cac4d0"),
+    today: v("--md-sys-color-tertiary", "#efb8c8"),
+    grayZone: v("--md-sys-color-surface-variant", "#49454f"),
   };
 }
 
@@ -226,17 +227,17 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       ctx.setLineDash([]);
     }
 
-    // Маркер «сегодня» — акцентная вертикаль + точка на оси.
+    // Маркер «сегодня» — tertiary-вертикаль + точка на оси (отличается от primary-UI).
     if (todayX >= 0 && todayX <= width) {
       const tx = Math.round(todayX) + 0.5;
-      ctx.strokeStyle = colors.accent;
+      ctx.strokeStyle = colors.today;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(tx, 0);
       ctx.lineTo(tx, height);
       ctx.stroke();
       ctx.lineWidth = 1;
-      ctx.fillStyle = colors.accent;
+      ctx.fillStyle = colors.today;
       ctx.beginPath();
       ctx.arc(tx, axisY, 4, 0, Math.PI * 2);
       ctx.fill();

@@ -2,6 +2,7 @@
 
 import { createElement } from "react";
 import { getSignificanceMeta } from "@/lib/significance";
+import { onColorFor } from "@/lib/colors";
 import { resolveIcon } from "@/lib/icons";
 import type { TimelineEvent } from "@/db/queries/events";
 
@@ -12,6 +13,9 @@ import type { TimelineEvent } from "@/db/queries/events";
 export function EventDot({ event }: { event: TimelineEvent }) {
   const sig = getSignificanceMeta(event.significance);
   const color = event.category_color ?? sig.color;
+  // Контент контрастен фактическому фону: по luminance для произвольного category_color,
+  // готовый on-токен значимости — если фон взят от неё.
+  const contentColor = event.category_color ? onColorFor(event.category_color) : sig.onColor;
   const diameter = sig.dotRadius * 2;
   const iconCmp = resolveIcon(event.category_icon);
   const showIcon = sig.dotRadius >= 9 && event.category_icon != null;
@@ -24,7 +28,7 @@ export function EventDot({ event }: { event: TimelineEvent }) {
         height: diameter,
         background: color,
         boxShadow: sig.ring
-          ? `0 0 0 2px var(--tl-surface-0), 0 0 0 4px ${sig.ringColor ?? color}`
+          ? `0 0 0 2px var(--md-sys-color-surface), 0 0 0 4px ${sig.ringColor ?? color}`
           : undefined,
       }}
     >
@@ -32,7 +36,7 @@ export function EventDot({ event }: { event: TimelineEvent }) {
         createElement(iconCmp, {
           size: Math.round(diameter * 0.6),
           strokeWidth: 2.5,
-          color: "#0a0a0b",
+          color: contentColor,
         })}
     </div>
   );
