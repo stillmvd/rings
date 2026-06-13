@@ -36,7 +36,7 @@ export function ThemeToggle() {
             aria-pressed={active}
             onClick={() => setTheme(value)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-              active ? "bg-surface-3 text-app-text" : "text-muted hover:text-app-text"
+              active ? "bg-surface-3 text-app-text" : "text-muted hover:bg-surface-2 hover:text-app-text"
             }`}
           >
             <Icon size={16} />

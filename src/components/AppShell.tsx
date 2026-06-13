@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Search } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
@@ -59,6 +60,7 @@ export function AppShell({
   categories: CategoryNode[];
 }) {
   const [mode, setMode] = useViewMode();
+  const reduceMotion = useReducedMotion();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   // Единый правый SideSheet для всех сценариев формы/просмотра события.
   const [sheet, setSheet] = useState<EventSheetState | null>(null);
@@ -121,31 +123,46 @@ export function AppShell({
       />
 
       <main className="relative flex-1 overflow-hidden">
-        {mode === "timeline" ? (
-          <TimelineStage
-            events={liveEvents}
-            filter={filter}
-            onFilterChange={setFilter}
-            focus={focus}
-            onCreateAt={openCreate}
-            onEventEdit={openEdit}
-          />
-        ) : mode === "gallery" ? (
-          <GalleryView
-            events={liveEvents}
-            filter={filter}
-            onFilterChange={setFilter}
-            onEventClick={openView}
-          />
-        ) : (
-          <CalendarView
-            events={liveEvents}
-            filter={filter}
-            onFilterChange={setFilter}
-            onEventClick={openView}
-            onCreateRequest={(dateISO) => openCreate(dateISO)}
-          />
-        )}
+        {/* M3 fade through: outgoing затухает (~90ms), incoming проявляется + лёгкий зум (~210ms). */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={mode}
+            className="absolute inset-0"
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: { duration: reduceMotion ? 0 : 0.21, ease: [0.2, 0, 0, 1] },
+            }}
+            exit={{ opacity: 0, transition: { duration: reduceMotion ? 0 : 0.09, ease: [0.4, 0, 1, 1] } }}
+          >
+            {mode === "timeline" ? (
+              <TimelineStage
+                events={liveEvents}
+                filter={filter}
+                onFilterChange={setFilter}
+                focus={focus}
+                onCreateAt={openCreate}
+                onEventEdit={openEdit}
+              />
+            ) : mode === "gallery" ? (
+              <GalleryView
+                events={liveEvents}
+                filter={filter}
+                onFilterChange={setFilter}
+                onEventClick={openView}
+              />
+            ) : (
+              <CalendarView
+                events={liveEvents}
+                filter={filter}
+                onFilterChange={setFilter}
+                onEventClick={openView}
+                onCreateRequest={(dateISO) => openCreate(dateISO)}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
           <button
@@ -153,7 +170,7 @@ export function AppShell({
             aria-label="Поиск"
             title="Поиск (/)"
             onClick={() => setSearchOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:bg-surface-2 hover:text-app-text"
           >
             <Search size={18} />
           </button>

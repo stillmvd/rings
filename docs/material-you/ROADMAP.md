@@ -62,11 +62,11 @@
 - [x] `.tl-cal-*` переписаны на прямые M3-токены; **плоская сетка** (разделители outline-variant, без рамок-карточек), DayCell, **залитые чипы** событий (цвет события + авто-контраст onColorFor), today=tertiary, выходные=on-surface-variant tint, праздники=error, контейнер=Elevated surface-container-low, кнопка «Сегодня»=tonal
 - **Готово когда:** календарь в M3.
 
-### Ф7 — Motion, polish, seed-пикер
-- [ ] State layers/ripple везде; переходы режимов (motion: shared axis / fade through)
-- [ ] UI-пикер seed-цвета в настройках (live-применение dynamic color)
-- [ ] Контраст/доступность, адаптив, финальные tsc/lint/build, визуальная проверка
-- **Готово когда:** целостный, кастомизируемый Material You.
+### Ф7 — Motion, polish, seed-пикер ✅
+- [x] Переходы режимов — **M3 fade through** (motion + `useReducedMotion`); CSS state-layers догружены (search-кнопка, ThemeToggle)
+- [x] **UI-пикер seed-цвета** в настройках (10 пресетов + hex-поле), **live-применение** dynamic color (клиентский пересчёт `themeStyleSheet` → `<style id="md-theme">`), персист в localStorage + БД, анти-вспышка inline head-скриптом
+- [x] Десктоп-only (по решению), финальные tsc/lint/build зелёные, визуальная проверка (dark+light, смена seed во всех режимах)
+- **Готово когда:** целостный, кастомизируемый Material You. ✅ **Милстоун Material You завершён.**
 
 ## Рабочий цикл
 Ф0 → … → Ф7 последовательно. Внутри фазы: реализовать задачи → tsc/lint → коммит. Текущее состояние — в [PROGRESS.md](PROGRESS.md).

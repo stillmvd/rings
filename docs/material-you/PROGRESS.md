@@ -13,7 +13,9 @@
 | Ф4 | Canvas под M3 | ✅ ГОТОВО |
 | Ф5 | Галерея под M3 | ✅ ГОТОВО |
 | Ф6 | Календарь под M3 | ✅ ГОТОВО |
-| Ф7 | Motion, polish, seed-пикер | ⏳ (следующая) |
+| Ф7 | Motion, polish, seed-пикер | ✅ ГОТОВО |
+
+**🎉 Милстоун Material You завершён (Ф0–Ф7).**
 
 ## Готово (инфраструктура)
 
@@ -116,8 +118,17 @@
 - **Popover «События дня»** — маркер на авто-контраст (`onColorFor`/`sig.onColor`, убран жёсткий `text-white`).
 - ✅ tsc/lint/build зелёные. **Проверено в браузере (prod `next start` :3100, dark+light)**, консоль чистая. На тестовых событиях (июнь+май 2026, today=13.06): Elevated-контейнер, плоская сетка с разделителями, залитые чипы 3 цветов с авто-контрастом (синий→белый, оранжевый/зелёный→тёмный, sig-3), период «↔» через today+праздник, overflow «+1» (сортировка важные-сверху), today=розовый tertiary, праздники 12.06/1.05/9.05=error, выходные сб/вс серые + перенос 11.05 (Server Action РФ-календаря работает), будущее (>today) приглушено, кнопка «Сегодня» tonal + возврат на текущий месяц. Тестовые события удалены (БД чистая: 0).
 
-### Следующий шаг — Ф7 (Motion, polish, seed-пикер)
-State layers/ripple везде; переходы режимов (shared axis / fade through); **UI-пикер seed-цвета в настройках** (live dynamic color — учесть, что `/` статическая, нужен `revalidatePath('/')`/динамика); контраст/доступность, адаптив, финальные tsc/lint/build + визуальная проверка. Подробности — ROADMAP Ф7.
+### ✅ Ф7 закрыта. Что сделано:
+- **Seed-пикер** (решение пользователя: пресеты + hex). `components/settings/SeedPicker.tsx` — 10 пресетов-свотчей (`SEED_PRESETS`) + hex-поле (нормализация без `#`, Enter/blur). Активный seed через `useSyncExternalStore` (localStorage + кастом-event `timeline:seed`, паттерн проекта — без setState в эффекте). Встроен в `SettingsDialog` → секция «Оформление» рядом с ThemeToggle.
+- **Live-применение dynamic color**: `lib/m3/seed-client.ts` — `applySeed(hex)` пересчитывает `themeStyleSheet(seed)` (оба набора light+dark) на КЛИЕНТЕ и перезаписывает `<style id="md-theme">.textContent` → вся палитра (sys-роли + значимость sig, гармонизированная к новому seed) меняется мгновенно во всех режимах/диалогах. `dynamic-color.ts` не `server-only` — `material-color-utilities` бандлится и в клиент.
+- **Персист + анти-вспышка**: `applySeed` пишет в localStorage `theme.seed` (hex) и `md-theme-sheet` (готовый CSS). `SEED_BOOT_SCRIPT` (inline `<script>` в `<head>` после `<style id="md-theme">`, без модулей) перезаписывает md-theme сохранённым CSS **до paint** — нет вспышки дефолтного фиолетового при перезагрузке (важно, т.к. `/` статическая и держит build-time seed). `setSeedAction` (`actions/settings.ts`, `"use server"`) пишет в БД (`setSetting` + `revalidatePath`) — для build-time дефолта.
+- **Переходы режимов** (решение: M3 **fade through**): `AppShell` оборачивает контент режима в `AnimatePresence mode="wait"` + `motion.div` (key=mode): outgoing fade-out ~90ms (`ease 0.4,0,1,1`), incoming opacity+scale 0.96→1 ~210ms (`ease 0.2,0,0,1`). `useReducedMotion` → мгновенно. Плавающий top-row (поиск+тема) вне анимации.
+- **Polish** (решение: CSS state-layers, не md-ripple): hover-фон `surface-2` на search-кнопке (`AppShell`) и неактивных кнопках `ThemeToggle` (раньше менялся только цвет текста).
+- **Адаптив** — desktop-only (решение пользователя, как Ф2; приложение локальное desktop).
+- ✅ tsc/lint/build зелёные. **Проверено в браузере (prod :3100, dark+light)**: seed-пикер (свотчи + hex без `#`), live-смена палитры на зелёный/красный во всех режимах (rail/FAB/today-линия/значимость/диалоги), персист после reload **без вспышки**, активный свотч (галочка+кольцо), fade-through переходы, обе темы. Консоль чистая. БД очищена, `theme.seed` сброшен в дефолт.
+
+### 🎉 Милстоун Material You завершён (Ф0–Ф7)
+Весь UI на Material 3 / Material You: dynamic color из seed, кастомизируемый акцент, кастомные M3-компоненты (Rail/SideSheet/Dialog/Snackbar/DatePicker/Card), canvas/галерея/календарь под M3, motion. Бизнес-логика (БД, Server Actions, проекция, LOD, CRUD) не менялась. Ветка `material-you` (worktree, не пушится).
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -159,6 +170,7 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 ---
 
 ## Журнал
+- Сессия 6: закрыты **Ф6 + Ф7** — **милстоун Material You завершён**. Ф7: seed-пикер (пресеты+hex) с live dynamic color (клиентский пересчёт `themeStyleSheet` → `<style id=md-theme>`, персист localStorage+БД, анти-вспышка inline head-скриптом), переходы режимов M3 fade through (motion + reduced-motion), CSS state-layers polish, desktop-only. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light, смена seed во всех режимах, reload без вспышки), консоль чистая, БД очищена + seed сброшен. Коммит Ф7.
 - Сессия 6: закрыта **Ф6** (Календарь под M3). Все `.tl-cal-*` с моста `--tl-*` → прямые `--md-sys-color-*`. Решения пользователя (AskUserQuestion): **плоская сетка** (разделители outline-variant, border-collapse, без рамок-карточек), **today=tertiary** (как canvas Ф4), **чипы залиты цветом события** (Google-style, авто-контраст onColorFor/sig.onColor — паттерн Ф4/Ф5), **контейнер=Elevated** (surface-container-low + тень). Выходные=on-surface-variant tint (поднял 6%→11% после визуалки), праздники=error. Кнопка «Сегодня»=M3 tonal. `EventMarker` упрощён, Popover-маркер на авто-контраст. tsc/lint/build зелёные, проверено в браузере (prod :3100, dark+light, тестовые события июнь+май, overflow, период, праздники/переносы РФ), консоль чистая, БД очищена. Коммит Ф6.
 - Сессия 5: закрыта **Ф5** (Галерея под M3). `gallery/EventCard` → M3 Elevated card (surface-container-low + elevation 1→2 hover + CSS state-layer 8%, без зума фото), плейсхолдер без обложки = цвет категории/значимости + авто-контраст иконки (`onColorFor` YIQ / `sig.onColor`). `GalleryView` — sticky-заголовки/empty-state на прямые M3-токены. `DateScrubber` — линия/thumb на M3 (primary), метка месяца → inverse-surface tooltip. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light, тестовые события sig 2-3 с/без категории и период), консоль чистая, БД очищена. Коммит Ф5.
 - Сессия 4: закрыта **Ф4** (Canvas под M3). `GridCanvas.readColors` → прямые M3 sys-роли (outline/on-surface/...), маркер «сегодня» = tertiary, ДР-пунктир = outline, вуаль «вне жизни» = surface-variant. Единый `significance.ts` → `var(--md-sig-N)` + поле `onColor` + ring sig-3 на `--md-sig-3-on-container` (затронуло все режимы). Добавлен `onColorFor` (авто-контраст по YIQ) для контента точек с произвольным category_color; EventDot/EventLayer boxShadow → surface, счётчик кластера → meta.onColor. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light), консоль чистая. Коммит Ф4.
