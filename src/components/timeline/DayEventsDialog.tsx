@@ -3,11 +3,12 @@
 import { createElement, useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { Pencil, Trash2, MoveHorizontal, X } from "lucide-react";
+import { Pencil, Trash2, MoveHorizontal, Plus, X } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
-import { onColorFor } from "@/lib/colors";
+import { eventAccent } from "@/lib/accent";
 import { resolveIcon } from "@/lib/icons";
+import { Button } from "@/components/ui/Button";
 import { ContextMenu } from "@/components/m3/ContextMenu";
 import type { TimelineEvent } from "@/db/queries/events";
 
@@ -18,6 +19,7 @@ interface DayEventsDialogProps {
   onView: (event: TimelineEvent) => void;
   onEdit: (event: TimelineEvent) => void;
   onDelete: (event: TimelineEvent) => void;
+  onCreate: (dateISO: string) => void;
   onClose: () => void;
 }
 
@@ -28,13 +30,6 @@ const useMounted = () =>
     () => true,
     () => false,
   );
-
-function accentPair(event: TimelineEvent): { bg: string; on: string } {
-  const sig = getSignificanceMeta(event.significance);
-  return event.category_color
-    ? { bg: event.category_color, on: onColorFor(event.category_color) }
-    : { bg: sig.color, on: sig.onColor };
-}
 
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
 
@@ -49,6 +44,7 @@ export function DayEventsDialog({
   onView,
   onEdit,
   onDelete,
+  onCreate,
   onClose,
 }: DayEventsDialogProps) {
   const mounted = useMounted();
@@ -110,7 +106,7 @@ export function DayEventsDialog({
               </button>
             </header>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 pb-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4">
               {events.map((event) => (
                 <EventCard
                   key={event.id}
@@ -119,6 +115,13 @@ export function DayEventsDialog({
                   onContextMenu={(x, y) => setMenu({ event, x, y })}
                 />
               ))}
+            </div>
+
+            <div className="flex shrink-0 justify-end px-6 pb-5 pt-3">
+              <Button variant="secondary" onClick={() => dateISO && onCreate(dateISO)}>
+                <Plus size={16} />
+                Добавить событие
+              </Button>
             </div>
           </motion.div>
 
@@ -161,7 +164,7 @@ function EventCard({
   onView: () => void;
   onContextMenu: (x: number, y: number) => void;
 }) {
-  const { bg, on } = accentPair(event);
+  const accent = eventAccent(event);
   const sig = getSignificanceMeta(event.significance);
   const Icon = resolveIcon(event.category_icon);
 
@@ -187,7 +190,7 @@ function EventCard({
       ) : (
         <span
           className="grid h-16 w-16 shrink-0 place-items-center rounded-xl"
-          style={{ background: bg, color: on }}
+          style={{ background: accent.container, color: accent.onContainer }}
         >
           {createElement(Icon, { size: 26, strokeWidth: 1.5 })}
         </span>
@@ -204,7 +207,7 @@ function EventCard({
         <span className="mt-0.5 flex items-center gap-1.5 text-xs">
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5"
-            style={{ background: bg, color: on }}
+            style={{ background: accent.fill, color: accent.onFill }}
           >
             {createElement(Icon, { size: 11 })}
             {event.category_name ?? "Без категории"}

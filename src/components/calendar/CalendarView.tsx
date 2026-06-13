@@ -15,10 +15,8 @@ import { ru } from "date-fns/locale";
 import { parseISO, eachDayOfInterval, format, startOfMonth, isSameMonth } from "date-fns";
 import { MoveHorizontal, ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
-import { Popover, type PopoverAnchor } from "@/components/ui/Popover";
-import { getSignificanceMeta } from "@/lib/significance";
-import { onColorFor } from "@/lib/colors";
-import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
+import { type PopoverAnchor } from "@/components/ui/Popover";
+import { eventAccent } from "@/lib/accent";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import { BIRTH_DATE } from "@/lib/constants";
 import { holidayName } from "@/lib/holidays";
@@ -31,15 +29,6 @@ const MAX_CHIPS = 3;
 // M3 elevation level 1 — приподнятый контейнер месяца (как Elevated-карточки галереи, Ф5).
 const ELEVATION_1 =
   "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 1px 3px 1px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent)";
-
-// Фон акцента + контрастный контент: произвольный category_color → авто-контраст по YIQ,
-// роль значимости → готовый on-цвет (паттерн Ф4/Ф5).
-function accentPair(event: TimelineEvent): { bg: string; on: string } {
-  const sig = getSignificanceMeta(event.significance);
-  return event.category_color
-    ? { bg: event.category_color, on: onColorFor(event.category_color) }
-    : { bg: sig.color, on: sig.onColor };
-}
 
 // Допустимый диапазон месяцев (0–11) для конкретного года:
 // в год рождения снизу режет месяц рождения, в текущий год сверху — текущий месяц.
@@ -70,9 +59,6 @@ function shiftYear(today: Date, current: Date, delta: number): Date {
 type DayIndex = Map<string, TimelineEvent[]>;
 
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
-
-const dateLabel = (e: TimelineEvent) =>
-  e.end_date ? `${formatDayMonthRu(e.date)} — ${formatFullRu(e.end_date)}` : formatFullRu(e.date);
 
 const anchorFrom = (e: { clientX: number; currentTarget: HTMLElement }): PopoverAnchor => {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -109,7 +95,7 @@ type CalCtx = {
   dayIndex: DayIndex;
   onEventOpen: (event: TimelineEvent) => void;
   onCreateAt: (iso: string, anchor: PopoverAnchor) => void;
-  onOverflowOpen: (events: TimelineEvent[], anchor: PopoverAnchor) => void;
+  onDayOpen: (iso: string) => void;
   displayMonth: Date;
   onShift: (unit: "month" | "year", delta: number) => void;
   onToday: () => void;
@@ -121,7 +107,7 @@ const CalendarContext = createContext<CalCtx>({
   dayIndex: new Map(),
   onEventOpen: () => {},
   onCreateAt: () => {},
-  onOverflowOpen: () => {},
+  onDayOpen: () => {},
   displayMonth: new Date(0),
   onShift: () => {},
   onToday: () => {},
@@ -149,7 +135,7 @@ function EventMarker({ event, onColor }: { event: TimelineEvent; onColor: string
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
 function DayCell({ day, modifiers, className, ...rest }: DayProps) {
-  const { dayIndex, onEventOpen, onCreateAt, onOverflowOpen, dayKind } =
+  const { dayIndex, onEventOpen, onCreateAt, onDayOpen, dayKind } =
     useContext(CalendarContext);
   const dayEvents = modifiers.disabled ? [] : dayIndex.get(day.isoDate) ?? [];
   const shown = dayEvents.slice(0, MAX_CHIPS);
@@ -160,7 +146,14 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
   return (
     <td {...(rest as HTMLAttributes<HTMLTableCellElement>)} className={`${className ?? ""} tl-cal-td`}>
       <div
-        onClick={modifiers.disabled ? undefined : (e) => onCreateAt(day.isoDate, anchorFrom(e))}
+        onClick={
+          modifiers.disabled
+            ? undefined
+            : (e) =>
+                dayEvents.length > 0
+                  ? onDayOpen(day.isoDate)
+                  : onCreateAt(day.isoDate, anchorFrom(e))
+        }
         title={holiday ?? undefined}
         className={`tl-cal-cell${modifiers.today ? " is-today" : ""}${
           modifiers.disabled ? " is-disabled" : ""
@@ -170,20 +163,20 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
         {shown.length > 0 && (
           <div className="tl-cal-chips">
             {shown.map((e) => {
-              const { bg, on } = accentPair(e);
+              const accent = eventAccent(e);
               return (
                 <button
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{ background: bg, color: on }}
+                  style={{ background: accent.fill, color: accent.onFill }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();
                     onEventOpen(e);
                   }}
                 >
-                  <EventMarker event={e} onColor={on} />
+                  <EventMarker event={e} onColor={accent.onFill} />
                   <span className="tl-cal-chip-title">{e.title}</span>
                 </button>
               );
@@ -194,7 +187,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                 className="tl-cal-more"
                 onClick={(ev) => {
                   ev.stopPropagation();
-                  onOverflowOpen(dayEvents, anchorFrom(ev));
+                  onDayOpen(day.isoDate);
                 }}
               >
                 +{extra}
@@ -305,18 +298,17 @@ export function CalendarView({
   filter = EMPTY_FILTER,
   onEventClick = () => {},
   onCreateRequest = () => {},
+  onDayOpen = () => {},
 }: {
   events: TimelineEvent[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   onEventClick?: (event: TimelineEvent) => void;
   onCreateRequest?: (dateISO: string, anchor: PopoverAnchor) => void;
+  onDayOpen?: (dateISO: string) => void;
 }) {
   const today = useMemo(() => new Date(), []);
   const [month, setMonth] = useState<Date>(() => new Date());
-  const [dayList, setDayList] = useState<{ events: TimelineEvent[]; anchor: PopoverAnchor } | null>(
-    null,
-  );
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
 
   // Нерабочие дни (праздники + переносы РФ) по годам; null — данных нет, fallback на сб/вс.
@@ -378,14 +370,14 @@ export function CalendarView({
       dayIndex,
       onEventOpen: onEventClick,
       onCreateAt: onCreateRequest,
-      onOverflowOpen: (evs, anchor) => setDayList({ events: evs, anchor }),
+      onDayOpen,
       displayMonth: month,
       onShift: handleShift,
       onToday: handleToday,
       isTodayMonth: isSameMonth(month, today),
       dayKind,
     }),
-    [dayIndex, onEventClick, onCreateRequest, month, handleShift, handleToday, today, dayKind],
+    [dayIndex, onEventClick, onCreateRequest, onDayOpen, month, handleShift, handleToday, today, dayKind],
   );
 
   return (
@@ -413,44 +405,6 @@ export function CalendarView({
           />
         </CalendarContext.Provider>
       </div>
-
-      <Popover
-        open={dayList !== null}
-        anchor={dayList?.anchor ?? null}
-        onClose={() => setDayList(null)}
-        width={300}
-      >
-        {dayList && (
-          <div className="flex flex-col gap-1">
-            <h3 className="mb-1 px-1 text-sm font-semibold text-app-text">События дня</h3>
-            {dayList.events.map((e) => {
-              const { bg, on } = accentPair(e);
-              return (
-                <button
-                  key={e.id}
-                  type="button"
-                  onClick={() => {
-                    setDayList(null);
-                    onEventClick(e);
-                  }}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
-                >
-                  <span
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-md"
-                    style={{ background: bg, color: on }}
-                  >
-                    {isPeriod(e) && <MoveHorizontal size={12} />}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-app-text">{e.title}</span>
-                    <span className="block truncate text-xs text-muted">{dateLabel(e)}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </Popover>
     </div>
   );
 }

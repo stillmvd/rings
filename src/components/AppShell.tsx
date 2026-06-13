@@ -177,6 +177,7 @@ export function AppShell({
                 onFilterChange={setFilter}
                 onEventClick={openView}
                 onCreateRequest={(dateISO) => openCreate(dateISO)}
+                onDayOpen={(dateISO) => setDayDate(dateISO)}
               />
             )}
           </motion.div>
@@ -241,6 +242,10 @@ export function AppShell({
           openEdit(ev);
         }}
         onDelete={(ev) => setPendingDelete(ev)}
+        onCreate={(dateISO) => {
+          setDayDate(null);
+          openCreate(dateISO);
+        }}
         onClose={() => setDayDate(null)}
       />
 
