@@ -19,14 +19,14 @@ export function TimelineStage({
   filter,
   focus,
   onCreateAt,
-  onEventEdit,
+  onEventOpen,
 }: {
   events: TimelineEvent[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   focus?: { event: TimelineEvent; token: number } | null;
   onCreateAt: (dateISO: string) => void;
-  onEventEdit: (event: TimelineEvent) => void;
+  onEventOpen: (event: TimelineEvent) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -34,8 +34,8 @@ export function TimelineStage({
     size.width,
   );
 
-  // Клик по точке открывает форму редактирования в общем правом SideSheet (AppShell).
-  const handleEventClick = (event: TimelineEvent) => onEventEdit(event);
+  // Клик по точке/кластеру открывает модалку предпросмотра событий дня (AppShell).
+  const handleEventClick = (event: TimelineEvent) => onEventOpen(event);
 
   // Размеры контейнера.
   useEffect(() => {

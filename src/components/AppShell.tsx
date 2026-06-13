@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Search } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
@@ -10,6 +10,7 @@ import { EventSheet, type EventSheetState } from "@/components/timeline/EventShe
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { NavigationRail } from "@/components/m3/NavigationRail";
 import { ConfirmDialog } from "@/components/m3/ConfirmDialog";
+import { DayEventsDialog } from "@/components/timeline/DayEventsDialog";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -67,6 +68,8 @@ export function AppShell({
   const [sheet, setSheet] = useState<EventSheetState | null>(null);
   // Событие, ожидающее подтверждения удаления (M3 alert dialog поверх sheet).
   const [pendingDelete, setPendingDelete] = useState<TimelineEvent | null>(null);
+  // Дата открытой модалки предпросмотра «события за день» (клик по точке таймлайна).
+  const [dayDate, setDayDate] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
@@ -74,6 +77,18 @@ export function AppShell({
   // Выбранный в поиске результат: таймлайн центрируется и подсвечивает событие.
   const [focus, setFocus] = useState<{ event: TimelineEvent; token: number } | null>(null);
   const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // События выбранного дня: точечные с этой датой + периоды, чей интервал её покрывает.
+  const dayEvents = useMemo(() => {
+    if (!dayDate) return [];
+    return liveEvents
+      .filter(
+        (e) =>
+          e.date === dayDate ||
+          (e.end_date != null && e.date <= dayDate && e.end_date >= dayDate),
+      )
+      .sort((a, b) => b.significance - a.significance || b.id - a.id);
+  }, [dayDate, liveEvents]);
 
   const handleSelectResult = (event: TimelineEvent) => {
     setSearchOpen(false);
@@ -146,7 +161,7 @@ export function AppShell({
                 onFilterChange={setFilter}
                 focus={focus}
                 onCreateAt={openCreate}
-                onEventEdit={openEdit}
+                onEventOpen={(ev) => setDayDate(ev.date)}
               />
             ) : mode === "gallery" ? (
               <GalleryView
@@ -211,6 +226,22 @@ export function AppShell({
           setPendingDelete(ev);
         }}
         onClose={() => setSheet(null)}
+      />
+
+      <DayEventsDialog
+        open={dayDate !== null && dayEvents.length > 0}
+        dateISO={dayDate}
+        events={dayEvents}
+        onView={(ev) => {
+          setDayDate(null);
+          openView(ev);
+        }}
+        onEdit={(ev) => {
+          setDayDate(null);
+          openEdit(ev);
+        }}
+        onDelete={(ev) => setPendingDelete(ev)}
+        onClose={() => setDayDate(null)}
       />
 
       <ConfirmDialog

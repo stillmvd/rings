@@ -197,6 +197,10 @@ export function EventLayer({
                 color: meta.onColor,
                 boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
               }}
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                onEventClick?.(cluster.events[0], { x: r.left + r.width / 2, y: r.top + r.height / 2 });
+              }}
             >
               {cluster.events.length}
             </motion.div>

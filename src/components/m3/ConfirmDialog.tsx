@@ -39,11 +39,16 @@ export function ConfirmDialog({
 
   useEffect(() => {
     if (!open) return;
+    // capture + stopPropagation: Esc закрывает только этот (верхний) слой,
+    // не пробрасываясь к нижней модалке/sheet, которые тоже слушают document.
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
   }, [open, onClose]);
 
   if (!mounted) return null;
