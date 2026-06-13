@@ -17,6 +17,7 @@ import { MoveHorizontal, ChevronUp, ChevronDown, CalendarDays } from "lucide-rea
 import "react-day-picker/style.css";
 import { Popover, type PopoverAnchor } from "@/components/ui/Popover";
 import { getSignificanceMeta } from "@/lib/significance";
+import { onColorFor } from "@/lib/colors";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import { BIRTH_DATE } from "@/lib/constants";
@@ -26,6 +27,19 @@ import type { TimelineEvent } from "@/db/queries/events";
 
 const START_MONTH = parseISO(BIRTH_DATE);
 const MAX_CHIPS = 3;
+
+// M3 elevation level 1 — приподнятый контейнер месяца (как Elevated-карточки галереи, Ф5).
+const ELEVATION_1 =
+  "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 1px 3px 1px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent)";
+
+// Фон акцента + контрастный контент: произвольный category_color → авто-контраст по YIQ,
+// роль значимости → готовый on-цвет (паттерн Ф4/Ф5).
+function accentPair(event: TimelineEvent): { bg: string; on: string } {
+  const sig = getSignificanceMeta(event.significance);
+  return event.category_color
+    ? { bg: event.category_color, on: onColorFor(event.category_color) }
+    : { bg: sig.color, on: sig.onColor };
+}
 
 // Допустимый диапазон месяцев (0–11) для конкретного года:
 // в год рождения снизу режет месяц рождения, в текущий год сверху — текущий месяц.
@@ -115,8 +129,7 @@ const CalendarContext = createContext<CalCtx>({
   dayKind: () => "",
 });
 
-function EventMarker({ event }: { event: TimelineEvent }) {
-  const color = event.category_color ?? getSignificanceMeta(event.significance).color;
+function EventMarker({ event, onColor }: { event: TimelineEvent; onColor: string }) {
   if (event.cover) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -129,8 +142,9 @@ function EventMarker({ event }: { event: TimelineEvent }) {
       />
     );
   }
-  if (isPeriod(event)) return <MoveHorizontal size={10} style={{ color }} className="shrink-0" />;
-  return <span className="tl-cal-chip-dot" style={{ background: color }} />;
+  if (isPeriod(event))
+    return <MoveHorizontal size={10} style={{ color: onColor }} className="shrink-0" />;
+  return null;
 }
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
@@ -156,20 +170,20 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
         {shown.length > 0 && (
           <div className="tl-cal-chips">
             {shown.map((e) => {
-              const color = e.category_color ?? getSignificanceMeta(e.significance).color;
+              const { bg, on } = accentPair(e);
               return (
                 <button
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{ borderLeftColor: color }}
+                  style={{ background: bg, color: on }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();
                     onEventOpen(e);
                   }}
                 >
-                  <EventMarker event={e} />
+                  <EventMarker event={e} onColor={on} />
                   <span className="tl-cal-chip-title">{e.title}</span>
                 </button>
               );
@@ -378,7 +392,12 @@ export function CalendarView({
     <div className="flex h-full w-full justify-center overflow-auto p-6">
       <div
         ref={cardRef}
-        className="tl-calendar tl-calendar-lg m-auto rounded-card border border-line bg-surface-1 p-5 shadow-2xl"
+        className="tl-calendar tl-calendar-lg m-auto p-5"
+        style={{
+          background: "var(--md-sys-color-surface-container-low)",
+          borderRadius: "var(--md-sys-shape-corner-large)",
+          boxShadow: ELEVATION_1,
+        }}
       >
         <CalendarContext.Provider value={ctx}>
           <DayPicker
@@ -405,7 +424,7 @@ export function CalendarView({
           <div className="flex flex-col gap-1">
             <h3 className="mb-1 px-1 text-sm font-semibold text-app-text">События дня</h3>
             {dayList.events.map((e) => {
-              const color = e.category_color ?? getSignificanceMeta(e.significance).color;
+              const { bg, on } = accentPair(e);
               return (
                 <button
                   key={e.id}
@@ -418,9 +437,9 @@ export function CalendarView({
                 >
                   <span
                     className="grid h-6 w-6 shrink-0 place-items-center rounded-md"
-                    style={{ background: color }}
+                    style={{ background: bg, color: on }}
                   >
-                    {isPeriod(e) && <MoveHorizontal size={12} className="text-white" />}
+                    {isPeriod(e) && <MoveHorizontal size={12} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm text-app-text">{e.title}</span>

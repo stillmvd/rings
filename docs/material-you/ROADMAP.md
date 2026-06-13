@@ -58,8 +58,8 @@
 - [x] Карточки (M3 Elevated card: surface-container-low + elevation 1→2 + corner-medium), date-scrubber, CSS state layers; плейсхолдер = цвет категории/значимости + авто-контраст
 - **Готово когда:** галерея в M3.
 
-### Ф6 — Календарь под M3
-- [ ] Переписать `.tl-cal-*` на M3-токены; DayCell, chips событий, today/выходные/праздники (error/tertiary)
+### Ф6 — Календарь под M3 ✅
+- [x] `.tl-cal-*` переписаны на прямые M3-токены; **плоская сетка** (разделители outline-variant, без рамок-карточек), DayCell, **залитые чипы** событий (цвет события + авто-контраст onColorFor), today=tertiary, выходные=on-surface-variant tint, праздники=error, контейнер=Elevated surface-container-low, кнопка «Сегодня»=tonal
 - **Готово когда:** календарь в M3.
 
 ### Ф7 — Motion, polish, seed-пикер

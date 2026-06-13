@@ -12,8 +12,8 @@
 | Ф3 | Формы и диалоги (Side Sheet, dialogs) | ✅ ГОТОВО |
 | Ф4 | Canvas под M3 | ✅ ГОТОВО |
 | Ф5 | Галерея под M3 | ✅ ГОТОВО |
-| Ф6 | Календарь под M3 | ⏳ (следующая) |
-| Ф7 | Motion, polish, seed-пикер | ⏳ |
+| Ф6 | Календарь под M3 | ✅ ГОТОВО |
+| Ф7 | Motion, polish, seed-пикер | ⏳ (следующая) |
 
 ## Готово (инфраструктура)
 
@@ -105,8 +105,19 @@
 - **Решения пользователя (AskUserQuestion):** Elevated card; только CSS state-layer (без зума фото); плейсхолдер = цвет категории + авто-контраст; scrubber-метка = inverse-surface tooltip.
 - ✅ tsc/lint/build зелёные. **Проверено в браузере (prod, 1920×1080, тёмная + светлая темы), консоль чистая.** Подтверждено на тестовых событиях (sig 2–3, с/без категории, период): Elevated-карточки с тенями, hover (state-layer + рост тени), авто-контраст плейсхолдеров (жёлтая кат.→тёмная иконка, синяя→белая, sig-2 light→тёмно-зелёный+белая), sig-1 не попадает в галерею, sticky-заголовки, date-scrubber (primary-thumb + inverse-surface tooltip «Апрель 2026», перетаскивание прокручивает). Тестовые данные удалены (БД чистая: 0 событий).
 
-### Следующий шаг — Ф6 (Календарь под M3)
-Переписать `.tl-cal-*` на M3-токены; DayCell, chips событий, today/выходные/праздники (error/tertiary). Цвет значимости уже M3 (единый `significance.ts`). Подробности — ROADMAP Ф6.
+### ✅ Ф6 закрыта. Что сделано:
+- **`globals.css` `.tl-cal-*`** — все классы крупной сетки переведены с моста `--tl-*` на **прямые** `--md-sys-color-*` (как Ф4/Ф5).
+- **Плоская сетка M3** (по решению пользователя): `.rdp-month_grid { border-collapse: collapse }`, у `.tl-cal-td` единая рамка `outline-variant` → тонкие разделители между днями; `.tl-cal-cell` без рамок-карточек/радиуса, фон transparent, tint только у спец-дней. Hover кликабельной ячейки — `on-surface` 8%.
+- **«Сегодня» = tertiary** (как маркер canvas Ф4, отличается от primary-UI): `is-today` фон `color-mix(tertiary 12%)`, число `tertiary` bold.
+- **Выходные** (сб/вс + переносы РФ через `getNonWorkingDaysAction`) — `on-surface-variant` **11%** tint (6% было невидимо в обеих темах — поднял после визуальной проверки). **Праздники** РФ — `error` 9% tint + число `error` bold.
+- **Чипы событий = залиты цветом** (Google-style, решение пользователя): фон = `category_color`/`sig.color`, текст **авто-контрастен** (`onColorFor` по YIQ для произвольного hex, `sig.onColor` для роли — паттерн Ф4/Ф5). Inline-стили в `CalendarView`; `EventMarker` упрощён (точка убрана — фон уже цветной; период=иконка `MoveHorizontal` цветом onColor; обложка=thumb). Hover чипа → elevation тень (tema-independent). `.tl-cal-chip-dot` удалён.
+- **Контейнер месяца = Elevated** (решение пользователя): `surface-container-low` + `ELEVATION_1` тень + `corner-large`, inline-стилем (как Elevated-карточки галереи Ф5). Убраны Tailwind-мост-утилиты `bg-surface-1 border-line shadow-2xl rounded-card`.
+- **Шапка**: `.tl-cal-wheel` hover → `surface-container-high`/`outline-variant`; chev → `on-surface-variant`→hover `primary`; **кнопка «Сегодня» = M3 tonal** (`secondary-container`/`on-secondary-container`, `corner-full`, hover-тень). chevron/weekday rdp → прямые `on-surface(-variant)`.
+- **Popover «События дня»** — маркер на авто-контраст (`onColorFor`/`sig.onColor`, убран жёсткий `text-white`).
+- ✅ tsc/lint/build зелёные. **Проверено в браузере (prod `next start` :3100, dark+light)**, консоль чистая. На тестовых событиях (июнь+май 2026, today=13.06): Elevated-контейнер, плоская сетка с разделителями, залитые чипы 3 цветов с авто-контрастом (синий→белый, оранжевый/зелёный→тёмный, sig-3), период «↔» через today+праздник, overflow «+1» (сортировка важные-сверху), today=розовый tertiary, праздники 12.06/1.05/9.05=error, выходные сб/вс серые + перенос 11.05 (Server Action РФ-календаря работает), будущее (>today) приглушено, кнопка «Сегодня» tonal + возврат на текущий месяц. Тестовые события удалены (БД чистая: 0).
+
+### Следующий шаг — Ф7 (Motion, polish, seed-пикер)
+State layers/ripple везде; переходы режимов (shared axis / fade through); **UI-пикер seed-цвета в настройках** (live dynamic color — учесть, что `/` статическая, нужен `revalidatePath('/')`/динамика); контраст/доступность, адаптив, финальные tsc/lint/build + визуальная проверка. Подробности — ROADMAP Ф7.
 
 **Заметки для Ф1+:**
 - `/` собирается как **static** (layout читает seed на build-time). При вводе seed-пикера (Ф7) нужен `revalidatePath('/')`/динамика, иначе смена seed не применится в prod.
@@ -148,6 +159,7 @@ const g = customColor(argbFromHex(seedHex), { value: argbFromHex(base), name, bl
 ---
 
 ## Журнал
+- Сессия 6: закрыта **Ф6** (Календарь под M3). Все `.tl-cal-*` с моста `--tl-*` → прямые `--md-sys-color-*`. Решения пользователя (AskUserQuestion): **плоская сетка** (разделители outline-variant, border-collapse, без рамок-карточек), **today=tertiary** (как canvas Ф4), **чипы залиты цветом события** (Google-style, авто-контраст onColorFor/sig.onColor — паттерн Ф4/Ф5), **контейнер=Elevated** (surface-container-low + тень). Выходные=on-surface-variant tint (поднял 6%→11% после визуалки), праздники=error. Кнопка «Сегодня»=M3 tonal. `EventMarker` упрощён, Popover-маркер на авто-контраст. tsc/lint/build зелёные, проверено в браузере (prod :3100, dark+light, тестовые события июнь+май, overflow, период, праздники/переносы РФ), консоль чистая, БД очищена. Коммит Ф6.
 - Сессия 5: закрыта **Ф5** (Галерея под M3). `gallery/EventCard` → M3 Elevated card (surface-container-low + elevation 1→2 hover + CSS state-layer 8%, без зума фото), плейсхолдер без обложки = цвет категории/значимости + авто-контраст иконки (`onColorFor` YIQ / `sig.onColor`). `GalleryView` — sticky-заголовки/empty-state на прямые M3-токены. `DateScrubber` — линия/thumb на M3 (primary), метка месяца → inverse-surface tooltip. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light, тестовые события sig 2-3 с/без категории и период), консоль чистая, БД очищена. Коммит Ф5.
 - Сессия 4: закрыта **Ф4** (Canvas под M3). `GridCanvas.readColors` → прямые M3 sys-роли (outline/on-surface/...), маркер «сегодня» = tertiary, ДР-пунктир = outline, вуаль «вне жизни» = surface-variant. Единый `significance.ts` → `var(--md-sig-N)` + поле `onColor` + ring sig-3 на `--md-sig-3-on-container` (затронуло все режимы). Добавлен `onColorFor` (авто-контраст по YIQ) для контента точек с произвольным category_color; EventDot/EventLayer boxShadow → surface, счётчик кластера → meta.onColor. Решения через AskUserQuestion. tsc/lint/build зелёные, проверено в браузере (prod, dark+light), консоль чистая. Коммит Ф4.
 - Сессия 1: создан форк, поставлены deps, проведён research (5 агентов) + инвентарь (1 агент), зафиксированы ROADMAP/решения, сверен API material-color-utilities. Начат Ф0. Пауза по контексту перед написанием `dynamic-color.ts`.
