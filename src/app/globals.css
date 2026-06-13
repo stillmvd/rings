@@ -333,6 +333,7 @@
 }
 
 .tl-calendar-lg .rdp-weekday {
+  width: var(--rdp-day-width);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -340,9 +341,12 @@
   padding-bottom: 0.5rem;
 }
 
-/* Плоская сетка M3: единые тонкие разделители между днями (без рамок-карточек). */
+/* Плоская сетка M3: единые тонкие разделители между днями (без рамок-карточек).
+   table-layout: fixed — колонки строго по --rdp-day-width, длинный текст чипа не раздувает ячейку. */
 .tl-calendar-lg .rdp-month_grid {
   border-collapse: collapse;
+  table-layout: fixed;
+  width: calc(var(--rdp-day-width) * 7);
 }
 
 /* Кастомная ячейка дня (components.Day): td-обёртка + flex-контент. */
@@ -366,11 +370,6 @@
   overflow: hidden;
   text-align: left;
   transition: background-color 0.15s;
-}
-
-/* «Сегодня» — tertiary (как маркер на canvas таймлайна, Ф4): отличается от primary-UI. */
-.tl-cal-cell.is-today {
-  background: color-mix(in srgb, var(--md-sys-color-tertiary) 12%, transparent);
 }
 
 /* Выходные (сб/вс, перенесённые) — приглушённый фон; праздники — error-акцент. */
@@ -408,8 +407,16 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
+/* «Сегодня» — залитый tertiary-кружок на числе (M3 accent day): отличается от primary-UI. */
 .tl-cal-cell.is-today .tl-cal-num {
-  color: var(--md-sys-color-tertiary);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-on-tertiary);
   font-weight: 700;
 }
 
@@ -455,6 +462,7 @@
 }
 
 .tl-cal-chip-title {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
