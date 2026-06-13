@@ -9,6 +9,7 @@ import { CalendarView } from "@/components/calendar/CalendarView";
 import { EventSheet, type EventSheetState } from "@/components/timeline/EventSheet";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { NavigationRail } from "@/components/m3/NavigationRail";
+import { ConfirmDialog } from "@/components/m3/ConfirmDialog";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -64,6 +65,8 @@ export function AppShell({
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   // Единый правый SideSheet для всех сценариев формы/просмотра события.
   const [sheet, setSheet] = useState<EventSheetState | null>(null);
+  // Событие, ожидающее подтверждения удаления (M3 alert dialog поверх sheet).
+  const [pendingDelete, setPendingDelete] = useState<TimelineEvent | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
@@ -201,10 +204,33 @@ export function AppShell({
           setSheet(null);
         }}
         onDelete={(id) => {
-          remove(id);
-          setSheet(null);
+          const ev =
+            sheet && "event" in sheet && sheet.event.id === id
+              ? sheet.event
+              : liveEvents.find((e) => e.id === id) ?? null;
+          setPendingDelete(ev);
         }}
         onClose={() => setSheet(null)}
+      />
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Удалить событие?"
+        description={
+          pendingDelete ? (
+            <>
+              «{pendingDelete.title}» будет удалено безвозвратно.
+            </>
+          ) : null
+        }
+        confirmLabel="Удалить"
+        danger
+        onConfirm={() => {
+          if (pendingDelete) remove(pendingDelete.id);
+          setPendingDelete(null);
+          setSheet(null);
+        }}
+        onClose={() => setPendingDelete(null)}
       />
 
       <SettingsDialog
