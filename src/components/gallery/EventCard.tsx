@@ -2,9 +2,8 @@
 
 import { createElement } from "react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
-import { getSignificanceMeta } from "@/lib/significance";
+import { eventAccent } from "@/lib/accent";
 import { resolveIcon } from "@/lib/icons";
-import { onColorFor } from "@/lib/colors";
 import type { TimelineEvent } from "@/db/queries/events";
 
 // M3 elevation level 1 → level 2 при hover (карточка Elevated).
@@ -20,11 +19,7 @@ export function EventCard({
   event: TimelineEvent;
   onClick: (event: TimelineEvent) => void;
 }) {
-  const sig = getSignificanceMeta(event.significance);
-  // Фон акцента и контрастный контент: для произвольного category_color — авто-контраст по YIQ,
-  // для роли значимости — готовый on-цвет (как в Ф4 EventDot).
-  const accent = event.category_color ?? sig.color;
-  const onAccent = event.category_color ? onColorFor(event.category_color) : sig.onColor;
+  const accent = eventAccent(event);
   const Icon = resolveIcon(event.category_icon);
   const dateLabel = event.end_date
     ? `${formatDayMonthRu(event.date)} — ${formatFullRu(event.end_date)}`
@@ -61,16 +56,16 @@ export function EventCard({
         ) : (
           <div
             className="flex h-full w-full items-center justify-center"
-            style={{ background: accent }}
+            style={{ background: accent.container }}
           >
-            {createElement(Icon, { size: 48, strokeWidth: 1.5, style: { color: onAccent } })}
+            {createElement(Icon, { size: 48, strokeWidth: 1.5, style: { color: accent.onContainer } })}
           </div>
         )}
         <span
           className="absolute left-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full"
           style={{
-            background: accent,
-            color: onAccent,
+            background: accent.fill,
+            color: accent.onFill,
             boxShadow: "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent)",
           }}
           title={event.category_name ?? undefined}

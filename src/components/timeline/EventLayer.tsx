@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { type Viewport, msToX, xToMs } from "@/lib/projection";
 import { isoToMs, formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { isVisibleAtLod, getSignificanceMeta } from "@/lib/significance";
+import { eventAccent } from "@/lib/accent";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import { type Lod, lodRank } from "./lod";
 import { EventDot } from "./EventDot";
@@ -114,7 +115,7 @@ export function EventLayer({
       <AnimatePresence initial={false}>
         {bars.map((bar) => {
           const sig = getSignificanceMeta(bar.ev.significance);
-          const color = bar.ev.category_color ?? sig.color;
+          const color = eventAccent(bar.ev).fill;
           const barH = Math.max(6, Math.round(sig.dotRadius * 1.5));
           return (
             <motion.div

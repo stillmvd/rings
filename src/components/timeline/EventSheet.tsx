@@ -4,6 +4,7 @@ import { createElement, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
+import { eventAccent } from "@/lib/accent";
 import { resolveIcon } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import { Lightbox } from "@/components/ui/Lightbox";
@@ -142,7 +143,7 @@ function EventView({
   onLightbox: (i: number) => void;
 }) {
   const sig = getSignificanceMeta(event.significance);
-  const accent = event.category_color ?? sig.color;
+  const accent = eventAccent(event);
   const Icon = resolveIcon(event.category_icon);
   const images = media.map((m) => ({ key: `m-${m.id}`, src: `/media/${m.path}` }));
   const dateLabel = event.end_date
@@ -168,9 +169,13 @@ function EventView({
       ) : (
         <div
           className="-mx-6 -mt-2 flex aspect-video w-[calc(100%+3rem)] items-center justify-center rounded-xl"
-          style={{ background: accent }}
+          style={{ background: accent.container }}
         >
-          {createElement(Icon, { size: 64, strokeWidth: 1.25, className: "text-white/70" })}
+          {createElement(Icon, {
+            size: 64,
+            strokeWidth: 1.25,
+            style: { color: accent.onContainer, opacity: 0.85 },
+          })}
         </div>
       )}
 
@@ -205,8 +210,8 @@ function EventView({
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-white"
-          style={{ background: accent }}
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
+          style={{ background: accent.fill, color: accent.onFill }}
         >
           {createElement(Icon, { size: 14 })}
           {event.category_name ?? "Без категории"}

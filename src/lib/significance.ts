@@ -7,6 +7,10 @@ export type SignificanceMeta = {
   color: string;
   /** Контрастный on-цвет для контента поверх color (--md-sig-N-on). */
   onColor: string;
+  /** Приглушённый container-тон для крупных заливок (плейсхолдеры) — не слепит в тёмной теме. */
+  container: string;
+  /** Насыщенный контент поверх container (--md-sig-N-on-container). */
+  onContainer: string;
   /** Радиус точки в px при базовом масштабе. */
   dotRadius: number;
   /** Обводка для выделения самых важных событий. */
@@ -25,6 +29,8 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Обычное",
     color: "var(--md-sig-1)",
     onColor: "var(--md-sig-1-on)",
+    container: "var(--md-sig-1-container)",
+    onContainer: "var(--md-sig-1-on-container)",
     dotRadius: 4,
     ring: false,
     ringColor: null,
@@ -35,6 +41,8 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Важное",
     color: "var(--md-sig-2)",
     onColor: "var(--md-sig-2-on)",
+    container: "var(--md-sig-2-container)",
+    onContainer: "var(--md-sig-2-on-container)",
     dotRadius: 6,
     ring: false,
     ringColor: null,
@@ -45,6 +53,8 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Самое важное",
     color: "var(--md-sig-3)",
     onColor: "var(--md-sig-3-on)",
+    container: "var(--md-sig-3-container)",
+    onContainer: "var(--md-sig-3-on-container)",
     dotRadius: 9,
     ring: true,
     ringColor: "var(--md-sig-3-on-container)",
