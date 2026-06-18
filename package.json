@@ -34,11 +34,5 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.7.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "unrs-resolver"
-    ]
   }
 }
