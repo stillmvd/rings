@@ -205,6 +205,17 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
+/* Нативные select месяца/года (captionLayout="dropdown") — раскрытый список под тему. */
+.tl-calendar .rdp-dropdown,
+.tl-calendar .rdp-dropdown option {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+}
+
+.tl-calendar .rdp-caption_label {
+  color: var(--md-sys-color-on-surface);
+}
+
 .tl-calendar .tl-cal-caption {
   position: relative;
   display: flex;

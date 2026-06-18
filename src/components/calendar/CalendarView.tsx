@@ -12,8 +12,8 @@ import {
 } from "react";
 import { DayPicker, type DayProps, type MonthCaptionProps } from "react-day-picker";
 import { ru } from "date-fns/locale";
-import { parseISO, eachDayOfInterval, format, startOfMonth, isSameMonth } from "date-fns";
-import { MoveHorizontal, ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
+import { parseISO, format, startOfMonth, isSameMonth } from "date-fns";
+import { ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
 import { type PopoverAnchor } from "@/components/ui/Popover";
 import { eventAccent } from "@/lib/accent";
@@ -65,7 +65,7 @@ const anchorFrom = (e: { clientX: number; currentTarget: HTMLElement }): Popover
   return { x: e.clientX, y: rect.top + rect.height / 2 };
 };
 
-// Индекс «день → события». Период (end_date) попадает в каждый день интервала.
+// Индекс «день → события». Только разовые — события-периоды в календаре не показываем.
 function buildDayIndex(events: TimelineEvent[], filter: EventFilter): DayIndex {
   const filterOn = isFilterActive(filter);
   const map: DayIndex = new Map();
@@ -76,13 +76,8 @@ function buildDayIndex(events: TimelineEvent[], filter: EventFilter): DayIndex {
   };
   for (const e of events) {
     if (filterOn && !matchesFilter(e, filter)) continue;
-    if (isPeriod(e)) {
-      for (const d of eachDayOfInterval({ start: parseISO(e.date), end: parseISO(e.end_date!) })) {
-        push(format(d, "yyyy-MM-dd"), e);
-      }
-    } else {
-      push(e.date, e);
-    }
+    if (isPeriod(e)) continue;
+    push(e.date, e);
   }
   // Важные сверху — при переполнении первыми обрезаются менее значимые.
   for (const bucket of map.values()) {
@@ -115,22 +110,18 @@ const CalendarContext = createContext<CalCtx>({
   dayKind: () => "",
 });
 
-function EventMarker({ event, onColor }: { event: TimelineEvent; onColor: string }) {
-  if (event.cover) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={`/media/${event.cover}`}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="tl-cal-chip-thumb"
-      />
-    );
-  }
-  if (isPeriod(event))
-    return <MoveHorizontal size={10} style={{ color: onColor }} className="shrink-0" />;
-  return null;
+function EventMarker({ event }: { event: TimelineEvent }) {
+  if (!event.cover) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/media/${event.cover}`}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      className="tl-cal-chip-thumb"
+    />
+  );
 }
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
@@ -176,7 +167,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                     onEventOpen(e);
                   }}
                 >
-                  <EventMarker event={e} onColor={accent.onFill} />
+                  <EventMarker event={e} />
                   <span className="tl-cal-chip-title">{e.title}</span>
                 </button>
               );

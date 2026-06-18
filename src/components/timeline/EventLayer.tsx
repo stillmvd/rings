@@ -114,9 +114,7 @@ export function EventLayer({
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <AnimatePresence initial={false}>
         {bars.map((bar) => {
-          const sig = getSignificanceMeta(bar.ev.significance);
           const color = eventAccent(bar.ev).fill;
-          const barH = Math.max(6, Math.round(sig.dotRadius * 1.5));
           return (
             <motion.div
               key={`bar-${bar.ev.id}`}
@@ -126,11 +124,8 @@ export function EventLayer({
                 top: axisY,
                 y: "-50%",
                 width: bar.x2 - bar.x1,
-                height: barH,
+                height: 3,
                 background: color,
-                boxShadow: sig.ring
-                  ? `0 0 0 2px var(--md-sys-color-surface), 0 0 0 3px ${sig.ringColor ?? color}`
-                  : "0 0 0 2px var(--md-sys-color-surface)",
               }}
               initial={{ opacity: 0, scaleY: 0.4 }}
               animate={{ opacity: 1, scaleY: 1 }}
