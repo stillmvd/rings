@@ -3,14 +3,16 @@
 import { createElement, useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { Pencil, Trash2, MoveHorizontal, Plus, X } from "lucide-react";
+import { Pencil, Trash2, Plus, X } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
+import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { ContextMenu } from "@/components/m3/ContextMenu";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Significance } from "@/lib/constants";
 
 interface DayEventsDialogProps {
   open: boolean;
@@ -34,7 +36,7 @@ const useMounted = () =>
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
 
 const dateLabel = (e: TimelineEvent) =>
-  e.end_date ? `${formatDayMonthRu(e.date)} — ${formatFullRu(e.end_date)}` : formatFullRu(e.date);
+  e.end_date ? `${formatDayMonthRu(e.date)} ↔ ${formatFullRu(e.end_date)}` : formatFullRu(e.date);
 
 // M3 dialog: предпросмотр всех событий календарного дня. ЛКМ — просмотр, ПКМ — контекстное меню.
 export function DayEventsDialog({
@@ -49,6 +51,10 @@ export function DayEventsDialog({
 }: DayEventsDialogProps) {
   const mounted = useMounted();
   const [menu, setMenu] = useState<{ event: TimelineEvent; x: number; y: number } | null>(null);
+
+  const periods = events.filter(isPeriod);
+  const moments = events.filter((e) => !isPeriod(e));
+  const grouped = periods.length > 0 && moments.length > 0;
 
   useEffect(() => {
     if (!open) return;
@@ -107,7 +113,17 @@ export function DayEventsDialog({
             </header>
 
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4">
-              {events.map((event) => (
+              {grouped && <GroupLabel label="Периоды" />}
+              {periods.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onView={() => onView(event)}
+                  onContextMenu={(x, y) => setMenu({ event, x, y })}
+                />
+              ))}
+              {grouped && <GroupLabel label="События" />}
+              {moments.map((event) => (
                 <EventCard
                   key={event.id}
                   event={event}
@@ -200,22 +216,36 @@ function EventCard({
         <span className="truncate text-sm font-medium text-[var(--md-sys-color-on-surface)]">
           {event.title}
         </span>
-        <span className="flex items-center gap-1.5 truncate text-xs text-[var(--md-sys-color-on-surface-variant)]">
-          {isPeriod(event) && <MoveHorizontal size={12} className="shrink-0" />}
+        <span className="truncate text-xs text-[var(--md-sys-color-on-surface-variant)]">
           {dateLabel(event)}
         </span>
-        <span className="mt-0.5 flex items-center gap-1.5 text-xs">
+        <span className="mt-0.5 flex">
           <span
-            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5"
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
             style={{ background: accent.fill, color: accent.onFill }}
           >
             {Icon && createElement(Icon, { size: 11 })}
             {event.category_name ?? "Без категории"}
           </span>
-          <span className="text-[var(--md-sys-color-on-surface-variant)]">{sig.label}</span>
         </span>
       </span>
+
+      <span
+        className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-full px-2.5 py-1 text-sm text-[var(--md-sys-color-on-surface-variant)]"
+        style={{ background: "color-mix(in srgb, var(--md-sys-color-on-surface) 7%, transparent)" }}
+      >
+        <SignificanceIcon level={event.significance as Significance} size={16} />
+        {sig.label}
+      </span>
     </button>
+  );
+}
+
+function GroupLabel({ label }: { label: string }) {
+  return (
+    <span className="px-2 pt-1.5 text-xs font-medium uppercase tracking-wide text-[var(--md-sys-color-on-surface-variant)]">
+      {label}
+    </span>
   );
 }
 

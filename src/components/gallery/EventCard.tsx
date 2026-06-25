@@ -22,7 +22,7 @@ export function EventCard({
   const accent = eventAccent(event);
   const Icon = resolveIconOrNull(event.category_icon);
   const dateLabel = event.end_date
-    ? `${formatDayMonthRu(event.date)} — ${formatFullRu(event.end_date)}`
+    ? `${formatDayMonthRu(event.date)} ↔ ${formatFullRu(event.end_date)}`
     : formatFullRu(event.date);
 
   return (

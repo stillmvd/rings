@@ -7,6 +7,7 @@ import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
+import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { SideSheet } from "@/components/m3/SideSheet";
 import { EventForm, type EventFormPayload, type EventFormValues } from "./EventForm";
@@ -147,7 +148,7 @@ function EventView({
   const Icon = resolveIconOrNull(event.category_icon);
   const images = media.map((m) => ({ key: `m-${m.id}`, src: `/media/${m.path}` }));
   const dateLabel = event.end_date
-    ? `${formatDayMonthRu(event.date)} — ${formatFullRu(event.end_date)}`
+    ? `${formatDayMonthRu(event.date)} ↔ ${formatFullRu(event.end_date)}`
     : formatFullRu(event.date);
 
   return (
@@ -217,7 +218,10 @@ function EventView({
           {Icon && createElement(Icon, { size: 14 })}
           {event.category_name ?? "Без категории"}
         </span>
-        <span className="text-[var(--md-sys-color-on-surface-variant)]">{sig.label}</span>
+        <span className="inline-flex items-center gap-1.5 text-[var(--md-sys-color-on-surface-variant)]">
+          <SignificanceIcon level={event.significance as Significance} size={15} />
+          {sig.label}
+        </span>
       </div>
 
       {event.description && (

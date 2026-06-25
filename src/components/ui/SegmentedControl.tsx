@@ -1,9 +1,12 @@
 "use client";
 
+import { Check } from "lucide-react";
+import type { ReactNode } from "react";
+
 interface Segment<T extends string> {
   value: T;
   label: string;
-  color?: string;
+  icon?: ReactNode;
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -13,7 +16,8 @@ interface SegmentedControlProps<T extends string> {
   label?: string;
 }
 
-// @material/web не содержит segmented buttons — используем single-select filter-chips.
+// Однострочный single-select в стиле M3 filter-chips, но на flex-кнопках:
+// flex-auto + flex-wrap → чипы растягиваются по ширине и при переносе занимают строку целиком.
 export function SegmentedControl<T extends string>({
   segments,
   value,
@@ -23,30 +27,32 @@ export function SegmentedControl<T extends string>({
   return (
     <div className="flex flex-col gap-1.5">
       {label && <span className="text-sm font-medium text-muted">{label}</span>}
-      <md-chip-set role="radiogroup">
-        {segments.map((seg) => (
-          <md-filter-chip
-            key={seg.value}
-            label={seg.label}
-            selected={seg.value === value}
-            has-icon={seg.color ? true : undefined}
-            onClick={() => onChange(seg.value)}
-          >
-            {seg.color && (
-              <span
-                slot="icon"
-                style={{
-                  display: "inline-block",
-                  width: 12,
-                  height: 12,
-                  borderRadius: 9999,
-                  background: seg.color,
-                }}
-              />
-            )}
-          </md-filter-chip>
-        ))}
-      </md-chip-set>
+      <div role="radiogroup" className="flex flex-wrap gap-2">
+        {segments.map((seg) => {
+          const active = seg.value === value;
+          return (
+            <button
+              key={seg.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(seg.value)}
+              className={`flex flex-auto min-w-[5rem] items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                active
+                  ? "border-transparent bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
+                  : "border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface)_8%,transparent)]"
+              }`}
+            >
+              {seg.icon ? (
+                <span className="inline-flex shrink-0">{seg.icon}</span>
+              ) : (
+                active && <Check size={16} className="shrink-0" />
+              )}
+              {seg.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

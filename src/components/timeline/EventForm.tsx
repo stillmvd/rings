@@ -18,6 +18,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Button } from "@/components/ui/Button";
 
 export interface EventFormValues {
@@ -57,10 +58,11 @@ interface EventFormProps {
   onDelete?: () => void;
 }
 
-const sigSegments = SIGNIFICANCE_VALUES.map((v) => {
-  const meta = getSignificanceMeta(v);
-  return { value: String(v), label: meta.label, color: meta.color };
-});
+const sigSegments = SIGNIFICANCE_VALUES.map((v) => ({
+  value: String(v),
+  label: getSignificanceMeta(v).label,
+  icon: <SignificanceIcon level={v as Significance} size={16} />,
+}));
 
 const kindSegments: { value: "point" | "period"; label: string }[] = [
   { value: "point", label: "Момент" },
