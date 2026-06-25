@@ -7,7 +7,7 @@ import { Pencil, Trash2, MoveHorizontal, Plus, X } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
-import { resolveIcon } from "@/lib/icons";
+import { resolveIconOrNull } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import { ContextMenu } from "@/components/m3/ContextMenu";
 import type { TimelineEvent } from "@/db/queries/events";
@@ -166,7 +166,7 @@ function EventCard({
 }) {
   const accent = eventAccent(event);
   const sig = getSignificanceMeta(event.significance);
-  const Icon = resolveIcon(event.category_icon);
+  const Icon = resolveIconOrNull(event.category_icon);
 
   return (
     <button
@@ -192,7 +192,7 @@ function EventCard({
           className="grid h-16 w-16 shrink-0 place-items-center rounded-xl"
           style={{ background: accent.container, color: accent.onContainer }}
         >
-          {createElement(Icon, { size: 26, strokeWidth: 1.5 })}
+          {Icon && createElement(Icon, { size: 26, strokeWidth: 1.5 })}
         </span>
       )}
 
@@ -209,7 +209,7 @@ function EventCard({
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5"
             style={{ background: accent.fill, color: accent.onFill }}
           >
-            {createElement(Icon, { size: 11 })}
+            {Icon && createElement(Icon, { size: 11 })}
             {event.category_name ?? "Без категории"}
           </span>
           <span className="text-[var(--md-sys-color-on-surface-variant)]">{sig.label}</span>

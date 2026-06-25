@@ -3,7 +3,7 @@
 import { createElement } from "react";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
-import { resolveIcon } from "@/lib/icons";
+import { resolveIconOrNull } from "@/lib/icons";
 import type { TimelineEvent } from "@/db/queries/events";
 
 /**
@@ -14,8 +14,8 @@ export function EventDot({ event }: { event: TimelineEvent }) {
   const sig = getSignificanceMeta(event.significance);
   const { fill: color, onFill: contentColor } = eventAccent(event);
   const diameter = sig.dotRadius * 2;
-  const iconCmp = resolveIcon(event.category_icon);
-  const showIcon = sig.dotRadius >= 9 && event.category_icon != null;
+  const iconCmp = resolveIconOrNull(event.category_icon);
+  const showIcon = sig.dotRadius >= 9 && iconCmp != null;
 
   return (
     <div
@@ -30,6 +30,7 @@ export function EventDot({ event }: { event: TimelineEvent }) {
       }}
     >
       {showIcon &&
+        iconCmp &&
         createElement(iconCmp, {
           size: Math.round(diameter * 0.6),
           strokeWidth: 2.5,

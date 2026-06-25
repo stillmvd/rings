@@ -3,7 +3,7 @@
 import { createElement } from "react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { eventAccent } from "@/lib/accent";
-import { resolveIcon } from "@/lib/icons";
+import { resolveIconOrNull } from "@/lib/icons";
 import type { TimelineEvent } from "@/db/queries/events";
 
 // M3 elevation level 1 → level 2 при hover (карточка Elevated).
@@ -20,7 +20,7 @@ export function EventCard({
   onClick: (event: TimelineEvent) => void;
 }) {
   const accent = eventAccent(event);
-  const Icon = resolveIcon(event.category_icon);
+  const Icon = resolveIconOrNull(event.category_icon);
   const dateLabel = event.end_date
     ? `${formatDayMonthRu(event.date)} — ${formatFullRu(event.end_date)}`
     : formatFullRu(event.date);
@@ -58,20 +58,28 @@ export function EventCard({
             className="flex h-full w-full items-center justify-center"
             style={{ background: accent.container }}
           >
-            {createElement(Icon, { size: 48, strokeWidth: 1.5, style: { color: accent.onContainer } })}
+            {Icon &&
+              createElement(Icon, {
+                size: 48,
+                strokeWidth: 1.5,
+                style: { color: accent.onContainer },
+              })}
           </div>
         )}
-        <span
-          className="absolute left-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full"
-          style={{
-            background: accent.fill,
-            color: accent.onFill,
-            boxShadow: "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent)",
-          }}
-          title={event.category_name ?? undefined}
-        >
-          {createElement(Icon, { size: 15 })}
-        </span>
+        {Icon && (
+          <span
+            className="absolute left-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full"
+            style={{
+              background: accent.fill,
+              color: accent.onFill,
+              boxShadow:
+                "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent)",
+            }}
+            title={event.category_name ?? undefined}
+          >
+            {createElement(Icon, { size: 15 })}
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-0.5 p-3">
         <p

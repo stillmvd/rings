@@ -5,7 +5,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
-import { resolveIcon } from "@/lib/icons";
+import { resolveIconOrNull } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { SideSheet } from "@/components/m3/SideSheet";
@@ -68,7 +68,7 @@ export function EventSheet({
 
   return (
     <>
-      <SideSheet open={state !== null} onClose={close} title={title} width={380}>
+      <SideSheet open={state !== null} onClose={close} title={title} width={390}>
         {state?.mode === "create" && (
           <EventForm
             key={`create-${state.dateISO}`}
@@ -144,7 +144,7 @@ function EventView({
 }) {
   const sig = getSignificanceMeta(event.significance);
   const accent = eventAccent(event);
-  const Icon = resolveIcon(event.category_icon);
+  const Icon = resolveIconOrNull(event.category_icon);
   const images = media.map((m) => ({ key: `m-${m.id}`, src: `/media/${m.path}` }));
   const dateLabel = event.end_date
     ? `${formatDayMonthRu(event.date)} — ${formatFullRu(event.end_date)}`
@@ -171,11 +171,12 @@ function EventView({
           className="-mx-6 -mt-2 flex aspect-video w-[calc(100%+3rem)] items-center justify-center rounded-xl"
           style={{ background: accent.container }}
         >
-          {createElement(Icon, {
-            size: 64,
-            strokeWidth: 1.25,
-            style: { color: accent.onContainer, opacity: 0.85 },
-          })}
+          {Icon &&
+            createElement(Icon, {
+              size: 64,
+              strokeWidth: 1.25,
+              style: { color: accent.onContainer, opacity: 0.85 },
+            })}
         </div>
       )}
 
@@ -213,7 +214,7 @@ function EventView({
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
           style={{ background: accent.fill, color: accent.onFill }}
         >
-          {createElement(Icon, { size: 14 })}
+          {Icon && createElement(Icon, { size: 14 })}
           {event.category_name ?? "Без категории"}
         </span>
         <span className="text-[var(--md-sys-color-on-surface-variant)]">{sig.label}</span>
