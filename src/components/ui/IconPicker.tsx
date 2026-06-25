@@ -50,7 +50,7 @@ export function IconPicker({ value, onChange, label, color }: IconPickerProps) {
       >
         <span className="flex min-w-0 items-center gap-2">
           {createElement(resolveIcon(value), {
-            size: 18,
+            size: 20,
             style: color ? { color } : undefined,
           })}
           <span className="truncate text-muted">{value}</span>
@@ -69,19 +69,19 @@ export function IconPicker({ value, onChange, label, color }: IconPickerProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.14 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 rounded-xl border border-line bg-surface-2 p-2 shadow-lg"
+            className="absolute left-0 top-full z-50 mt-1.5 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface-2 p-2.5 shadow-lg"
           >
-            <div className="mb-2 flex items-center gap-2 rounded-lg border border-line bg-surface-1 px-2">
-              <Search size={14} className="shrink-0 text-muted" />
+            <div className="mb-2.5 flex items-center gap-2 rounded-xl border border-line bg-surface-1 px-2.5">
+              <Search size={16} className="shrink-0 text-muted" />
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Поиск…"
-                className="h-8 w-full bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
+                className="h-9 w-full bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
               />
             </div>
-            <div className="grid max-h-48 grid-cols-7 gap-1 overflow-auto">
+            <div className="grid max-h-64 grid-cols-6 gap-1.5 overflow-y-auto overflow-x-hidden">
               {filtered.map((name) => {
                 const active = name === value;
                 return (
@@ -94,19 +94,19 @@ export function IconPicker({ value, onChange, label, color }: IconPickerProps) {
                       setQuery("");
                       setOpen(false);
                     }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                    className={`flex aspect-square items-center justify-center rounded-xl transition-colors ${
                       active ? "bg-accent-500 text-white" : "text-app-text hover:bg-surface-3"
                     }`}
                   >
                     {createElement(resolveIcon(name), {
-                      size: 16,
+                      size: 22,
                       style: active || !color ? undefined : { color },
                     })}
                   </button>
                 );
               })}
               {filtered.length === 0 && (
-                <span className="col-span-7 px-2 py-3 text-center text-sm text-muted">
+                <span className="col-span-6 px-2 py-3 text-center text-sm text-muted">
                   Ничего не найдено
                 </span>
               )}
