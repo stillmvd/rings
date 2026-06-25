@@ -1,15 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { createElement, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { type Viewport, msToX, xToMs } from "@/lib/projection";
 import { isoToMs, formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { isVisibleAtLod, getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
-import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
+import { onColorFor } from "@/lib/colors";
+import { resolveIconOrNull } from "@/lib/icons";
+import {
+  EMPTY_FILTER,
+  isFilterActive,
+  matchesFilter,
+  matchesMarkFilter,
+  type EventFilter,
+} from "@/lib/filter";
 import { type Lod, lodRank } from "./lod";
 import { EventDot } from "./EventDot";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
 
 const CLUSTER_GAP_PX = 18;
 const MIN_BAR_PX = 14;
@@ -22,6 +31,7 @@ type Bar = { ev: TimelineEvent; x1: number; x2: number; tip: Cluster };
 
 type Props = {
   events: TimelineEvent[];
+  marks?: Mark[];
   viewport: Viewport;
   width: number;
   height: number;
@@ -29,10 +39,13 @@ type Props = {
   filter?: EventFilter;
   highlightId?: number | null;
   onEventClick?: (event: TimelineEvent, anchor: { x: number; y: number }) => void;
+  onMarkOpen?: (dateISO: string) => void;
+  onMarkMenu?: (mark: Mark, x: number, y: number) => void;
 };
 
 export function EventLayer({
   events,
+  marks = [],
   viewport,
   width,
   height,
@@ -40,6 +53,8 @@ export function EventLayer({
   filter = EMPTY_FILTER,
   highlightId = null,
   onEventClick,
+  onMarkOpen,
+  onMarkMenu,
 }: Props) {
   const axisY = height / 2;
   const rank = lodRank(lod);
@@ -82,6 +97,31 @@ export function EventLayer({
     }
     return { bars, clusters: out.map(({ x, events: e }) => ({ x, events: e })) };
   }, [events, viewport, width, rank, filter, filterOn]);
+
+  // Отметки видны только на крупном зуме (дни/недели), как события значимости 1.
+  // Кластеризуем близкие, как события: одиночная — иконка, группа — счётчик.
+  const markClusters = useMemo<Array<{ x: number; marks: Mark[] }>>(() => {
+    if (rank < 2) return [];
+    const pts: Array<{ m: Mark; x: number }> = [];
+    for (const m of marks) {
+      if (filterOn && !matchesMarkFilter(m, filter)) continue;
+      const x = msToX(isoToMs(m.date), viewport);
+      if (x >= -24 && x <= width + 24) pts.push({ m, x });
+    }
+    pts.sort((a, b) => a.x - b.x);
+    const out: Array<{ x: number; sumX: number; marks: Mark[] }> = [];
+    for (const { m, x } of pts) {
+      const last = out[out.length - 1];
+      if (last && x - last.x <= CLUSTER_GAP_PX) {
+        last.marks.push(m);
+        last.sumX += x;
+        last.x = last.sumX / last.marks.length;
+      } else {
+        out.push({ x, sumX: x, marks: [m] });
+      }
+    }
+    return out.map(({ x, marks: ms }) => ({ x, marks: ms }));
+  }, [marks, viewport, width, rank, filter, filterOn]);
 
   // Подсказка для пустого диапазона: считаем по времени, без LOD-фильтра.
   const emptyHint = useMemo<string | null>(() => {
@@ -203,6 +243,67 @@ export function EventLayer({
           );
         })}
       </AnimatePresence>
+
+      {markClusters.map(({ x, marks: ms }) => {
+        const first = ms[0];
+        if (ms.length === 1) {
+          const Icon = resolveIconOrNull(first.type_icon);
+          return (
+            <div
+              key={`mark-${first.id}`}
+              className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full"
+              style={{
+                left: x,
+                top: axisY + 20,
+                width: 18,
+                height: 18,
+                transform: "translate(-50%, -50%)",
+                background: first.type_color,
+                color: onColorFor(first.type_color),
+                boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
+              }}
+              title={`${first.type_name} · ${formatFullRu(first.date)}`}
+              onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+              onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkOpen?.(first.date);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onMarkMenu?.(first, e.clientX, e.clientY);
+              }}
+            >
+              {Icon && createElement(Icon, { size: 11 })}
+            </div>
+          );
+        }
+        return (
+          <div
+            key={`markc-${first.id}`}
+            className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full text-[10px] font-semibold"
+            style={{
+              left: x,
+              top: axisY + 20,
+              width: 20,
+              height: 20,
+              transform: "translate(-50%, -50%)",
+              background: "var(--md-sys-color-secondary-container)",
+              color: "var(--md-sys-color-on-secondary-container)",
+              boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
+            }}
+            title={`${ms.length} отметок`}
+            onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+            onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkOpen?.(first.date);
+            }}
+          >
+            {ms.length}
+          </div>
+        );
+      })}
 
       <AnimatePresence>
         {highlightX != null && (

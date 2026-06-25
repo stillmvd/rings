@@ -43,3 +43,21 @@ export function seedIfEmpty(db: Database.Database): void {
   });
   seed();
 }
+
+const SEED_MARK_TYPES: Array<{ name: string; icon: string; color: string }> = [
+  { name: "Секс", icon: "Heart", color: "#ec4899" },
+  { name: "Месячные", icon: "Droplet", color: "#ef4444" },
+];
+
+export function seedMarkTypesIfEmpty(db: Database.Database): void {
+  const row = db.prepare<[], { c: number }>("SELECT COUNT(*) AS c FROM mark_types").get();
+  if ((row?.c ?? 0) > 0) return;
+
+  const insert = db.prepare(
+    "INSERT INTO mark_types(name, icon, color, sort_order) VALUES(?, ?, ?, ?)",
+  );
+  const seed = db.transaction(() => {
+    SEED_MARK_TYPES.forEach((t, index) => insert.run(t.name, t.icon, t.color, index));
+  });
+  seed();
+}

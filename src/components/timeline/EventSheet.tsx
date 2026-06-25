@@ -11,7 +11,10 @@ import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { SideSheet } from "@/components/m3/SideSheet";
 import { EventForm, type EventFormPayload, type EventFormValues } from "./EventForm";
+import { MarkForm, type MarkFormPayload } from "./MarkForm";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import type { CategoryNode } from "@/db/queries/categories";
+import type { MarkType } from "@/db/queries/markTypes";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { EventMedia } from "@/db/queries/media";
 import type { Significance } from "@/lib/constants";
@@ -37,8 +40,10 @@ export function splitCategory(
 interface Props {
   state: EventSheetState | null;
   categories: CategoryNode[];
+  markTypes: MarkType[];
   onStartEdit: () => void;
   onCreate: (payload: EventFormPayload) => void;
+  onCreateMark: (payload: MarkFormPayload) => void;
   onUpdate: (id: number, payload: EventFormPayload) => void;
   onDelete: (id: number) => void;
   onClose: () => void;
@@ -47,13 +52,16 @@ interface Props {
 export function EventSheet({
   state,
   categories,
+  markTypes,
   onStartEdit,
   onCreate,
+  onCreateMark,
   onUpdate,
   onDelete,
   onClose,
 }: Props) {
   const [lbIndex, setLbIndex] = useState(-1);
+  const [createKind, setCreateKind] = useState<"event" | "mark">("event");
 
   const close = () => {
     setLbIndex(-1);
@@ -62,7 +70,9 @@ export function EventSheet({
 
   const title =
     state?.mode === "create"
-      ? "Новое событие"
+      ? createKind === "mark"
+        ? "Новая отметка"
+        : "Новое событие"
       : state?.mode === "edit"
         ? "Редактирование"
         : undefined;
@@ -71,13 +81,33 @@ export function EventSheet({
     <>
       <SideSheet open={state !== null} onClose={close} title={title} width={390}>
         {state?.mode === "create" && (
-          <EventForm
-            key={`create-${state.dateISO}`}
-            categories={categories}
-            initial={{ date: state.dateISO }}
-            onSubmit={onCreate}
-            onCancel={close}
-          />
+          <div className="flex flex-col gap-3.5">
+            <SegmentedControl
+              segments={[
+                { value: "event", label: "Событие" },
+                { value: "mark", label: "Отметка" },
+              ]}
+              value={createKind}
+              onChange={setCreateKind}
+            />
+            {createKind === "event" ? (
+              <EventForm
+                key={`create-${state.dateISO}`}
+                categories={categories}
+                initial={{ date: state.dateISO }}
+                onSubmit={onCreate}
+                onCancel={close}
+              />
+            ) : (
+              <MarkForm
+                key={`mark-${state.dateISO}`}
+                markTypes={markTypes}
+                initialDate={state.dateISO}
+                onSubmit={onCreateMark}
+                onCancel={close}
+              />
+            )}
+          </div>
         )}
 
         {state?.mode === "edit" && (

@@ -12,15 +12,18 @@ import { Button } from "@/components/ui/Button";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { ContextMenu } from "@/components/m3/ContextMenu";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
 import type { Significance } from "@/lib/constants";
 
 interface DayEventsDialogProps {
   open: boolean;
   dateISO: string | null;
   events: TimelineEvent[];
+  marks: Mark[];
   onView: (event: TimelineEvent) => void;
   onEdit: (event: TimelineEvent) => void;
   onDelete: (event: TimelineEvent) => void;
+  onDeleteMark: (mark: Mark) => void;
   onCreate: (dateISO: string) => void;
   onClose: () => void;
 }
@@ -43,9 +46,11 @@ export function DayEventsDialog({
   open,
   dateISO,
   events,
+  marks,
   onView,
   onEdit,
   onDelete,
+  onDeleteMark,
   onCreate,
   onClose,
 }: DayEventsDialogProps) {
@@ -54,7 +59,10 @@ export function DayEventsDialog({
 
   const periods = events.filter(isPeriod);
   const moments = events.filter((e) => !isPeriod(e));
-  const grouped = periods.length > 0 && moments.length > 0;
+  const total = events.length + marks.length;
+  const groupsCount =
+    (periods.length > 0 ? 1 : 0) + (moments.length > 0 ? 1 : 0) + (marks.length > 0 ? 1 : 0);
+  const showLabels = groupsCount >= 2;
 
   useEffect(() => {
     if (!open) return;
@@ -99,7 +107,7 @@ export function DayEventsDialog({
                   {dateISO ? formatFullRu(dateISO) : "События"}
                 </h2>
                 <p className="mt-0.5 text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                  {events.length} {plural(events.length)}
+                  {total} {plural(total)}
                 </p>
               </div>
               <button
@@ -113,7 +121,7 @@ export function DayEventsDialog({
             </header>
 
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4">
-              {grouped && <GroupLabel label="Периоды" />}
+              {showLabels && periods.length > 0 && <GroupLabel label="Периоды" />}
               {periods.map((event) => (
                 <EventCard
                   key={event.id}
@@ -122,7 +130,7 @@ export function DayEventsDialog({
                   onContextMenu={(x, y) => setMenu({ event, x, y })}
                 />
               ))}
-              {grouped && <GroupLabel label="События" />}
+              {showLabels && moments.length > 0 && <GroupLabel label="События" />}
               {moments.map((event) => (
                 <EventCard
                   key={event.id}
@@ -130,6 +138,10 @@ export function DayEventsDialog({
                   onView={() => onView(event)}
                   onContextMenu={(x, y) => setMenu({ event, x, y })}
                 />
+              ))}
+              {showLabels && marks.length > 0 && <GroupLabel label="Отметки" />}
+              {marks.map((mark) => (
+                <MarkRow key={mark.id} mark={mark} onDelete={() => onDeleteMark(mark)} />
               ))}
             </div>
 
@@ -238,6 +250,34 @@ function EventCard({
         {sig.label}
       </span>
     </button>
+  );
+}
+
+function MarkRow({ mark, onDelete }: { mark: Mark; onDelete: () => void }) {
+  const Icon = resolveIconOrNull(mark.type_icon);
+  return (
+    <div className="flex items-center gap-3 rounded-2xl p-2">
+      <span
+        className="grid h-16 w-16 shrink-0 place-items-center rounded-xl"
+        style={{
+          background: `color-mix(in srgb, ${mark.type_color} 20%, var(--md-sys-color-surface-container-high))`,
+          color: mark.type_color,
+        }}
+      >
+        {Icon && createElement(Icon, { size: 26, strokeWidth: 1.5 })}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--md-sys-color-on-surface)]">
+        {mark.type_name}
+      </span>
+      <button
+        type="button"
+        aria-label="Удалить отметку"
+        onClick={onDelete}
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[var(--md-sys-color-on-surface-variant)] transition-colors hover:bg-[color-mix(in_srgb,var(--md-sys-color-error)_12%,transparent)] hover:text-[var(--md-sys-color-error)]"
+      >
+        <Trash2 size={16} />
+      </button>
+    </div>
   );
 }
 

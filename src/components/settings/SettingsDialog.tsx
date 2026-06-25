@@ -4,16 +4,20 @@ import { Dialog } from "@/components/m3/Dialog";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SeedPicker } from "@/components/settings/SeedPicker";
 import { CategoryManager } from "@/components/categories/CategoryManager";
+import { MarkTypeManager } from "@/components/marktypes/MarkTypeManager";
 import { BackupPanel } from "@/components/settings/BackupPanel";
 import type { CategoryNode } from "@/db/queries/categories";
+import type { MarkType } from "@/db/queries/markTypes";
 
 export function SettingsDialog({
   open,
   categories,
+  markTypes,
   onClose,
 }: {
   open: boolean;
   categories: CategoryNode[];
+  markTypes: MarkType[];
   onClose: () => void;
 }) {
   return (
@@ -35,6 +39,8 @@ export function SettingsDialog({
         </section>
 
         <CategoryManager categories={categories} />
+
+        <MarkTypeManager markTypes={markTypes} />
 
         <BackupPanel />
       </div>

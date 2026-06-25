@@ -10,23 +10,30 @@ import { xToMs } from "@/lib/projection";
 import { msToISO, isoToMs } from "@/lib/dates";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
 import type { EventFilter } from "@/lib/filter";
 
 const CLICK_THRESHOLD_PX = 4;
 
 export function TimelineStage({
   events,
+  marks,
   filter,
   focus,
   onCreateAt,
   onEventOpen,
+  onMarkOpen,
+  onMarkMenu,
 }: {
   events: TimelineEvent[];
+  marks: Mark[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   focus?: { event: TimelineEvent; token: number } | null;
   onCreateAt: (dateISO: string) => void;
   onEventOpen: (event: TimelineEvent) => void;
+  onMarkOpen: (dateISO: string) => void;
+  onMarkMenu: (mark: Mark, x: number, y: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -163,6 +170,7 @@ export function TimelineStage({
       <GridCanvas viewport={viewport} width={size.width} height={size.height} lod={lod} />
       <EventLayer
         events={events}
+        marks={marks}
         viewport={viewport}
         width={size.width}
         height={size.height}
@@ -170,6 +178,8 @@ export function TimelineStage({
         filter={filter}
         highlightId={focus?.event.id ?? null}
         onEventClick={handleEventClick}
+        onMarkOpen={onMarkOpen}
+        onMarkMenu={onMarkMenu}
       />
       <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />
       <TimelineControls

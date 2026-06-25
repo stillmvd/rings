@@ -2,7 +2,7 @@ import "server-only";
 import Database from "better-sqlite3";
 import { readFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
-import { seedIfEmpty } from "./seed";
+import { seedIfEmpty, seedMarkTypesIfEmpty } from "./seed";
 
 const DB_DIR = path.join(process.cwd(), "data");
 const DB_PATH = path.join(DB_DIR, "timeline.db");
@@ -31,17 +31,36 @@ function createDb(): Database.Database {
   db.exec(schema);
   seedIfEmpty(db);
   migrate(db);
+  seedMarkTypesIfEmpty(db);
   return db;
 }
 
 function migrate(db: Database.Database): void {
   migrateEventEndDate(db);
+  migrateMarksToTypes(db);
 }
 
 function migrateEventEndDate(db: Database.Database): void {
   if (!hasColumn(db, "events", "end_date")) {
     db.exec("ALTER TABLE events ADD COLUMN end_date TEXT");
   }
+}
+
+// Старая схема marks ссылалась на categories(category_id). Переходим на отдельный
+// справочник mark_types: пересоздаём таблицу (тестовые отметки удаляются — данных в проде нет).
+function migrateMarksToTypes(db: Database.Database): void {
+  if (!hasColumn(db, "marks", "category_id")) return;
+  db.exec(`
+    DROP TABLE marks;
+    CREATE TABLE IF NOT EXISTS marks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      mark_type_id INTEGER NOT NULL REFERENCES mark_types(id) ON DELETE CASCADE,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_marks_date ON marks(date);
+    CREATE INDEX IF NOT EXISTS idx_marks_type ON marks(mark_type_id);
+  `);
 }
 
 function hasColumn(db: Database.Database, table: string, column: string): boolean {

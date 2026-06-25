@@ -28,6 +28,26 @@ CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
 CREATE INDEX IF NOT EXISTS idx_events_category ON events(category_id);
 CREATE INDEX IF NOT EXISTS idx_events_significance ON events(significance);
 
+-- Типы отметок: отдельный справочник трекеров (имя/иконка/цвет), независим от категорий событий.
+CREATE TABLE IF NOT EXISTS mark_types (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  icon TEXT NOT NULL,
+  color TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Отметки: быстрый лог дня без названия — дата + тип отметки (иконка на оси/в календаре).
+CREATE TABLE IF NOT EXISTS marks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL,                              -- YYYY-MM-DD
+  mark_type_id INTEGER NOT NULL REFERENCES mark_types(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_marks_date ON marks(date);
+CREATE INDEX IF NOT EXISTS idx_marks_type ON marks(mark_type_id);
+
 CREATE TABLE IF NOT EXISTS event_media (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,

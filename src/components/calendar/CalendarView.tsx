@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  createElement,
   useCallback,
   useContext,
   useEffect,
@@ -17,11 +18,20 @@ import { ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
 import { type PopoverAnchor } from "@/components/ui/Popover";
 import { eventAccent } from "@/lib/accent";
-import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
+import { onColorFor } from "@/lib/colors";
+import { resolveIconOrNull } from "@/lib/icons";
+import {
+  EMPTY_FILTER,
+  isFilterActive,
+  matchesFilter,
+  matchesMarkFilter,
+  type EventFilter,
+} from "@/lib/filter";
 import { BIRTH_DATE } from "@/lib/constants";
 import { holidayName } from "@/lib/holidays";
 import { getNonWorkingDaysAction } from "@/actions/calendar";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
 
 const START_MONTH = parseISO(BIRTH_DATE);
 const MAX_CHIPS = 3;
@@ -57,6 +67,7 @@ function shiftYear(today: Date, current: Date, delta: number): Date {
 }
 
 type DayIndex = Map<string, TimelineEvent[]>;
+type MarkIndex = Map<string, Mark[]>;
 
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
 
@@ -86,11 +97,27 @@ function buildDayIndex(events: TimelineEvent[], filter: EventFilter): DayIndex {
   return map;
 }
 
+// Индекс «день → отметки» (быстрый лог без названия, рендерятся иконкой).
+function buildMarkIndex(marks: Mark[], filter: EventFilter): MarkIndex {
+  const filterOn = isFilterActive(filter);
+  const map: MarkIndex = new Map();
+  for (const m of marks) {
+    if (filterOn && !matchesMarkFilter(m, filter)) continue;
+    const bucket = map.get(m.date);
+    if (bucket) bucket.push(m);
+    else map.set(m.date, [m]);
+  }
+  return map;
+}
+
 type CalCtx = {
   dayIndex: DayIndex;
+  markIndex: MarkIndex;
   onEventOpen: (event: TimelineEvent) => void;
   onCreateAt: (iso: string, anchor: PopoverAnchor) => void;
   onDayOpen: (iso: string) => void;
+  onMarkOpen: (iso: string) => void;
+  onMarkMenu: (mark: Mark, x: number, y: number) => void;
   displayMonth: Date;
   onShift: (unit: "month" | "year", delta: number) => void;
   onToday: () => void;
@@ -100,9 +127,12 @@ type CalCtx = {
 
 const CalendarContext = createContext<CalCtx>({
   dayIndex: new Map(),
+  markIndex: new Map(),
   onEventOpen: () => {},
   onCreateAt: () => {},
   onDayOpen: () => {},
+  onMarkOpen: () => {},
+  onMarkMenu: () => {},
   displayMonth: new Date(0),
   onShift: () => {},
   onToday: () => {},
@@ -126,9 +156,10 @@ function EventMarker({ event }: { event: TimelineEvent }) {
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
 function DayCell({ day, modifiers, className, ...rest }: DayProps) {
-  const { dayIndex, onEventOpen, onCreateAt, onDayOpen, dayKind } =
+  const { dayIndex, markIndex, onEventOpen, onCreateAt, onDayOpen, onMarkOpen, onMarkMenu, dayKind } =
     useContext(CalendarContext);
   const dayEvents = modifiers.disabled ? [] : dayIndex.get(day.isoDate) ?? [];
+  const dayMarks = modifiers.disabled ? [] : markIndex.get(day.isoDate) ?? [];
   const shown = dayEvents.slice(0, MAX_CHIPS);
   const extra = dayEvents.length - shown.length;
   const kind = dayKind(day.isoDate, day.date, !!modifiers.disabled);
@@ -141,7 +172,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
           modifiers.disabled
             ? undefined
             : (e) =>
-                dayEvents.length > 0
+                dayEvents.length > 0 || dayMarks.length > 0
                   ? onDayOpen(day.isoDate)
                   : onCreateAt(day.isoDate, anchorFrom(e))
         }
@@ -184,6 +215,33 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                 +{extra}
               </button>
             )}
+          </div>
+        )}
+        {dayMarks.length > 0 && (
+          <div className="tl-cal-marks">
+            {dayMarks.map((m) => {
+              const Icon = resolveIconOrNull(m.type_icon);
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  className="tl-cal-mark"
+                  title={m.type_name}
+                  style={{ background: m.type_color, color: onColorFor(m.type_color) }}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    onMarkOpen(day.isoDate);
+                  }}
+                  onContextMenu={(ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    onMarkMenu(m, ev.clientX, ev.clientY);
+                  }}
+                >
+                  {Icon && createElement(Icon, { size: 12 })}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -286,21 +344,28 @@ const COMPONENTS = { Day: DayCell, MonthCaption };
 
 export function CalendarView({
   events,
+  marks = [],
   filter = EMPTY_FILTER,
   onEventClick = () => {},
   onCreateRequest = () => {},
   onDayOpen = () => {},
+  onMarkOpen = () => {},
+  onMarkMenu = () => {},
 }: {
   events: TimelineEvent[];
+  marks?: Mark[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   onEventClick?: (event: TimelineEvent) => void;
   onCreateRequest?: (dateISO: string, anchor: PopoverAnchor) => void;
   onDayOpen?: (dateISO: string) => void;
+  onMarkOpen?: (dateISO: string) => void;
+  onMarkMenu?: (mark: Mark, x: number, y: number) => void;
 }) {
   const today = useMemo(() => new Date(), []);
   const [month, setMonth] = useState<Date>(() => new Date());
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
+  const markIndex = useMemo(() => buildMarkIndex(marks, filter), [marks, filter]);
 
   // Нерабочие дни (праздники + переносы РФ) по годам; null — данных нет, fallback на сб/вс.
   const displayYear = month.getFullYear();
@@ -359,16 +424,32 @@ export function CalendarView({
   const ctx = useMemo<CalCtx>(
     () => ({
       dayIndex,
+      markIndex,
       onEventOpen: onEventClick,
       onCreateAt: onCreateRequest,
       onDayOpen,
+      onMarkOpen,
+      onMarkMenu,
       displayMonth: month,
       onShift: handleShift,
       onToday: handleToday,
       isTodayMonth: isSameMonth(month, today),
       dayKind,
     }),
-    [dayIndex, onEventClick, onCreateRequest, onDayOpen, month, handleShift, handleToday, today, dayKind],
+    [
+      dayIndex,
+      markIndex,
+      onEventClick,
+      onCreateRequest,
+      onDayOpen,
+      onMarkOpen,
+      onMarkMenu,
+      month,
+      handleShift,
+      handleToday,
+      today,
+      dayKind,
+    ],
   );
 
   return (

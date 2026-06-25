@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { CalendarView } from "@/components/calendar/CalendarView";
@@ -12,13 +12,17 @@ import { NavigationRail } from "@/components/m3/NavigationRail";
 import { ConfirmDialog } from "@/components/m3/ConfirmDialog";
 import { DayEventsDialog } from "@/components/timeline/DayEventsDialog";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
+import { ContextMenu } from "@/components/m3/ContextMenu";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
+import { useMarkCrud } from "@/components/timeline/useMarkCrud";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
 import { todayISO } from "@/lib/dates";
-import { EMPTY_FILTER, type EventFilter } from "@/lib/filter";
+import { EMPTY_FILTER, isFilterActive, matchesMarkFilter, type EventFilter } from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
+import type { MarkType } from "@/db/queries/markTypes";
 import type { CategoryNode } from "@/db/queries/categories";
 
 const MODE_KEY = "timeline.viewMode";
@@ -56,14 +60,21 @@ function useViewMode(): [ViewMode, (mode: ViewMode) => void] {
 
 export function AppShell({
   events,
+  marks,
+  markTypes,
   categories,
 }: {
   events: TimelineEvent[];
+  marks: Mark[];
+  markTypes: MarkType[];
   categories: CategoryNode[];
 }) {
   const [mode, setMode] = useViewMode();
   const reduceMotion = useReducedMotion();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
+  const { marks: liveMarks, create: createMark, remove: removeMark } = useMarkCrud(marks, markTypes);
+  // Контекст-меню удаления отметки (ПКМ/клик по иконке отметки на оси или в календаре).
+  const [markMenu, setMarkMenu] = useState<{ mark: Mark; x: number; y: number } | null>(null);
   // Единый правый SideSheet для всех сценариев формы/просмотра события.
   const [sheet, setSheet] = useState<EventSheetState | null>(null);
   // Событие, ожидающее подтверждения удаления (M3 alert dialog поверх sheet).
@@ -89,6 +100,13 @@ export function AppShell({
       )
       .sort((a, b) => b.significance - a.significance || b.id - a.id);
   }, [dayDate, liveEvents]);
+
+  // Отметки выбранного дня (одиночная дата) с учётом активного фильтра.
+  const dayMarks = useMemo(() => {
+    if (!dayDate) return [];
+    const active = isFilterActive(filter);
+    return liveMarks.filter((m) => m.date === dayDate && (!active || matchesMarkFilter(m, filter)));
+  }, [dayDate, liveMarks, filter]);
 
   const handleSelectResult = (event: TimelineEvent) => {
     setSearchOpen(false);
@@ -157,27 +175,35 @@ export function AppShell({
             {mode === "timeline" ? (
               <TimelineStage
                 events={liveEvents}
+                marks={liveMarks}
                 filter={filter}
                 onFilterChange={setFilter}
                 focus={focus}
                 onCreateAt={openCreate}
                 onEventOpen={(ev) => setDayDate(ev.date)}
+                onMarkOpen={(date) => setDayDate(date)}
+                onMarkMenu={(mark, x, y) => setMarkMenu({ mark, x, y })}
               />
             ) : mode === "gallery" ? (
               <GalleryView
                 events={liveEvents}
+                marks={liveMarks}
                 filter={filter}
                 onFilterChange={setFilter}
                 onEventClick={openView}
+                onMarkOpen={(date) => setDayDate(date)}
               />
             ) : (
               <CalendarView
                 events={liveEvents}
+                marks={liveMarks}
                 filter={filter}
                 onFilterChange={setFilter}
                 onEventClick={openView}
                 onCreateRequest={(dateISO) => openCreate(dateISO)}
                 onDayOpen={(dateISO) => setDayDate(dateISO)}
+                onMarkOpen={(date) => setDayDate(date)}
+                onMarkMenu={(mark, x, y) => setMarkMenu({ mark, x, y })}
               />
             )}
           </motion.div>
@@ -210,9 +236,14 @@ export function AppShell({
       <EventSheet
         state={sheet}
         categories={categories}
+        markTypes={markTypes}
         onStartEdit={startEdit}
         onCreate={(payload) => {
           create(payload);
+          setSheet(null);
+        }}
+        onCreateMark={(payload) => {
+          createMark(payload);
           setSheet(null);
         }}
         onUpdate={(id, payload) => {
@@ -230,9 +261,10 @@ export function AppShell({
       />
 
       <DayEventsDialog
-        open={dayDate !== null && dayEvents.length > 0}
+        open={dayDate !== null && (dayEvents.length > 0 || dayMarks.length > 0)}
         dateISO={dayDate}
         events={dayEvents}
+        marks={dayMarks}
         onView={(ev) => {
           setDayDate(null);
           openView(ev);
@@ -242,6 +274,7 @@ export function AppShell({
           openEdit(ev);
         }}
         onDelete={(ev) => setPendingDelete(ev)}
+        onDeleteMark={(mark) => removeMark(mark.id)}
         onCreate={(dateISO) => {
           setDayDate(null);
           openCreate(dateISO);
@@ -272,7 +305,27 @@ export function AppShell({
       <SettingsDialog
         open={settingsOpen}
         categories={categories}
+        markTypes={markTypes}
         onClose={() => setSettingsOpen(false)}
+      />
+
+      <ContextMenu
+        open={markMenu !== null}
+        x={markMenu?.x ?? 0}
+        y={markMenu?.y ?? 0}
+        onClose={() => setMarkMenu(null)}
+        items={
+          markMenu
+            ? [
+                {
+                  label: "Удалить отметку",
+                  icon: <Trash2 size={16} />,
+                  danger: true,
+                  onSelect: () => removeMark(markMenu.mark.id),
+                },
+              ]
+            : []
+        }
       />
     </div>
   );

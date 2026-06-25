@@ -2,54 +2,82 @@
 
 import { useMemo, useRef } from "react";
 import { formatMonthRu } from "@/lib/dates";
-import { EventCard } from "./EventCard";
+import { EventCard, MarkCard } from "./EventCard";
 import { DateScrubber } from "./DateScrubber";
-import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
+import {
+  EMPTY_FILTER,
+  isFilterActive,
+  matchesFilter,
+  matchesMarkFilter,
+  type EventFilter,
+} from "@/lib/filter";
 import type { TimelineEvent } from "@/db/queries/events";
+import type { Mark } from "@/db/queries/marks";
 
 const GALLERY_MIN_SIGNIFICANCE = 2;
 
 const capitalize = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const byDateDesc = <T extends { date: string; id: number }>(a: T, b: T) =>
+  a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id;
 
 type MonthGroup = {
   key: string;
   label: string;
   events: TimelineEvent[];
+  marks: Mark[];
 };
 
-function groupByMonth(events: TimelineEvent[], filter: EventFilter): MonthGroup[] {
+function buildGroups(events: TimelineEvent[], marks: Mark[], filter: EventFilter): MonthGroup[] {
   const filterOn = isFilterActive(filter);
-  const map = new Map<string, TimelineEvent[]>();
+  const evMap = new Map<string, TimelineEvent[]>();
+  const mkMap = new Map<string, Mark[]>();
   for (const e of events) {
     // Базовый порог галереи sig 2–3 + пользовательский фильтр поверх.
     if (e.significance < GALLERY_MIN_SIGNIFICANCE) continue;
     if (filterOn && !matchesFilter(e, filter)) continue;
     const key = e.date.slice(0, 7);
-    const bucket = map.get(key);
+    const bucket = evMap.get(key);
     if (bucket) bucket.push(e);
-    else map.set(key, [e]);
+    else evMap.set(key, [e]);
   }
-  return [...map.entries()]
-    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    .map(([key, evs]) => ({
-      key,
-      label: capitalize(formatMonthRu(evs[0].date)),
-      events: evs.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id)),
-    }));
+  for (const m of marks) {
+    if (filterOn && !matchesMarkFilter(m, filter)) continue;
+    const key = m.date.slice(0, 7);
+    const bucket = mkMap.get(key);
+    if (bucket) bucket.push(m);
+    else mkMap.set(key, [m]);
+  }
+  const keys = new Set([...evMap.keys(), ...mkMap.keys()]);
+  return [...keys]
+    .sort((a, b) => (a < b ? 1 : -1))
+    .map((key) => {
+      const evs = (evMap.get(key) ?? []).sort(byDateDesc);
+      const mks = (mkMap.get(key) ?? []).sort(byDateDesc);
+      return {
+        key,
+        label: capitalize(formatMonthRu((evs[0] ?? mks[0]).date)),
+        events: evs,
+        marks: mks,
+      };
+    });
 }
 
 export function GalleryView({
   events,
+  marks = [],
   filter = EMPTY_FILTER,
   onFilterChange,
   onEventClick,
+  onMarkOpen = () => {},
 }: {
   events: TimelineEvent[];
+  marks?: Mark[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   onEventClick: (event: TimelineEvent) => void;
+  onMarkOpen?: (dateISO: string) => void;
 }) {
-  const groups = useMemo(() => groupByMonth(events, filter), [events, filter]);
+  const groups = useMemo(() => buildGroups(events, marks, filter), [events, marks, filter]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   if (groups.length === 0) {
@@ -96,6 +124,9 @@ export function GalleryView({
               <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 [contain-intrinsic-size:auto_400px] [content-visibility:auto]">
                 {group.events.map((event) => (
                   <EventCard key={event.id} event={event} onClick={onEventClick} />
+                ))}
+                {group.marks.map((mark) => (
+                  <MarkCard key={`m-${mark.id}`} mark={mark} onClick={() => onMarkOpen(mark.date)} />
                 ))}
               </div>
             </section>
