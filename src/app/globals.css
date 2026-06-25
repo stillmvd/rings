@@ -494,20 +494,30 @@
   color: var(--md-sys-color-on-surface);
 }
 
-/* Отметки дня — круглые иконки-чипы без текста (быстрый лог по категории). */
+/* Шапка ячейки: число дня слева, иконки отметок справа в одну строку. */
+.tl-cal-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tl-cal-head .tl-cal-num {
+  align-self: center;
+}
+
+/* Отметки дня — круглые иконки-чипы без текста (быстрый лог по типу), прижаты к правому краю. */
 .tl-cal-marks {
   display: flex;
-  flex-wrap: wrap;
   gap: 3px;
-  margin-top: 3px;
+  margin-left: auto;
 }
 
 .tl-cal-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: none;
   border-radius: 9999px;
   cursor: pointer;

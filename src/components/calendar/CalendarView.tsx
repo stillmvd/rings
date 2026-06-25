@@ -17,7 +17,7 @@ import { parseISO, format, startOfMonth, isSameMonth } from "date-fns";
 import { ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
 import { type PopoverAnchor } from "@/components/ui/Popover";
-import { eventAccent } from "@/lib/accent";
+import { getSignificanceMeta } from "@/lib/significance";
 import { onColorFor } from "@/lib/colors";
 import { resolveIconOrNull } from "@/lib/icons";
 import {
@@ -181,17 +181,50 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
           modifiers.disabled ? " is-disabled" : ""
         }${kind ? ` is-${kind}` : ""}`}
       >
-        <span className="tl-cal-num">{day.date.getDate()}</span>
+        <div className="tl-cal-head">
+          <span className="tl-cal-num">{day.date.getDate()}</span>
+          {dayMarks.length > 0 && (
+            <div className="tl-cal-marks">
+              {dayMarks.slice(0, 3).map((m) => {
+                const Icon = resolveIconOrNull(m.type_icon);
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className="tl-cal-mark"
+                    title={m.type_name}
+                    style={{ background: m.type_color, color: onColorFor(m.type_color) }}
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      onMarkOpen(day.isoDate);
+                    }}
+                    onContextMenu={(ev) => {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      onMarkMenu(m, ev.clientX, ev.clientY);
+                    }}
+                  >
+                    {Icon && createElement(Icon, { size: 11 })}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
         {shown.length > 0 && (
           <div className="tl-cal-chips">
             {shown.map((e) => {
-              const accent = eventAccent(e);
+              const sig = getSignificanceMeta(e.significance);
               return (
                 <button
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{ background: accent.fill, color: accent.onFill }}
+                  style={{
+                    background: sig.color,
+                    color: sig.onColor,
+                    borderLeft: e.category_color ? `4px solid ${e.category_color}` : undefined,
+                  }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();
@@ -215,33 +248,6 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                 +{extra}
               </button>
             )}
-          </div>
-        )}
-        {dayMarks.length > 0 && (
-          <div className="tl-cal-marks">
-            {dayMarks.map((m) => {
-              const Icon = resolveIconOrNull(m.type_icon);
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  className="tl-cal-mark"
-                  title={m.type_name}
-                  style={{ background: m.type_color, color: onColorFor(m.type_color) }}
-                  onClick={(ev) => {
-                    ev.stopPropagation();
-                    onMarkOpen(day.isoDate);
-                  }}
-                  onContextMenu={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    onMarkMenu(m, ev.clientX, ev.clientY);
-                  }}
-                >
-                  {Icon && createElement(Icon, { size: 12 })}
-                </button>
-              );
-            })}
           </div>
         )}
       </div>
