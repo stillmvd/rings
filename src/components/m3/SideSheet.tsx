@@ -23,7 +23,7 @@ const useMounted = () =>
 
 // Modal side sheet (M3): scrim + панель справа во всю высоту, slide-in.
 // Десктоп-only, поэтому всегда модальный (scrim перехватывает фон).
-export function SideSheet({ open, onClose, title, width = 360, children }: SideSheetProps) {
+export function SideSheet({ open, onClose, title, width = 390, children }: SideSheetProps) {
   const mounted = useMounted();
 
   useEffect(() => {

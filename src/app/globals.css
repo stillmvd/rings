@@ -318,8 +318,8 @@
 /* === Крупная сетка месяца (режим «Календарь») ============================ */
 
 .tl-calendar-lg .rdp-root {
-  --rdp-day-width: 112px;
-  --rdp-day-height: 96px;
+  --rdp-day-width: 152px;
+  --rdp-day-height: 126px;
   --rdp-day_button-width: 108px;
   --rdp-day_button-height: 92px;
   --rdp-day_button-border-radius: 0.75rem;
@@ -340,7 +340,7 @@
 
 /* Резерв под максимум недель (6) — высота карточки не зависит от месяца, шапка не прыгает. */
 .tl-calendar-lg .rdp-month {
-  min-height: calc(var(--rdp-day-height) * 6 + 7rem);
+  min-height: calc(var(--rdp-day-height) * 6);
 }
 
 .tl-calendar-lg .rdp-weekday {
@@ -445,7 +445,7 @@
   width: 100%;
   align-items: center;
   gap: 4px;
-  padding: 1px 6px;
+  padding: 3px 6px;
   border: none;
   border-radius: var(--md-sys-shape-corner-extra-small);
   font-family: inherit;
