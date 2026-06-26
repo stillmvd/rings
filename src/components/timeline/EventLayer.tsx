@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { type Viewport, msToX, xToMs } from "@/lib/projection";
 import { isoToMs, formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { isVisibleAtLod, getSignificanceMeta } from "@/lib/significance";
+import { isFuture } from "@/lib/duration";
 import { eventAccent } from "@/lib/accent";
 import { onColorFor } from "@/lib/colors";
 import { resolveIconOrNull } from "@/lib/icons";
@@ -155,6 +156,8 @@ export function EventLayer({
       <AnimatePresence initial={false}>
         {bars.map((bar) => {
           const color = eventAccent(bar.ev).fill;
+          // Будущий период — пунктирная полоса вместо сплошной.
+          const future = isFuture(bar.ev.date);
           return (
             <motion.div
               key={`bar-${bar.ev.id}`}
@@ -165,10 +168,12 @@ export function EventLayer({
                 y: "-50%",
                 width: bar.x2 - bar.x1,
                 height: 3,
-                background: color,
+                background: future
+                  ? `repeating-linear-gradient(90deg, ${color} 0 6px, transparent 6px 11px)`
+                  : color,
               }}
               initial={{ opacity: 0, scaleY: 0.4 }}
-              animate={{ opacity: 1, scaleY: 1 }}
+              animate={{ opacity: future ? 0.75 : 1, scaleY: 1 }}
               exit={{ opacity: 0, scaleY: 0.4 }}
               transition={{ duration: 0.18, ease: "easeOut" as const }}
               onMouseEnter={() => setHovered(bar.tip)}
@@ -220,6 +225,8 @@ export function EventLayer({
           const maxSig = Math.max(...cluster.events.map((e) => e.significance));
           const meta = getSignificanceMeta(maxSig);
           const size = meta.dotRadius * 2 + 6;
+          // Кластер целиком в будущем — контурный (пунктир + светлая заливка).
+          const clusterFuture = cluster.events.every((e) => isFuture(e.date));
           return (
             <motion.div
               key={key}
@@ -229,10 +236,14 @@ export function EventLayer({
                 ...common.style,
                 width: size,
                 height: size,
-                background: meta.color,
-                color: meta.onColor,
+                background: clusterFuture
+                  ? `color-mix(in srgb, ${meta.color} 30%, var(--md-sys-color-surface))`
+                  : meta.color,
+                color: clusterFuture ? meta.color : meta.onColor,
+                border: clusterFuture ? `1.5px dashed ${meta.color}` : undefined,
                 boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
               }}
+              animate={{ opacity: clusterFuture ? 0.8 : 1, scale: 1 }}
               onClick={(e) => {
                 const r = e.currentTarget.getBoundingClientRect();
                 onEventClick?.(cluster.events[0], { x: r.left + r.width / 2, y: r.top + r.height / 2 });

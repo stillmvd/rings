@@ -28,6 +28,7 @@ import {
   type EventFilter,
 } from "@/lib/filter";
 import { BIRTH_DATE } from "@/lib/constants";
+import { isFuture } from "@/lib/duration";
 import { holidayName } from "@/lib/holidays";
 import { getNonWorkingDaysAction } from "@/actions/calendar";
 import type { TimelineEvent } from "@/db/queries/events";
@@ -167,6 +168,8 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
   const extra = dayEvents.length - shown.length;
   const kind = dayKind(day.isoDate, day.date, !!modifiers.disabled);
   const holiday = kind === "holiday" ? holidayName(day.isoDate) : null;
+  // Будущий день — приглушаем чипы/маркеры (событие ещё не наступило).
+  const future = !modifiers.disabled && isFuture(day.isoDate);
 
   return (
     <td {...(rest as HTMLAttributes<HTMLTableCellElement>)} className={`${className ?? ""} tl-cal-td`}>
@@ -187,7 +190,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
         <div className="tl-cal-head">
           <span className="tl-cal-num">{day.date.getDate()}</span>
           {dayMarks.length > 0 && (
-            <div className="tl-cal-marks">
+            <div className="tl-cal-marks" style={{ opacity: future ? 0.5 : undefined }}>
               {dayMarks.slice(0, 3).map((m) => {
                 const Icon = resolveIconOrNull(m.type_icon);
                 return (
@@ -215,7 +218,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
           )}
         </div>
         {shown.length > 0 && (
-          <div className="tl-cal-chips">
+          <div className="tl-cal-chips" style={{ opacity: future ? 0.5 : undefined }}>
             {shown.map((e) => {
               const sig = getSignificanceMeta(e.significance);
               return (

@@ -1,9 +1,11 @@
 "use client";
 
 import { createElement } from "react";
+import { CalendarClock } from "lucide-react";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
+import { isFuture } from "@/lib/duration";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
 
@@ -25,6 +27,8 @@ export function EventCard({
   const dateLabel = event.end_date
     ? `${formatDayMonthRu(event.date)} ↔ ${formatFullRu(event.end_date)}`
     : formatFullRu(event.date);
+  // Будущее ещё не наступило → пунктирная рамка + приглушённое медиа + бейдж.
+  const future = isFuture(event.date);
 
   return (
     <button
@@ -35,6 +39,7 @@ export function EventCard({
         background: "var(--md-sys-color-surface-container-low)",
         color: "var(--md-sys-color-on-surface)",
         boxShadow: ELEVATION_1,
+        border: future ? "1.5px dashed var(--md-sys-color-outline)" : undefined,
       }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
@@ -53,11 +58,12 @@ export function EventCard({
             loading="lazy"
             decoding="async"
             className="h-full w-full object-cover"
+            style={{ opacity: future ? 0.6 : undefined }}
           />
         ) : (
           <div
             className="flex h-full w-full items-center justify-center"
-            style={{ background: accent.container }}
+            style={{ background: accent.container, opacity: future ? 0.6 : undefined }}
           >
             {Icon &&
               createElement(Icon, {
@@ -66,6 +72,20 @@ export function EventCard({
                 style: { color: accent.onContainer },
               })}
           </div>
+        )}
+        {future && (
+          <span
+            className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full"
+            style={{
+              background: "var(--md-sys-color-surface-container-high)",
+              color: "var(--md-sys-color-on-surface-variant)",
+              boxShadow:
+                "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent)",
+            }}
+            title="Запланировано"
+          >
+            <CalendarClock size={15} />
+          </span>
         )}
         {Icon && (
           <span

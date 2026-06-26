@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
+import { isFuture } from "@/lib/duration";
 import type { TimelineEvent } from "@/db/queries/events";
 
 /**
@@ -16,6 +17,8 @@ export function EventDot({ event }: { event: TimelineEvent }) {
   const diameter = sig.dotRadius * 2;
   const iconCmp = resolveIconOrNull(event.category_icon);
   const showIcon = sig.dotRadius >= 9 && iconCmp != null;
+  // Будущее ещё не свершилось → контурная точка (пунктир + лёгкая заливка) вместо залитой.
+  const future = isFuture(event.date);
 
   return (
     <div
@@ -23,7 +26,9 @@ export function EventDot({ event }: { event: TimelineEvent }) {
       style={{
         width: diameter,
         height: diameter,
-        background: color,
+        background: future ? `color-mix(in srgb, ${color} 20%, transparent)` : color,
+        border: future ? `1.5px dashed ${color}` : undefined,
+        opacity: future ? 0.85 : undefined,
         boxShadow: sig.ring
           ? `0 0 0 2px var(--md-sys-color-surface), 0 0 0 4px ${sig.ringColor ?? color}`
           : undefined,
@@ -34,7 +39,7 @@ export function EventDot({ event }: { event: TimelineEvent }) {
         createElement(iconCmp, {
           size: Math.round(diameter * 0.6),
           strokeWidth: 2.5,
-          color: contentColor,
+          color: future ? color : contentColor,
         })}
     </div>
   );
