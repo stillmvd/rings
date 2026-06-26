@@ -37,12 +37,19 @@ function createDb(): Database.Database {
 
 function migrate(db: Database.Database): void {
   migrateEventEndDate(db);
+  migrateEventTrack(db);
   migrateMarksToTypes(db);
 }
 
 function migrateEventEndDate(db: Database.Database): void {
   if (!hasColumn(db, "events", "end_date")) {
     db.exec("ALTER TABLE events ADD COLUMN end_date TEXT");
+  }
+}
+
+function migrateEventTrack(db: Database.Database): void {
+  if (!hasColumn(db, "events", "track")) {
+    db.exec("ALTER TABLE events ADD COLUMN track INTEGER NOT NULL DEFAULT 0");
   }
 }
 

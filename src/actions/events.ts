@@ -15,6 +15,7 @@ type EventActionInput = {
   endDate: string | null;
   significance: number;
   categoryId: number | null;
+  track: boolean;
 };
 
 function validate(input: EventActionInput): string | null {
@@ -46,6 +47,7 @@ export async function createEventAction(input: EventActionInput): Promise<EventR
     endDate: input.endDate?.trim() || null,
     significance: input.significance,
     categoryId: input.categoryId,
+    track: input.track ? 1 : 0,
   });
   revalidatePath("/");
   return { ok: true, id };
@@ -65,6 +67,7 @@ export async function updateEventAction(
     endDate: input.endDate?.trim() || null,
     significance: input.significance,
     categoryId: input.categoryId,
+    track: input.track ? 1 : 0,
   });
   revalidatePath("/");
   return { ok: true };

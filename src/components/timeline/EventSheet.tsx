@@ -123,6 +123,7 @@ export function EventSheet({
                 date: state.event.date,
                 endDate: state.event.end_date,
                 significance: state.event.significance as Significance,
+                track: state.event.track === 1,
                 ...splitCategory(categories, state.event.category_id),
               } satisfies Partial<EventFormValues>
             }

@@ -55,6 +55,7 @@ export function useEventCrud(events: TimelineEvent[], categories: CategoryNode[]
       end_date: payload.endDate,
       significance: payload.significance,
       category_id: payload.categoryId,
+      track: payload.track ? 1 : 0,
       category_name: cat?.name ?? null,
       category_icon: cat?.icon ?? null,
       category_color: cat?.color ?? null,
@@ -69,6 +70,7 @@ export function useEventCrud(events: TimelineEvent[], categories: CategoryNode[]
     endDate: payload.endDate,
     significance: payload.significance,
     categoryId: payload.categoryId,
+    track: payload.track,
   });
 
   const finalizeMedia = async (eventId: number, media: EventFormPayload["media"]) => {

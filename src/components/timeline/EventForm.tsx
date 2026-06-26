@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Target } from "lucide-react";
 import type { CategoryNode } from "@/db/queries/categories";
 import type { EventMedia } from "@/db/queries/media";
 import { MediaUploader, filterAcceptedImages, type MediaItem } from "./MediaUploader";
@@ -29,6 +30,7 @@ export interface EventFormValues {
   significance: Significance;
   categoryId: number | null;
   subcategoryId: number | null;
+  track: boolean;
 }
 
 export interface EventMediaPayload {
@@ -44,6 +46,7 @@ export interface EventFormPayload {
   endDate: string | null;
   significance: Significance;
   categoryId: number | null;
+  track: boolean;
   media: EventMediaPayload;
 }
 
@@ -95,6 +98,7 @@ export function EventForm({
   const [subcategoryId, setSubcategoryId] = useState<number | null>(
     initial?.subcategoryId ?? null,
   );
+  const [track, setTrack] = useState<boolean>(initial?.track ?? false);
 
   const [titleError, setTitleError] = useState<string>();
   const [dateError, setDateError] = useState<string>();
@@ -231,6 +235,7 @@ export function EventForm({
       endDate: kind === "period" ? endDate : null,
       significance,
       categoryId: subcategoryId ?? categoryId,
+      track,
       media: { files, removedIds, orderedIds },
     });
   }
@@ -304,6 +309,16 @@ export function EventForm({
           placeholder="—"
         />
       )}
+
+      <SegmentedControl
+        label="Отслеживание"
+        segments={[
+          { value: "off", label: "Выкл" },
+          { value: "on", label: "Вкл", icon: <Target size={16} /> },
+        ]}
+        value={track ? "on" : "off"}
+        onChange={(v) => setTrack(v === "on")}
+      />
 
       <MediaUploader
         items={mediaItems}

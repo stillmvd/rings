@@ -21,6 +21,7 @@ export type BackupEvent = {
   end_date: string | null;
   significance: number;
   category_id: number | null;
+  track: number;
   created_at: string;
   updated_at: string;
 };
@@ -57,10 +58,11 @@ export function importBackupData(data: BackupData): { categories: number; events
       for (const c of sorted) insCat.run(c);
 
       const insEvent = db.prepare(
-        `INSERT INTO events(id, title, description, date, end_date, significance, category_id, created_at, updated_at)
-         VALUES(@id, @title, @description, @date, @end_date, @significance, @category_id, @created_at, @updated_at)`,
+        `INSERT INTO events(id, title, description, date, end_date, significance, category_id, track, created_at, updated_at)
+         VALUES(@id, @title, @description, @date, @end_date, @significance, @category_id, @track, @created_at, @updated_at)`,
       );
-      for (const e of data.events) insEvent.run(e);
+      // Бэкапы версии < текущей могут не содержать track — нормализуем к 0.
+      for (const e of data.events) insEvent.run({ ...e, track: e.track ?? 0 });
 
       const insSetting = db.prepare("INSERT INTO settings(key, value) VALUES(@key, @value)");
       for (const s of data.settings) insSetting.run(s);
@@ -82,7 +84,7 @@ export function getBackupData(): BackupData {
     .all();
   const events = db
     .prepare<[], BackupEvent>(
-      `SELECT id, title, description, date, end_date, significance, category_id, created_at, updated_at
+      `SELECT id, title, description, date, end_date, significance, category_id, track, created_at, updated_at
        FROM events ORDER BY id`,
     )
     .all();

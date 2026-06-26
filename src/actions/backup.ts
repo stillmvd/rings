@@ -73,6 +73,7 @@ function normalize(parsed: Record<string, unknown>): BackupData | string {
       end_date: typeof raw.end_date === "string" ? raw.end_date : null,
       significance: raw.significance,
       category_id: typeof raw.category_id === "number" ? raw.category_id : null,
+      track: raw.track === 1 ? 1 : 0,
       created_at: typeof raw.created_at === "string" ? raw.created_at : now,
       updated_at: typeof raw.updated_at === "string" ? raw.updated_at : now,
     });

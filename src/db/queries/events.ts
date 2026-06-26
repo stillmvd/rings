@@ -9,6 +9,7 @@ export type TimelineEvent = {
   end_date: string | null;
   significance: number;
   category_id: number | null;
+  track: number;
   category_name: string | null;
   category_icon: string | null;
   category_color: string | null;
@@ -22,6 +23,7 @@ export type EventInput = {
   endDate: string | null;
   significance: number;
   categoryId: number | null;
+  track: number;
 };
 
 const SELECT = `
@@ -32,6 +34,7 @@ const SELECT = `
          e.end_date,
          e.significance,
          e.category_id,
+         e.track,
          c.name  AS category_name,
          c.icon  AS category_icon,
          c.color AS category_color,
@@ -59,8 +62,8 @@ export function getEvent(id: number): TimelineEvent | null {
 export function createEvent(input: EventInput): number {
   const res = getDb()
     .prepare(
-      `INSERT INTO events(title, description, date, end_date, significance, category_id)
-       VALUES(?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO events(title, description, date, end_date, significance, category_id, track)
+       VALUES(?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       input.title,
@@ -69,6 +72,7 @@ export function createEvent(input: EventInput): number {
       input.endDate,
       input.significance,
       input.categoryId,
+      input.track,
     );
   return Number(res.lastInsertRowid);
 }
@@ -77,7 +81,7 @@ export function updateEvent(id: number, input: EventInput): void {
   getDb()
     .prepare(
       `UPDATE events
-       SET title = ?, description = ?, date = ?, end_date = ?, significance = ?, category_id = ?,
+       SET title = ?, description = ?, date = ?, end_date = ?, significance = ?, category_id = ?, track = ?,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
     )
@@ -88,6 +92,7 @@ export function updateEvent(id: number, input: EventInput): void {
       input.endDate,
       input.significance,
       input.categoryId,
+      input.track,
       id,
     );
 }

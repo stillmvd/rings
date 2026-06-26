@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS events (
   end_date TEXT,                                   -- YYYY-MM-DD, NULL = точечное событие
   significance INTEGER NOT NULL DEFAULT 1 CHECK(significance IN (1, 2, 3)),
   category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  track INTEGER NOT NULL DEFAULT 0,                -- 1 = показывать в разделе «Отслеживание»
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
