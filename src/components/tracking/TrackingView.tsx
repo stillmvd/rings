@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Target } from "lucide-react";
 import { TrackingCard } from "./TrackingCard";
-import { isFuture } from "@/lib/duration";
+import { useTodayISO } from "./clock";
 import type { TimelineEvent } from "@/db/queries/events";
 
 // Сортировка по близости к сегодня: прошлое — недавнее сверху, будущее — ближайшее сверху.
@@ -53,13 +53,15 @@ export function TrackingView({
   events: TimelineEvent[];
   onEventClick: (event: TimelineEvent) => void;
 }) {
+  // Реактивный «сегодня»: в полночь наступившее напоминание само уезжает в «Уже прошло».
+  const today = useTodayISO();
   const { past, future } = useMemo(() => {
     const tracked = events.filter((e) => e.track === 1);
     return {
-      past: tracked.filter((e) => !isFuture(e.date)).sort(byDateDesc),
-      future: tracked.filter((e) => isFuture(e.date)).sort(byDateAsc),
+      past: tracked.filter((e) => e.date <= today).sort(byDateDesc),
+      future: tracked.filter((e) => e.date > today).sort(byDateAsc),
     };
-  }, [events]);
+  }, [events, today]);
 
   if (past.length === 0 && future.length === 0) {
     return (

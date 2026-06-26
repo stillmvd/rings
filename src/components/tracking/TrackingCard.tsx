@@ -8,7 +8,12 @@ import {
   remainingUntil,
   formatTotalDays,
   formatNextAnniversary,
+  totalDaysCount,
+  countdownParts,
+  formatCountdown,
+  COUNTDOWN_THRESHOLD_DAYS,
 } from "@/lib/duration";
+import { useNowMs } from "./clock";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { getSignificanceMeta } from "@/lib/significance";
@@ -69,6 +74,10 @@ export function TrackingCard({
   const Icon = resolveIconOrNull(event.category_icon);
   const sig = getSignificanceMeta(event.significance);
   const isFuture = variant === "future";
+
+  const live = isFuture && totalDaysCount(event.date) <= COUNTDOWN_THRESHOLD_DAYS;
+  const now = useNowMs(live);
+  const countdown = live && now !== null ? countdownParts(event.date, now) : null;
 
   const anniversary = isFuture ? null : formatNextAnniversary(event.date);
 
@@ -178,8 +187,14 @@ export function TrackingCard({
             {isFuture ? <BellRing size={14} /> : <Hourglass size={14} />}
             {isFuture ? "Осталось" : "Уже прошло"}
           </span>
-          <span className="mt-0.5 block text-2xl font-bold leading-tight">
-            {isFuture ? remainingUntil(event.date) : elapsedSince(event.date)}
+          <span className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums">
+            {countdown
+              ? countdown.done
+                ? "Наступило"
+                : formatCountdown(countdown)
+              : isFuture
+                ? remainingUntil(event.date)
+                : elapsedSince(event.date)}
           </span>
         </div>
 

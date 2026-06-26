@@ -6,6 +6,9 @@ type PluralForms = [one: string, few: string, many: string];
 const YEARS: PluralForms = ["год", "года", "лет"];
 const MONTHS: PluralForms = ["месяц", "месяца", "месяцев"];
 const DAYS: PluralForms = ["день", "дня", "дней"];
+const HOURS: PluralForms = ["час", "часа", "часов"];
+const MINUTES: PluralForms = ["минута", "минуты", "минут"];
+const SECONDS: PluralForms = ["секунда", "секунды", "секунд"];
 
 export function pluralRu(n: number, [one, few, many]: PluralForms): string {
   const abs = Math.abs(n) % 100;
@@ -82,4 +85,51 @@ export function formatNextAnniversary(dateISO: string): string | null {
   const label = unit(a.ordinal, YEARS);
   if (a.daysUntil === 0) return `${label} · сегодня`;
   return `${label} · через ${unit(a.daysUntil, DAYS)}`;
+}
+
+// Порог «близости» будущего события: ближе — живой обратный отсчёт, дальше — статично.
+export const COUNTDOWN_THRESHOLD_DAYS = 30;
+
+export interface CountdownParts {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  done: boolean;
+}
+
+// Локальная полночь целевого дня: счётчик обнуляется ровно тогда, когда событие
+// переходит future→past по локальному todayISO (isoToMs — UTC, рассинхронизировался бы).
+function localMidnightMs(iso: string): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).getTime();
+}
+
+export function countdownParts(targetISO: string, nowMs: number): CountdownParts {
+  const diff = localMidnightMs(targetISO) - nowMs;
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, done: true };
+  return {
+    days: Math.floor(diff / 86_400_000),
+    hours: Math.floor(diff / 3_600_000) % 24,
+    minutes: Math.floor(diff / 60_000) % 60,
+    seconds: Math.floor(diff / 1000) % 60,
+    done: false,
+  };
+}
+
+// Полный адаптивный формат: от старшей ненулевой единицы до секунд, рус. плюрализация каждой.
+// «3 дня 11 часов 12 минут 40 секунд», «5 минут 40 секунд», «40 секунд».
+export function formatCountdown({ days, hours, minutes, seconds }: CountdownParts): string {
+  const units: [number, PluralForms][] = [
+    [days, DAYS],
+    [hours, HOURS],
+    [minutes, MINUTES],
+    [seconds, SECONDS],
+  ];
+  const start = units.findIndex(([n]) => n > 0);
+  if (start === -1) return unit(0, SECONDS);
+  return units
+    .slice(start)
+    .map(([n, forms]) => unit(n, forms))
+    .join(" ");
 }
