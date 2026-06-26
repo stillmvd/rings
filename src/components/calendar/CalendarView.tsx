@@ -13,7 +13,7 @@ import {
 } from "react";
 import { DayPicker, type DayProps, type MonthCaptionProps } from "react-day-picker";
 import { ru } from "date-fns/locale";
-import { parseISO, format, startOfMonth, isSameMonth } from "date-fns";
+import { parseISO, format, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
 import "react-day-picker/style.css";
 import { type PopoverAnchor } from "@/components/ui/Popover";
@@ -36,32 +36,35 @@ import type { Mark } from "@/db/queries/marks";
 const START_MONTH = parseISO(BIRTH_DATE);
 const MAX_CHIPS = 3;
 
+// Горизонт будущего: «напоминания» можно листать и создавать на 15 лет вперёд от сегодня.
+const FUTURE_HORIZON_YEARS = 15;
+
 // M3 elevation level 1 — приподнятый контейнер месяца (как Elevated-карточки галереи, Ф5).
 const ELEVATION_1 =
   "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent), 0 1px 3px 1px color-mix(in srgb, var(--md-sys-color-shadow) 15%, transparent)";
 
-// Допустимый диапазон месяцев (0–11) для конкретного года:
-// в год рождения снизу режет месяц рождения, в текущий год сверху — текущий месяц.
-function monthBounds(today: Date, year: number): { lo: number; hi: number } {
+// Допустимый диапазон месяцев (0–11) для года в пределах [START_MONTH … limit]:
+// в год рождения снизу режет месяц рождения, в год горизонта сверху — месяц limit.
+function monthBounds(limit: Date, year: number): { lo: number; hi: number } {
   const lo = year === START_MONTH.getFullYear() ? START_MONTH.getMonth() : 0;
-  const hi = year === today.getFullYear() ? today.getMonth() : 11;
+  const hi = year === limit.getFullYear() ? limit.getMonth() : 11;
   return { lo, hi };
 }
 
-// Линейный сдвиг месяца с переносом года (январь−1 → декабрь прошлого года); кламп по диапазону.
-function stepMonth(today: Date, current: Date, delta: number): Date {
+// Линейный сдвиг месяца с переносом года (январь−1 → декабрь прошлого года); кламп [START_MONTH … limit].
+function stepMonth(limit: Date, current: Date, delta: number): Date {
   const next = new Date(current.getFullYear(), current.getMonth() + delta, 1);
   const lo = new Date(START_MONTH.getFullYear(), START_MONTH.getMonth(), 1);
-  const hi = new Date(today.getFullYear(), today.getMonth(), 1);
+  const hi = new Date(limit.getFullYear(), limit.getMonth(), 1);
   return next < lo ? lo : next > hi ? hi : next;
 }
 
-// Сдвиг года с клампом по диапазону; месяц подтягивается в границы нового года.
-function shiftYear(today: Date, current: Date, delta: number): Date {
+// Сдвиг года с клампом по диапазону [START_MONTH … limit]; месяц подтягивается в границы нового года.
+function shiftYear(limit: Date, current: Date, delta: number): Date {
   const minY = START_MONTH.getFullYear();
-  const maxY = today.getFullYear();
+  const maxY = limit.getFullYear();
   const year = Math.min(Math.max(current.getFullYear() + delta, minY), maxY);
-  const { lo, hi } = monthBounds(today, year);
+  const { lo, hi } = monthBounds(limit, year);
   const m = Math.min(Math.max(current.getMonth(), lo), hi);
   return new Date(year, m, 1);
 }
@@ -369,6 +372,13 @@ export function CalendarView({
   onMarkMenu?: (mark: Mark, x: number, y: number) => void;
 }) {
   const today = useMemo(() => new Date(), []);
+  // Верхняя граница навигации/создания: сегодня + горизонт будущего.
+  const limit = useMemo(() => {
+    const d = new Date(today);
+    d.setFullYear(d.getFullYear() + FUTURE_HORIZON_YEARS);
+    return d;
+  }, [today]);
+  const maxDay = useMemo(() => endOfMonth(limit), [limit]);
   const [month, setMonth] = useState<Date>(() => new Date());
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
   const markIndex = useMemo(() => buildMarkIndex(marks, filter), [marks, filter]);
@@ -405,9 +415,9 @@ export function CalendarView({
 
   const handleShift = useCallback(
     (unit: "month" | "year", delta: number) => {
-      setMonth((m) => (unit === "month" ? stepMonth(today, m, delta) : shiftYear(today, m, delta)));
+      setMonth((m) => (unit === "month" ? stepMonth(limit, m, delta) : shiftYear(limit, m, delta)));
     },
-    [today],
+    [limit],
   );
 
   const handleToday = useCallback(() => setMonth(startOfMonth(today)), [today]);
@@ -476,8 +486,8 @@ export function CalendarView({
             locale={ru}
             captionLayout="label"
             startMonth={START_MONTH}
-            endMonth={today}
-            disabled={[{ before: START_MONTH }, { after: today }]}
+            endMonth={limit}
+            disabled={[{ before: START_MONTH }, { after: maxDay }]}
             components={COMPONENTS}
             aria-label="Календарь событий"
           />
