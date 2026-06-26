@@ -37,5 +37,6 @@ export const formatDayMonthRu = (date: Date | string) => formatRu(date, "d MMM")
 export const formatMonthShortRu = (date: Date | string) => formatRu(date, "LLL");
 export const formatMonthRu = (date: Date | string) => formatRu(date, "LLLL yyyy");
 export const formatWeekdayShortRu = (date: Date | string) => formatRu(date, "EEEEEE");
+export const formatWeekdayFullRu = (date: Date | string) => formatRu(date, "EEEE");
 export const formatYear = (date: Date | string) => formatRu(date, "yyyy");
 export const formatDayNum = (date: Date | string) => formatRu(date, "d");
