@@ -1,12 +1,21 @@
 "use client";
 
-import { Waypoints, LayoutGrid, CalendarDays, Settings, Plus, type LucideIcon } from "lucide-react";
+import {
+  Waypoints,
+  LayoutGrid,
+  CalendarDays,
+  Target,
+  Settings,
+  Plus,
+  type LucideIcon,
+} from "lucide-react";
 import type { ViewMode } from "@/components/ui/ModeToggle";
 
 const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "timeline", label: "Таймлайн", icon: Waypoints },
   { value: "gallery", label: "Галерея", icon: LayoutGrid },
   { value: "calendar", label: "Календарь", icon: CalendarDays },
+  { value: "tracking", label: "Отслеживание", icon: Target },
 ];
 
 export function NavigationRail({

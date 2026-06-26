@@ -6,6 +6,7 @@ import { Search, Trash2 } from "lucide-react";
 import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { CalendarView } from "@/components/calendar/CalendarView";
+import { TrackingView } from "@/components/tracking/TrackingView";
 import { EventSheet, type EventSheetState } from "@/components/timeline/EventSheet";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { NavigationRail } from "@/components/m3/NavigationRail";
@@ -29,7 +30,7 @@ const MODE_KEY = "timeline.viewMode";
 const MODE_EVENT = "timeline:viewmode";
 
 const isMode = (v: string | null): v is ViewMode =>
-  v === "timeline" || v === "gallery" || v === "calendar";
+  v === "timeline" || v === "gallery" || v === "calendar" || v === "tracking";
 
 // Режим хранится в localStorage. useSyncExternalStore вместо useState+useEffect —
 // чтобы не нарушать запрет на setState в эффекте (паттерн проекта).
@@ -193,7 +194,7 @@ export function AppShell({
                 onEventClick={openView}
                 onMarkOpen={(date) => setDayDate(date)}
               />
-            ) : (
+            ) : mode === "calendar" ? (
               <CalendarView
                 events={liveEvents}
                 marks={liveMarks}
@@ -205,6 +206,8 @@ export function AppShell({
                 onMarkOpen={(date) => setDayDate(date)}
                 onMarkMenu={(mark, x, y) => setMarkMenu({ mark, x, y })}
               />
+            ) : (
+              <TrackingView events={liveEvents} onEventClick={openView} />
             )}
           </motion.div>
         </AnimatePresence>
