@@ -58,6 +58,19 @@ CREATE TABLE IF NOT EXISTS event_media (
 );
 CREATE INDEX IF NOT EXISTS idx_event_media_event ON event_media(event_id);
 
+-- Люди: отдельная сущность для раздела «Дни рождения» (не событие и не отметка).
+-- birth_date всегда YYYY-MM-DD; при has_year=0 год фиктивный (2000) и возраст скрыт.
+CREATE TABLE IF NOT EXISTS people (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  birth_date TEXT NOT NULL,
+  has_year INTEGER NOT NULL DEFAULT 1,
+  photo TEXT,                                     -- относительный путь в data/media/, NULL = нет фото
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_people_birth ON people(birth_date);
+
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

@@ -1,11 +1,11 @@
 import { intervalToDuration, differenceInCalendarDays, parseISO } from "date-fns";
-import { todayISO } from "./dates";
+import { todayISO, toISO } from "./dates";
 
-type PluralForms = [one: string, few: string, many: string];
+export type PluralForms = [one: string, few: string, many: string];
 
-const YEARS: PluralForms = ["год", "года", "лет"];
+export const YEARS: PluralForms = ["год", "года", "лет"];
 const MONTHS: PluralForms = ["месяц", "месяца", "месяцев"];
-const DAYS: PluralForms = ["день", "дня", "дней"];
+export const DAYS: PluralForms = ["день", "дня", "дней"];
 const HOURS: PluralForms = ["час", "часа", "часов"];
 const MINUTES: PluralForms = ["минута", "минуты", "минут"];
 const SECONDS: PluralForms = ["секунда", "секунды", "секунд"];
@@ -19,7 +19,7 @@ export function pluralRu(n: number, [one, few, many]: PluralForms): string {
   return many;
 }
 
-const unit = (n: number, forms: PluralForms) => `${n} ${pluralRu(n, forms)}`;
+export const unit = (n: number, forms: PluralForms) => `${n} ${pluralRu(n, forms)}`;
 
 export function isFuture(dateISO: string): boolean {
   return dateISO > todayISO();
@@ -57,7 +57,7 @@ export function formatTotalDays(dateISO: string): string {
 const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 
 // 29 февраля в невисокосный год отмечаем 28-го.
-function anniversaryInYear(origin: Date, year: number): Date {
+export function anniversaryInYear(origin: Date, year: number): Date {
   const month = origin.getMonth();
   const day = origin.getDate();
   if (month === 1 && day === 29 && !isLeapYear(year)) return new Date(year, 1, 28);
@@ -85,6 +85,18 @@ export function formatNextAnniversary(dateISO: string): string | null {
   const label = unit(a.ordinal, YEARS);
   if (a.daysUntil === 0) return `${label} · сегодня`;
   return `${label} · через ${unit(a.daysUntil, DAYS)}`;
+}
+
+/**
+ * Ближайшая годовщина даты (включая сегодня) как ISO + её порядковый номер.
+ * В отличие от nextAnniversary, не требует, чтобы origin была в прошлом.
+ */
+export function upcomingAnniversary(dateISO: string): { iso: string; ordinal: number } {
+  const origin = parseISO(dateISO);
+  const today = parseISO(todayISO());
+  let year = today.getFullYear();
+  if (differenceInCalendarDays(anniversaryInYear(origin, year), today) < 0) year += 1;
+  return { iso: toISO(anniversaryInYear(origin, year)), ordinal: year - origin.getFullYear() };
 }
 
 // Порог «близости» будущего события: ближе — живой обратный отсчёт, дальше — статично.
