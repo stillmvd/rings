@@ -14,7 +14,7 @@ import {
 import { DayPicker, type DayProps, type MonthCaptionProps } from "react-day-picker";
 import { ru } from "date-fns/locale";
 import { parseISO, format, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
-import { ChevronUp, ChevronDown, CalendarDays } from "lucide-react";
+import { ChevronUp, ChevronDown, CalendarDays, Cake } from "lucide-react";
 import "react-day-picker/style.css";
 import { type PopoverAnchor } from "@/components/ui/Popover";
 import { getSignificanceMeta } from "@/lib/significance";
@@ -33,6 +33,7 @@ import { holidayName } from "@/lib/holidays";
 import { getNonWorkingDaysAction } from "@/actions/calendar";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
+import type { Person } from "@/db/queries/people";
 
 const START_MONTH = parseISO(BIRTH_DATE);
 const MAX_CHIPS = 3;
@@ -72,6 +73,19 @@ function shiftYear(limit: Date, current: Date, delta: number): Date {
 
 type DayIndex = Map<string, TimelineEvent[]>;
 type MarkIndex = Map<string, Mark[]>;
+// Ключ «MM-DD»: годовщина повторяется в любом году, поэтому год отбрасываем.
+type BirthdayIndex = Map<string, Person[]>;
+
+function buildBirthdayIndex(people: Person[]): BirthdayIndex {
+  const map: BirthdayIndex = new Map();
+  for (const p of people) {
+    const key = p.birth_date.slice(5);
+    const bucket = map.get(key);
+    if (bucket) bucket.push(p);
+    else map.set(key, [p]);
+  }
+  return map;
+}
 
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
 
@@ -117,11 +131,13 @@ function buildMarkIndex(marks: Mark[], filter: EventFilter): MarkIndex {
 type CalCtx = {
   dayIndex: DayIndex;
   markIndex: MarkIndex;
+  birthdayIndex: BirthdayIndex;
   onEventOpen: (event: TimelineEvent) => void;
   onCreateAt: (iso: string, anchor: PopoverAnchor) => void;
   onDayOpen: (iso: string) => void;
   onMarkOpen: (iso: string) => void;
   onMarkMenu: (mark: Mark, x: number, y: number) => void;
+  onPersonOpen: (person: Person) => void;
   displayMonth: Date;
   onShift: (unit: "month" | "year", delta: number) => void;
   onToday: () => void;
@@ -132,11 +148,13 @@ type CalCtx = {
 const CalendarContext = createContext<CalCtx>({
   dayIndex: new Map(),
   markIndex: new Map(),
+  birthdayIndex: new Map(),
   onEventOpen: () => {},
   onCreateAt: () => {},
   onDayOpen: () => {},
   onMarkOpen: () => {},
   onMarkMenu: () => {},
+  onPersonOpen: () => {},
   displayMonth: new Date(0),
   onShift: () => {},
   onToday: () => {},
@@ -160,10 +178,21 @@ function EventMarker({ event }: { event: TimelineEvent }) {
 
 // Кастомная ячейка-gridcell: число + чипы событий (НЕ DayButton — чипы не вложены в button).
 function DayCell({ day, modifiers, className, ...rest }: DayProps) {
-  const { dayIndex, markIndex, onEventOpen, onCreateAt, onDayOpen, onMarkOpen, onMarkMenu, dayKind } =
-    useContext(CalendarContext);
+  const {
+    dayIndex,
+    markIndex,
+    birthdayIndex,
+    onEventOpen,
+    onCreateAt,
+    onDayOpen,
+    onMarkOpen,
+    onMarkMenu,
+    onPersonOpen,
+    dayKind,
+  } = useContext(CalendarContext);
   const dayEvents = modifiers.disabled ? [] : dayIndex.get(day.isoDate) ?? [];
   const dayMarks = modifiers.disabled ? [] : markIndex.get(day.isoDate) ?? [];
+  const dayBirthdays = modifiers.disabled ? [] : birthdayIndex.get(day.isoDate.slice(5)) ?? [];
   const shown = dayEvents.slice(0, MAX_CHIPS);
   const extra = dayEvents.length - shown.length;
   const kind = dayKind(day.isoDate, day.date, !!modifiers.disabled);
@@ -189,6 +218,28 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
       >
         <div className="tl-cal-head">
           <span className="tl-cal-num">{day.date.getDate()}</span>
+          {dayBirthdays.length > 0 && (
+            <div className="tl-cal-marks">
+              {dayBirthdays.slice(0, 3).map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="tl-cal-mark"
+                  title={`День рождения — ${p.name}`}
+                  style={{
+                    background: "var(--md-sys-color-tertiary)",
+                    color: "var(--md-sys-color-on-tertiary)",
+                  }}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    onPersonOpen(p);
+                  }}
+                >
+                  <Cake size={11} />
+                </button>
+              ))}
+            </div>
+          )}
           {dayMarks.length > 0 && (
             <div className="tl-cal-marks" style={{ opacity: future ? 0.5 : undefined }}>
               {dayMarks.slice(0, 3).map((m) => {
@@ -357,15 +408,18 @@ const COMPONENTS = { Day: DayCell, MonthCaption };
 export function CalendarView({
   events,
   marks = [],
+  people = [],
   filter = EMPTY_FILTER,
   onEventClick = () => {},
   onCreateRequest = () => {},
   onDayOpen = () => {},
   onMarkOpen = () => {},
   onMarkMenu = () => {},
+  onPersonOpen = () => {},
 }: {
   events: TimelineEvent[];
   marks?: Mark[];
+  people?: Person[];
   filter?: EventFilter;
   onFilterChange?: (filter: EventFilter) => void;
   onEventClick?: (event: TimelineEvent) => void;
@@ -373,6 +427,7 @@ export function CalendarView({
   onDayOpen?: (dateISO: string) => void;
   onMarkOpen?: (dateISO: string) => void;
   onMarkMenu?: (mark: Mark, x: number, y: number) => void;
+  onPersonOpen?: (person: Person) => void;
 }) {
   const today = useMemo(() => new Date(), []);
   // Верхняя граница навигации/создания: сегодня + горизонт будущего.
@@ -385,6 +440,7 @@ export function CalendarView({
   const [month, setMonth] = useState<Date>(() => new Date());
   const dayIndex = useMemo(() => buildDayIndex(events, filter), [events, filter]);
   const markIndex = useMemo(() => buildMarkIndex(marks, filter), [marks, filter]);
+  const birthdayIndex = useMemo(() => buildBirthdayIndex(people), [people]);
 
   // Нерабочие дни (праздники + переносы РФ) по годам; null — данных нет, fallback на сб/вс.
   const displayYear = month.getFullYear();
@@ -444,11 +500,13 @@ export function CalendarView({
     () => ({
       dayIndex,
       markIndex,
+      birthdayIndex,
       onEventOpen: onEventClick,
       onCreateAt: onCreateRequest,
       onDayOpen,
       onMarkOpen,
       onMarkMenu,
+      onPersonOpen,
       displayMonth: month,
       onShift: handleShift,
       onToday: handleToday,
@@ -458,11 +516,13 @@ export function CalendarView({
     [
       dayIndex,
       markIndex,
+      birthdayIndex,
       onEventClick,
       onCreateRequest,
       onDayOpen,
       onMarkOpen,
       onMarkMenu,
+      onPersonOpen,
       month,
       handleShift,
       handleToday,

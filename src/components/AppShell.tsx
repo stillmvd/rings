@@ -221,6 +221,7 @@ export function AppShell({
               <CalendarView
                 events={liveEvents}
                 marks={liveMarks}
+                people={livePeople}
                 filter={filter}
                 onFilterChange={setFilter}
                 onEventClick={openView}
@@ -228,6 +229,7 @@ export function AppShell({
                 onDayOpen={(dateISO) => setDayDate(dateISO)}
                 onMarkOpen={(date) => setDayDate(date)}
                 onMarkMenu={(mark, x, y) => setMarkMenu({ mark, x, y })}
+                onPersonOpen={openViewPerson}
               />
             ) : mode === "tracking" ? (
               <TrackingView events={liveEvents} onEventClick={openView} />
