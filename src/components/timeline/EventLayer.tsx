@@ -23,9 +23,14 @@ import type { Mark } from "@/db/queries/marks";
 
 const CLUSTER_GAP_PX = 18;
 const MIN_BAR_PX = 14;
-// Половина макс. ширины тултипа (max-w-56=224) + запас: держим центр в пределах,
+// Метки столбиком под днём: первый ряд ниже числа и дня недели, шаг по вертикали.
+const MARK_BASE_DY = 54;
+const MARK_STEP_PX = 20;
+// Сколько иконок показываем в столбце, прежде чем свернуть остаток в «+N».
+const MARK_STACK_MAX = 3;
+// Половина макс. ширины тултипа (max-w-sm=384) + запас: держим центр в пределах,
 // чтобы у краёв тултип не вылезал и не сужался в узкую колонку.
-const TOOLTIP_HALF_PX = 120;
+const TOOLTIP_HALF_PX = 196;
 
 type Cluster = { x: number; events: TimelineEvent[] };
 type Bar = { ev: TimelineEvent; x1: number; x2: number; tip: Cluster };
@@ -61,6 +66,9 @@ export function EventLayer({
   const rank = lodRank(lod);
   const [hovered, setHovered] = useState<Cluster | null>(null);
   const filterOn = isFilterActive(filter);
+  // Точки/метки стоят по центру ячейки дня (как число на оси), а не на её левой
+  // отсечке. На отдалении полдня ≈ 0 px — сдвиг незаметен и не требует гейта по LOD.
+  const cellShift = viewport.pxPerDay / 2;
 
   const { bars, clusters } = useMemo<{ bars: Bar[]; clusters: Cluster[] }>(() => {
     const bars: Bar[] = [];
@@ -70,9 +78,9 @@ export function EventLayer({
       // Фильтр применяется ДО кластеризации — несоответствующие не группируются.
       if (filterOn && !matchesFilter(ev, filter)) continue;
       if (!isVisibleAtLod(ev.significance, rank)) continue;
-      const x1 = msToX(isoToMs(ev.date), viewport);
+      const x1 = msToX(isoToMs(ev.date), viewport) + cellShift;
       if (ev.end_date) {
-        const x2 = msToX(isoToMs(ev.end_date), viewport);
+        const x2 = msToX(isoToMs(ev.end_date), viewport) + cellShift;
         if (x2 - x1 >= MIN_BAR_PX) {
           if (x2 >= -24 && x1 <= width + 24) {
             const cx = Math.min(Math.max((x1 + x2) / 2, 8), Math.max(8, width - 8));
@@ -97,32 +105,26 @@ export function EventLayer({
       }
     }
     return { bars, clusters: out.map(({ x, events: e }) => ({ x, events: e })) };
-  }, [events, viewport, width, rank, filter, filterOn]);
+  }, [events, viewport, width, rank, filter, filterOn, cellShift]);
 
-  // Отметки видны только на крупном зуме (дни/недели), как события значимости 1.
-  // Кластеризуем близкие, как события: одиночная — иконка, группа — счётчик.
-  const markClusters = useMemo<Array<{ x: number; marks: Mark[] }>>(() => {
+  // Отметки видны только на крупном зуме (дни). Группируем по дню (а не по близости):
+  // под одним числом метки выкладываются столбиком вниз — событие сверху, метка снизу.
+  const markDays = useMemo<Array<{ x: number; date: string; marks: Mark[] }>>(() => {
     if (rank < 2) return [];
-    const pts: Array<{ m: Mark; x: number }> = [];
+    const byDay = new Map<string, Mark[]>();
     for (const m of marks) {
       if (filterOn && !matchesMarkFilter(m, filter)) continue;
-      const x = msToX(isoToMs(m.date), viewport);
-      if (x >= -24 && x <= width + 24) pts.push({ m, x });
+      const arr = byDay.get(m.date);
+      if (arr) arr.push(m);
+      else byDay.set(m.date, [m]);
     }
-    pts.sort((a, b) => a.x - b.x);
-    const out: Array<{ x: number; sumX: number; marks: Mark[] }> = [];
-    for (const { m, x } of pts) {
-      const last = out[out.length - 1];
-      if (last && x - last.x <= CLUSTER_GAP_PX) {
-        last.marks.push(m);
-        last.sumX += x;
-        last.x = last.sumX / last.marks.length;
-      } else {
-        out.push({ x, sumX: x, marks: [m] });
-      }
+    const out: Array<{ x: number; date: string; marks: Mark[] }> = [];
+    for (const [date, ms] of byDay) {
+      const x = msToX(isoToMs(date), viewport) + cellShift;
+      if (x >= -24 && x <= width + 24) out.push({ x, date, marks: ms });
     }
-    return out.map(({ x, marks: ms }) => ({ x, marks: ms }));
-  }, [marks, viewport, width, rank, filter, filterOn]);
+    return out;
+  }, [marks, viewport, width, rank, filter, filterOn, cellShift]);
 
   // Подсказка для пустого диапазона: считаем по времени, без LOD-фильтра.
   const emptyHint = useMemo<string | null>(() => {
@@ -255,63 +257,70 @@ export function EventLayer({
         })}
       </AnimatePresence>
 
-      {markClusters.map(({ x, marks: ms }) => {
-        const first = ms[0];
-        if (ms.length === 1) {
-          const Icon = resolveIconOrNull(first.type_icon);
-          return (
-            <div
-              key={`mark-${first.id}`}
-              className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full"
-              style={{
-                left: x,
-                top: axisY + 20,
-                width: 18,
-                height: 18,
-                transform: "translate(-50%, -50%)",
-                background: first.type_color,
-                color: onColorFor(first.type_color),
-                boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
-              }}
-              title={`${first.type_name} · ${formatFullRu(first.date)}`}
-              onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-              onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onMarkOpen?.(first.date);
-              }}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                onMarkMenu?.(first, e.clientX, e.clientY);
-              }}
-            >
-              {Icon && createElement(Icon, { size: 11 })}
-            </div>
-          );
-        }
+      {markDays.map(({ x, date, marks: ms }) => {
+        // Столбик: при переполнении показываем (MARK_STACK_MAX − 1) иконок + «+N».
+        const overflow = ms.length > MARK_STACK_MAX ? ms.length - (MARK_STACK_MAX - 1) : 0;
+        const shown = overflow ? ms.slice(0, MARK_STACK_MAX - 1) : ms;
         return (
           <div
-            key={`markc-${first.id}`}
-            className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full text-[10px] font-semibold"
-            style={{
-              left: x,
-              top: axisY + 20,
-              width: 20,
-              height: 20,
-              transform: "translate(-50%, -50%)",
-              background: "var(--md-sys-color-secondary-container)",
-              color: "var(--md-sys-color-on-secondary-container)",
-              boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
-            }}
-            title={`${ms.length} отметок`}
-            onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-            onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMarkOpen?.(first.date);
-            }}
+            key={`markday-${date}`}
+            className="pointer-events-none absolute"
+            style={{ left: x, top: axisY + MARK_BASE_DY }}
           >
-            {ms.length}
+            {shown.map((m, i) => {
+              const Icon = resolveIconOrNull(m.type_icon);
+              return (
+                <div
+                  key={m.id}
+                  className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full"
+                  style={{
+                    top: i * MARK_STEP_PX,
+                    width: 18,
+                    height: 18,
+                    transform: "translate(-50%, -50%)",
+                    background: m.type_color,
+                    color: onColorFor(m.type_color),
+                    boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
+                  }}
+                  title={`${m.type_name} · ${formatFullRu(m.date)}`}
+                  onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+                  onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMarkOpen?.(date);
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    onMarkMenu?.(m, e.clientX, e.clientY);
+                  }}
+                >
+                  {Icon && createElement(Icon, { size: 11 })}
+                </div>
+              );
+            })}
+            {overflow > 0 && (
+              <div
+                className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full text-[10px] font-semibold"
+                style={{
+                  top: (MARK_STACK_MAX - 1) * MARK_STEP_PX,
+                  width: 20,
+                  height: 20,
+                  transform: "translate(-50%, -50%)",
+                  background: "var(--md-sys-color-secondary-container)",
+                  color: "var(--md-sys-color-on-secondary-container)",
+                  boxShadow: "0 0 0 2px var(--md-sys-color-surface)",
+                }}
+                title={`${ms.length} отметок`}
+                onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+                onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMarkOpen?.(date);
+                }}
+              >
+                +{overflow}
+              </div>
+            )}
           </div>
         );
       })}
@@ -354,7 +363,7 @@ export function EventLayer({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute z-20 w-max max-w-56 -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3 py-2 shadow-lg"
+            className="pointer-events-none absolute z-20 w-max min-w-[13rem] max-w-sm -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3.5 py-2.5 shadow-lg"
             style={{
               left: Math.min(
                 Math.max(hovered.x, TOOLTIP_HALF_PX),
@@ -387,13 +396,13 @@ export function EventLayer({
                 <div className="mb-1 text-xs font-semibold text-muted">
                   {hovered.events.length} событий
                 </div>
-                {hovered.events.slice(0, 4).map((e) => (
+                {hovered.events.slice(0, 6).map((e) => (
                   <div key={e.id} className="truncate text-sm text-app-text">
                     <span className="text-muted">{formatDayMonthRu(e.date)}</span> {e.title}
                   </div>
                 ))}
-                {hovered.events.length > 4 && (
-                  <div className="text-xs text-muted">…ещё {hovered.events.length - 4}</div>
+                {hovered.events.length > 6 && (
+                  <div className="text-xs text-muted">…ещё {hovered.events.length - 6}</div>
                 )}
               </>
             )}

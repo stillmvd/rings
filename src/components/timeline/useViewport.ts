@@ -128,7 +128,10 @@ export function useViewport(width: number): UseViewportResult {
       setState((prev) => {
         const anchorMs = xToMs(offsetX, prev.vp);
         const factor = Math.exp(-deltaY * ZOOM_SENSITIVITY);
-        const nextPpd = prev.vp.pxPerDay * factor;
+        // Клампим масштаб ДО вычисления origin: на упоре в макс/мин зум якорь
+        // не должен «уезжать» — origin считается под тот же ppd, что и рендер.
+        const minPpd = minPxPerDay(width, bounds);
+        const nextPpd = Math.min(PX_PER_DAY_MAX, Math.max(minPpd, prev.vp.pxPerDay * factor));
         const originMs = originForAnchor(anchorMs, offsetX, nextPpd);
         return nextState(prev, { pxPerDay: nextPpd, originMs }, width, bounds);
       });

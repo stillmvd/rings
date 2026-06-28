@@ -16,11 +16,11 @@ type Props = {
 };
 
 /**
- * Контекст-метка года и месяца по центру экрана над осью — показывает период
- * под центром видимой области. На years скрыта (год и так виден на оси).
+ * Контекст-метка года и месяца под центром видимой области. Закреплена в
+ * левом-нижнем углу над плашкой LOD — освобождает место над осью для точек.
  */
 export function StickyContext({ viewport, width, height, lod }: Props) {
-  if (lod === "years" || width <= 0 || height <= 0) return null;
+  if (width <= 0 || height <= 0) return null;
 
   const centerMs = xToMs(width / 2, viewport);
   const d = new Date(centerMs);
@@ -29,13 +29,10 @@ export function StickyContext({ viewport, width, height, lod }: Props) {
   const monthLabel = capitalize(formatRu(msToISO(Date.UTC(year, month, 1)), "LLLL"));
 
   return (
-    <div
-      className="pointer-events-none absolute z-10 flex -translate-x-1/2 flex-col items-center gap-0.5 rounded-xl bg-surface-1/70 px-4 py-1.5 backdrop-blur-sm"
-      style={{ left: "50%", top: height / 2 - 64 }}
-    >
-      <span className="text-lg font-semibold leading-none text-app-text">{year}</span>
-      {lod === "days" && (
-        <span className="text-sm font-medium leading-none text-muted">{monthLabel}</span>
+    <div className="pointer-events-none absolute bottom-14 left-4 z-30 flex items-center gap-1.5 rounded-xl border border-line bg-surface-1/80 px-3 py-1.5 backdrop-blur">
+      <span className="text-sm font-semibold leading-none text-app-text">{year}</span>
+      {lod !== "years" && (
+        <span className="text-xs font-medium leading-none text-muted">{monthLabel}</span>
       )}
     </div>
   );

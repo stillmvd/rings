@@ -51,6 +51,8 @@ const BIRTH_MS = isoToMs(BIRTH_DATE);
 const OUT_OF_LIFE_ALPHA = 0.4;
 /** Длительность кроссфейда подписей/делений при смене LOD. */
 const LOD_FADE_S = 0.26;
+/** Полуразрыв вертикалей («сегодня»/рождение) у оси — чтобы точки события влезали. */
+const AXIS_GAP_PX = 16;
 
 type DrawCtx = {
   ctx: CanvasRenderingContext2D;
@@ -143,11 +145,12 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
       ctx.textAlign = "center";
       ctx.font = "500 11px system-ui, sans-serif";
       ctx.fillStyle = colors.text;
-      ctx.fillText(formatDayNum(iso), x + ppd / 2, axisY + 16);
+      // Числа отодвинуты ниже самой крупной точки события (значимость 3 с обводкой).
+      ctx.fillText(formatDayNum(iso), x + ppd / 2, axisY + 24);
       if (showWeekday) {
         ctx.font = "400 9px system-ui, sans-serif";
         ctx.fillStyle = colors.muted;
-        ctx.fillText(formatWeekdayShortRu(iso), x + ppd / 2, axisY + 30);
+        ctx.fillText(formatWeekdayShortRu(iso), x + ppd / 2, axisY + 38);
       }
     }
   }
@@ -193,9 +196,12 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     const fromMs = xToMs(0, viewport);
     const toMs = xToMs(width, viewport);
 
+    // Точечные маркеры (рождение, сегодня) и их вуали — по центру ячейки дня,
+    // как точки событий и подписи чисел; на отдалении полдня ≈ 0 px.
+    const cellShift = viewport.pxPerDay / 2;
     const todayMs = isoToMs(todayISO());
-    const birthX = msToX(BIRTH_MS, viewport);
-    const todayX = msToX(todayMs, viewport);
+    const birthX = msToX(BIRTH_MS, viewport) + cellShift;
+    const todayX = msToX(todayMs, viewport) + cellShift;
     const inLife = (ms: number) => ms >= BIRTH_MS && ms <= todayMs;
 
     // Лёгкая вуаль на зонах вне «прожитой жизни» (прошлое до рождения и будущее).
@@ -225,32 +231,32 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       drawLodLayer(d, lod, 1);
     }
 
-    // Отметка дня рождения (начало «прожитой жизни»).
+    // Отметка дня рождения (начало «прожитой жизни») — с разрывом у оси под точки.
     if (birthX >= 0 && birthX <= width) {
       const bx = Math.round(birthX) + 0.5;
       ctx.strokeStyle = colors.lineStrong;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
       ctx.moveTo(bx, 0);
+      ctx.lineTo(bx, axisY - AXIS_GAP_PX);
+      ctx.moveTo(bx, axisY + AXIS_GAP_PX);
       ctx.lineTo(bx, height);
       ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    // Маркер «сегодня» — tertiary-вертикаль + точка на оси (отличается от primary-UI).
+    // Маркер «сегодня» — tertiary-вертикаль с разрывом у оси (место под точку события).
     if (todayX >= 0 && todayX <= width) {
       const tx = Math.round(todayX) + 0.5;
       ctx.strokeStyle = colors.today;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(tx, 0);
+      ctx.lineTo(tx, axisY - AXIS_GAP_PX);
+      ctx.moveTo(tx, axisY + AXIS_GAP_PX);
       ctx.lineTo(tx, height);
       ctx.stroke();
       ctx.lineWidth = 1;
-      ctx.fillStyle = colors.today;
-      ctx.beginPath();
-      ctx.arc(tx, axisY, 4, 0, Math.PI * 2);
-      ctx.fill();
     }
   };
 

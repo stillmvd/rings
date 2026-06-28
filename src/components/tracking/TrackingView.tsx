@@ -26,7 +26,7 @@ function Section({
   return (
     <section>
       <h2
-        className="sticky top-0 z-10 -mx-2 mb-4 px-2 py-2 text-lg font-semibold backdrop-blur"
+        className="sticky top-0 z-30 -mx-2 mb-4 px-2 py-2 text-lg font-semibold backdrop-blur"
         style={{
           background: "color-mix(in srgb, var(--md-sys-color-surface) 80%, transparent)",
           color: "var(--md-sys-color-on-surface)",
