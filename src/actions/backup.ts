@@ -13,7 +13,7 @@ export async function exportDataAction(): Promise<string> {
 }
 
 export type ImportResult =
-  | { ok: true; categories: number; events: number }
+  | { ok: true; categories: number; events: number; people: number }
   | { ok: false; error: string };
 
 function isObj(v: unknown): v is Record<string, unknown> {
@@ -79,6 +79,29 @@ function normalize(parsed: Record<string, unknown>): BackupData | string {
     });
   }
 
+  // people добавлены в версии 2 — у старых бэкапов поля нет, нормализуем к пустому списку.
+  const people: BackupData["people"] = [];
+  const rawPeople = Array.isArray(parsed.people) ? parsed.people : [];
+  for (const raw of rawPeople) {
+    if (
+      !isObj(raw) ||
+      typeof raw.id !== "number" ||
+      typeof raw.name !== "string" ||
+      typeof raw.birth_date !== "string"
+    ) {
+      return "Повреждены данные людей";
+    }
+    people.push({
+      id: raw.id,
+      name: raw.name,
+      birth_date: raw.birth_date,
+      has_year: raw.has_year === 0 ? 0 : 1,
+      photo: typeof raw.photo === "string" ? raw.photo : null,
+      sort_order: typeof raw.sort_order === "number" ? raw.sort_order : 0,
+      created_at: typeof raw.created_at === "string" ? raw.created_at : now,
+    });
+  }
+
   const settings: BackupData["settings"] = [];
   for (const raw of parsed.settings) {
     if (!isObj(raw) || typeof raw.key !== "string" || typeof raw.value !== "string") {
@@ -87,7 +110,7 @@ function normalize(parsed: Record<string, unknown>): BackupData | string {
     settings.push({ key: raw.key, value: raw.value });
   }
 
-  return { version: parsed.version, exportedAt: now, categories, events, settings };
+  return { version: parsed.version, exportedAt: now, categories, events, people, settings };
 }
 
 export async function importDataAction(json: string): Promise<ImportResult> {

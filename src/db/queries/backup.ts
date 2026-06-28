@@ -1,7 +1,7 @@
 import "server-only";
 import { getDb } from "../client";
 
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2;
 
 export type BackupCategory = {
   id: number;
@@ -26,6 +26,16 @@ export type BackupEvent = {
   updated_at: string;
 };
 
+export type BackupPerson = {
+  id: number;
+  name: string;
+  birth_date: string;
+  has_year: number;
+  photo: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
 export type BackupSetting = { key: string; value: string };
 
 export type BackupData = {
@@ -33,10 +43,15 @@ export type BackupData = {
   exportedAt: string;
   categories: BackupCategory[];
   events: BackupEvent[];
+  people: BackupPerson[];
   settings: BackupSetting[];
 };
 
-export function importBackupData(data: BackupData): { categories: number; events: number } {
+export function importBackupData(data: BackupData): {
+  categories: number;
+  events: number;
+  people: number;
+} {
   const db = getDb();
   // FK нельзя переключать внутри транзакции — отключаем вокруг неё,
   // чтобы порядок вставки (self-ref parent_id, events.category_id) не нарушал ссылки.
@@ -45,6 +60,7 @@ export function importBackupData(data: BackupData): { categories: number; events
     const run = db.transaction(() => {
       db.prepare("DELETE FROM events").run();
       db.prepare("DELETE FROM categories").run();
+      db.prepare("DELETE FROM people").run();
       db.prepare("DELETE FROM settings").run();
 
       const insCat = db.prepare(
@@ -64,6 +80,12 @@ export function importBackupData(data: BackupData): { categories: number; events
       // Бэкапы версии < текущей могут не содержать track — нормализуем к 0.
       for (const e of data.events) insEvent.run({ ...e, track: e.track ?? 0 });
 
+      const insPerson = db.prepare(
+        `INSERT INTO people(id, name, birth_date, has_year, photo, sort_order, created_at)
+         VALUES(@id, @name, @birth_date, @has_year, @photo, @sort_order, @created_at)`,
+      );
+      for (const p of data.people) insPerson.run(p);
+
       const insSetting = db.prepare("INSERT INTO settings(key, value) VALUES(@key, @value)");
       for (const s of data.settings) insSetting.run(s);
     });
@@ -71,7 +93,11 @@ export function importBackupData(data: BackupData): { categories: number; events
   } finally {
     db.pragma("foreign_keys = ON");
   }
-  return { categories: data.categories.length, events: data.events.length };
+  return {
+    categories: data.categories.length,
+    events: data.events.length,
+    people: data.people.length,
+  };
 }
 
 export function getBackupData(): BackupData {
@@ -88,6 +114,12 @@ export function getBackupData(): BackupData {
        FROM events ORDER BY id`,
     )
     .all();
+  const people = db
+    .prepare<[], BackupPerson>(
+      `SELECT id, name, birth_date, has_year, photo, sort_order, created_at
+       FROM people ORDER BY id`,
+    )
+    .all();
   const settings = db
     .prepare<[], BackupSetting>("SELECT key, value FROM settings ORDER BY key")
     .all();
@@ -97,6 +129,7 @@ export function getBackupData(): BackupData {
     exportedAt: new Date().toISOString(),
     categories,
     events,
+    people,
     settings,
   };
 }

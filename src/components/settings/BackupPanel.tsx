@@ -50,7 +50,10 @@ export function BackupPanel() {
     const res = await importDataAction(json);
     setBusy(false);
     if (res.ok) {
-      show(`Импортировано: ${res.categories} категорий, ${res.events} событий`, "success");
+      show(
+        `Импортировано: ${res.categories} категорий, ${res.events} событий, ${res.people} людей`,
+        "success",
+      );
       router.refresh();
     } else {
       show(res.error, "error");
@@ -64,7 +67,9 @@ export function BackupPanel() {
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-app-text">Экспорт</p>
-            <p className="text-xs text-muted">Сохранить все категории и события в JSON-файл.</p>
+            <p className="text-xs text-muted">
+              Сохранить категории, события и дни рождения в JSON-файл.
+            </p>
           </div>
           <Button variant="secondary" size="sm" onClick={handleExport} disabled={busy}>
             <Download size={16} /> Экспорт
@@ -121,7 +126,7 @@ export function BackupPanel() {
             >
               <h3 className="mb-2 text-sm font-semibold text-app-text">Заменить все данные?</h3>
               <p className="mb-1 text-sm text-muted">
-                Файл «{pendingImport.name}» заменит все текущие категории и события.
+                Файл «{pendingImport.name}» заменит все текущие категории, события и дни рождения.
               </p>
               <p className="mb-4 text-xs text-tl-danger">Это действие необратимо.</p>
               <div className="flex justify-end gap-2">
