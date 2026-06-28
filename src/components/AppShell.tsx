@@ -7,7 +7,9 @@ import { TimelineStage } from "@/components/timeline/TimelineStage";
 import { GalleryView } from "@/components/gallery/GalleryView";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { TrackingView } from "@/components/tracking/TrackingView";
+import { BirthdaysView } from "@/components/birthdays/BirthdaysView";
 import { EventSheet, type EventSheetState } from "@/components/timeline/EventSheet";
+import { PersonSheet, type PersonSheetState } from "@/components/birthdays/PersonSheet";
 import { SearchPanel } from "@/components/search/SearchPanel";
 import { NavigationRail } from "@/components/m3/NavigationRail";
 import { ConfirmDialog } from "@/components/m3/ConfirmDialog";
@@ -16,6 +18,7 @@ import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { ContextMenu } from "@/components/m3/ContextMenu";
 import { useEventCrud } from "@/components/timeline/useEventCrud";
 import { useMarkCrud } from "@/components/timeline/useMarkCrud";
+import { useBirthdayCrud } from "@/components/birthdays/useBirthdayCrud";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { type ViewMode } from "@/components/ui/ModeToggle";
 import { listMediaAction } from "@/actions/media";
@@ -25,12 +28,17 @@ import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
 import type { MarkType } from "@/db/queries/markTypes";
 import type { CategoryNode } from "@/db/queries/categories";
+import type { Person } from "@/db/queries/people";
 
 const MODE_KEY = "timeline.viewMode";
 const MODE_EVENT = "timeline:viewmode";
 
 const isMode = (v: string | null): v is ViewMode =>
-  v === "timeline" || v === "gallery" || v === "calendar" || v === "tracking";
+  v === "timeline" ||
+  v === "gallery" ||
+  v === "calendar" ||
+  v === "tracking" ||
+  v === "birthdays";
 
 // Режим хранится в localStorage. useSyncExternalStore вместо useState+useEffect —
 // чтобы не нарушать запрет на setState в эффекте (паттерн проекта).
@@ -64,16 +72,24 @@ export function AppShell({
   marks,
   markTypes,
   categories,
+  people,
 }: {
   events: TimelineEvent[];
   marks: Mark[];
   markTypes: MarkType[];
   categories: CategoryNode[];
+  people: Person[];
 }) {
   const [mode, setMode] = useViewMode();
   const reduceMotion = useReducedMotion();
   const { events: liveEvents, create, update, remove } = useEventCrud(events, categories);
   const { marks: liveMarks, create: createMark, remove: removeMark } = useMarkCrud(marks, markTypes);
+  const {
+    people: livePeople,
+    create: createPerson,
+    update: updatePerson,
+    remove: removePerson,
+  } = useBirthdayCrud(people);
   // Контекст-меню удаления отметки (ПКМ/клик по иконке отметки на оси или в календаре).
   const [markMenu, setMarkMenu] = useState<{ mark: Mark; x: number; y: number } | null>(null);
   // Единый правый SideSheet для всех сценариев формы/просмотра события.
@@ -83,6 +99,8 @@ export function AppShell({
   // Дата открытой модалки предпросмотра «события за день» (клик по точке таймлайна).
   const [dayDate, setDayDate] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [personSheet, setPersonSheet] = useState<PersonSheetState | null>(null);
+  const [pendingDeletePerson, setPendingDeletePerson] = useState<Person | null>(null);
   // Стейт фильтра поднят сюда — общий для всех режимов.
   const [filter, setFilter] = useState<EventFilter>(EMPTY_FILTER);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -150,12 +168,17 @@ export function AppShell({
   const startEdit = () =>
     setSheet((s) => (s && s.mode === "view" ? { mode: "edit", event: s.event, media: s.media } : s));
 
+  const openCreatePerson = () => setPersonSheet({ mode: "create" });
+  const openViewPerson = (person: Person) => setPersonSheet({ mode: "view", person });
+  const startEditPerson = () =>
+    setPersonSheet((s) => (s && s.mode === "view" ? { mode: "edit", person: s.person } : s));
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-surface-0 text-app-text">
       <NavigationRail
         mode={mode}
         onMode={setMode}
-        onCreate={() => openCreate(todayISO())}
+        onCreate={() => (mode === "birthdays" ? openCreatePerson() : openCreate(todayISO()))}
         onSettings={() => setSettingsOpen(true)}
       />
 
@@ -206,8 +229,10 @@ export function AppShell({
                 onMarkOpen={(date) => setDayDate(date)}
                 onMarkMenu={(mark, x, y) => setMarkMenu({ mark, x, y })}
               />
-            ) : (
+            ) : mode === "tracking" ? (
               <TrackingView events={liveEvents} onEventClick={openView} />
+            ) : (
+              <BirthdaysView people={livePeople} onPersonClick={openViewPerson} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -263,6 +288,27 @@ export function AppShell({
         onClose={() => setSheet(null)}
       />
 
+      <PersonSheet
+        state={personSheet}
+        onStartEdit={startEditPerson}
+        onCreate={(payload) => {
+          createPerson(payload);
+          setPersonSheet(null);
+        }}
+        onUpdate={(id, payload) => {
+          updatePerson(id, payload);
+          setPersonSheet(null);
+        }}
+        onDelete={(id) => {
+          const p =
+            personSheet && "person" in personSheet && personSheet.person.id === id
+              ? personSheet.person
+              : livePeople.find((x) => x.id === id) ?? null;
+          setPendingDeletePerson(p);
+        }}
+        onClose={() => setPersonSheet(null)}
+      />
+
       <DayEventsDialog
         open={dayDate !== null && (dayEvents.length > 0 || dayMarks.length > 0)}
         dateISO={dayDate}
@@ -303,6 +349,24 @@ export function AppShell({
           setSheet(null);
         }}
         onClose={() => setPendingDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={pendingDeletePerson !== null}
+        title="Удалить человека?"
+        description={
+          pendingDeletePerson ? (
+            <>«{pendingDeletePerson.name}» будет удалён безвозвратно.</>
+          ) : null
+        }
+        confirmLabel="Удалить"
+        danger
+        onConfirm={() => {
+          if (pendingDeletePerson) removePerson(pendingDeletePerson.id);
+          setPendingDeletePerson(null);
+          setPersonSheet(null);
+        }}
+        onClose={() => setPendingDeletePerson(null)}
       />
 
       <SettingsDialog

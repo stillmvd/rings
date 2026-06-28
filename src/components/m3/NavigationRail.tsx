@@ -5,6 +5,7 @@ import {
   LayoutGrid,
   CalendarDays,
   Target,
+  Cake,
   Settings,
   Plus,
   type LucideIcon,
@@ -16,6 +17,7 @@ const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "gallery", label: "Галерея", icon: LayoutGrid },
   { value: "calendar", label: "Календарь", icon: CalendarDays },
   { value: "tracking", label: "Отслеживание", icon: Target },
+  { value: "birthdays", label: "Дни рождения", icon: Cake },
 ];
 
 export function NavigationRail({
@@ -37,7 +39,7 @@ export function NavigationRail({
       <md-fab
         variant="primary"
         size="medium"
-        aria-label="Создать событие"
+        aria-label="Создать"
         style={{ marginBottom: "12px" }}
         onClick={onCreate}
       >

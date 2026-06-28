@@ -1,14 +1,15 @@
 "use client";
 
-import { Waypoints, LayoutGrid, CalendarDays, Target, type LucideIcon } from "lucide-react";
+import { Waypoints, LayoutGrid, CalendarDays, Target, Cake, type LucideIcon } from "lucide-react";
 
-export type ViewMode = "timeline" | "gallery" | "calendar" | "tracking";
+export type ViewMode = "timeline" | "gallery" | "calendar" | "tracking" | "birthdays";
 
 const OPTIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "timeline", label: "Таймлайн", icon: Waypoints },
   { value: "gallery", label: "Галерея", icon: LayoutGrid },
   { value: "calendar", label: "Календарь", icon: CalendarDays },
   { value: "tracking", label: "Отслеживание", icon: Target },
+  { value: "birthdays", label: "Дни рождения", icon: Cake },
 ];
 
 export function ModeToggle({
