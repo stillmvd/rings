@@ -6,6 +6,7 @@ import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { isFuture } from "@/lib/duration";
+import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
 
@@ -61,17 +62,14 @@ export function EventCard({
             style={{ opacity: future ? 0.6 : undefined }}
           />
         ) : (
-          <div
-            className="flex h-full w-full items-center justify-center"
-            style={{ background: accent.container, opacity: future ? 0.6 : undefined }}
-          >
-            {Icon &&
-              createElement(Icon, {
-                size: 48,
-                strokeWidth: 1.5,
-                style: { color: accent.onContainer },
-              })}
-          </div>
+          <CoverPlaceholder
+            icon={Icon}
+            fill={accent.fill}
+            container={accent.container}
+            onContainer={accent.onContainer}
+            iconSize={48}
+            dimmed={future}
+          />
         )}
         {future && (
           <span
@@ -138,18 +136,14 @@ export function MarkCard({ mark, onClick }: { mark: Mark; onClick: () => void })
         className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-200 group-hover:opacity-[0.08]"
         style={{ background: "var(--md-sys-color-on-surface)" }}
       />
-      <div
-        className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden"
-        style={{
-          background: `color-mix(in srgb, ${mark.type_color} 20%, var(--md-sys-color-surface-container-high))`,
-        }}
-      >
-        {Icon &&
-          createElement(Icon, {
-            size: 48,
-            strokeWidth: 1.5,
-            style: { color: mark.type_color },
-          })}
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <CoverPlaceholder
+          icon={Icon}
+          fill={mark.type_color}
+          container={`color-mix(in srgb, ${mark.type_color} 20%, var(--md-sys-color-surface-container-high))`}
+          onContainer={mark.type_color}
+          iconSize={48}
+        />
       </div>
       <div className="flex flex-col gap-0.5 p-3">
         <p className="truncate font-medium" style={{ color: "var(--md-sys-color-on-surface)" }}>

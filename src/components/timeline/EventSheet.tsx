@@ -13,6 +13,7 @@ import { SideSheet } from "@/components/m3/SideSheet";
 import { EventForm, type EventFormPayload, type EventFormValues } from "./EventForm";
 import { MarkForm, type MarkFormPayload } from "./MarkForm";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { CategoryNode } from "@/db/queries/categories";
 import type { MarkType } from "@/db/queries/markTypes";
 import type { TimelineEvent } from "@/db/queries/events";
@@ -199,16 +200,14 @@ function EventView({
           />
         </button>
       ) : (
-        <div
-          className="-mx-6 -mt-2 flex aspect-video w-[calc(100%+3rem)] items-center justify-center rounded-xl"
-          style={{ background: accent.container }}
-        >
-          {Icon &&
-            createElement(Icon, {
-              size: 64,
-              strokeWidth: 1.25,
-              style: { color: accent.onContainer, opacity: 0.85 },
-            })}
+        <div className="-mx-6 -mt-2 aspect-video w-[calc(100%+3rem)] overflow-hidden rounded-xl">
+          <CoverPlaceholder
+            icon={Icon}
+            fill={accent.fill}
+            container={accent.container}
+            onContainer={accent.onContainer}
+            iconSize={64}
+          />
         </div>
       )}
 

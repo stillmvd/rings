@@ -18,6 +18,7 @@ import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { getSignificanceMeta } from "@/lib/significance";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
+import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Significance } from "@/lib/constants";
 
@@ -114,17 +115,13 @@ export function TrackingCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div
-            className="flex h-full w-full items-center justify-center"
-            style={{ background: accent.container }}
-          >
-            {Icon &&
-              createElement(Icon, {
-                size: 56,
-                strokeWidth: 1.5,
-                style: { color: accent.onContainer },
-              })}
-          </div>
+          <CoverPlaceholder
+            icon={Icon}
+            fill={accent.fill}
+            container={accent.container}
+            onContainer={accent.onContainer}
+            iconSize={56}
+          />
         )}
         {event.category_name && (
           <span

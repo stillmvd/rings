@@ -11,6 +11,7 @@ import { resolveIconOrNull } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { ContextMenu } from "@/components/m3/ContextMenu";
+import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
 import type { Significance } from "@/lib/constants";
@@ -216,11 +217,16 @@ function EventCard({
           className="h-16 w-16 shrink-0 rounded-xl object-cover"
         />
       ) : (
-        <span
-          className="grid h-16 w-16 shrink-0 place-items-center rounded-xl"
-          style={{ background: accent.container, color: accent.onContainer }}
-        >
-          {Icon && createElement(Icon, { size: 26, strokeWidth: 1.5 })}
+        <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+          <CoverPlaceholder
+            icon={Icon}
+            fill={accent.fill}
+            container={accent.container}
+            onContainer={accent.onContainer}
+            iconSize={26}
+            size="sm"
+            texture={false}
+          />
         </span>
       )}
 
