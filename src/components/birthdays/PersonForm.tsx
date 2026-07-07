@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Cake, ImagePlus, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -58,14 +58,34 @@ export function PersonForm({
 
   const avatarSrc = pendingUrl ?? (existingPhoto ? `/media/${existingPhoto}` : null);
 
-  function pickFile(files: FileList | File[]) {
-    const accepted = filterAcceptedImages(files);
-    if (!accepted.length) return;
-    if (pendingUrl) URL.revokeObjectURL(pendingUrl);
-    const url = URL.createObjectURL(accepted[0]);
-    setPendingFile(accepted[0]);
-    setPendingUrl(url);
-  }
+  const pickFile = useCallback(
+    (files: FileList | File[]) => {
+      const accepted = filterAcceptedImages(files);
+      if (!accepted.length) return;
+      if (pendingUrl) URL.revokeObjectURL(pendingUrl);
+      const url = URL.createObjectURL(accepted[0]);
+      setPendingFile(accepted[0]);
+      setPendingUrl(url);
+    },
+    [pendingUrl],
+  );
+
+  useEffect(() => {
+    function handlePaste(e: ClipboardEvent) {
+      if (!e.clipboardData) return;
+      const files = filterAcceptedImages(
+        Array.from(e.clipboardData.items)
+          .filter((it) => it.kind === "file")
+          .map((it) => it.getAsFile())
+          .filter((f): f is File => f !== null),
+      );
+      if (!files.length) return;
+      e.preventDefault();
+      pickFile(files);
+    }
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [pickFile]);
 
   function clearAvatar() {
     if (pendingUrl) URL.revokeObjectURL(pendingUrl);
@@ -150,6 +170,9 @@ export function PersonForm({
             }}
           />
         </div>
+        <span className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
+          Можно вставить из буфера (Ctrl+V)
+        </span>
       </div>
 
       <Input
