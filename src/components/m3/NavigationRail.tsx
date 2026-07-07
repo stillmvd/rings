@@ -56,25 +56,16 @@ export function NavigationRail({
             aria-current={active ? "page" : undefined}
             aria-label={label}
             title={label}
-            className="group flex w-full flex-col items-center gap-1 py-1"
+            className="group flex w-full items-center justify-center py-2"
           >
             <span
-              className={`flex h-8 w-14 items-center justify-center rounded-2xl transition-colors ${
+              className={`flex h-10 w-14 items-center justify-center rounded-2xl transition-colors ${
                 active
                   ? "bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]"
                   : "text-[var(--md-sys-color-on-surface-variant)] group-hover:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface)_8%,transparent)]"
               }`}
             >
               <Icon size={22} />
-            </span>
-            <span
-              className={`text-[11px] leading-tight ${
-                active
-                  ? "font-semibold text-[var(--md-sys-color-on-surface)]"
-                  : "text-[var(--md-sys-color-on-surface-variant)]"
-              }`}
-            >
-              {label}
             </span>
           </button>
         );
@@ -87,13 +78,10 @@ export function NavigationRail({
         onClick={onSettings}
         aria-label="Настройки"
         title="Настройки"
-        className="group flex w-full flex-col items-center gap-1 py-1"
+        className="group flex w-full items-center justify-center py-2"
       >
-        <span className="flex h-8 w-14 items-center justify-center rounded-2xl text-[var(--md-sys-color-on-surface-variant)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface)_8%,transparent)]">
+        <span className="flex h-10 w-14 items-center justify-center rounded-2xl text-[var(--md-sys-color-on-surface-variant)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface)_8%,transparent)]">
           <Settings size={22} />
-        </span>
-        <span className="text-[11px] leading-tight text-[var(--md-sys-color-on-surface-variant)]">
-          Настройки
         </span>
       </button>
     </nav>
