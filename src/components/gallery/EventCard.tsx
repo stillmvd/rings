@@ -8,7 +8,6 @@ import { resolveIconOrNull } from "@/lib/icons";
 import { isFuture } from "@/lib/duration";
 import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { TimelineEvent } from "@/db/queries/events";
-import type { Mark } from "@/db/queries/marks";
 
 // M3 elevation level 1 → level 2 при hover (карточка Elevated).
 const ELEVATION_1 =
@@ -109,48 +108,6 @@ export function EventCard({
         </p>
         <p className="text-sm" style={{ color: "var(--md-sys-color-on-surface-variant)" }}>
           {dateLabel}
-        </p>
-      </div>
-    </button>
-  );
-}
-
-// Карточка отметки в галерее: иконка категории + имя + дата (без названия и обложки).
-export function MarkCard({ mark, onClick }: { mark: Mark; onClick: () => void }) {
-  const Icon = resolveIconOrNull(mark.type_icon);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative flex flex-col overflow-hidden rounded-[12px] text-left transition-shadow duration-200"
-      style={{
-        background: "var(--md-sys-color-surface-container-low)",
-        color: "var(--md-sys-color-on-surface)",
-        boxShadow: ELEVATION_1,
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
-      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-20 opacity-0 transition-opacity duration-200 group-hover:opacity-[0.08]"
-        style={{ background: "var(--md-sys-color-on-surface)" }}
-      />
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <CoverPlaceholder
-          icon={Icon}
-          fill={mark.type_color}
-          container={`color-mix(in srgb, ${mark.type_color} 20%, var(--md-sys-color-surface-container-high))`}
-          onContainer={mark.type_color}
-          iconSize={48}
-        />
-      </div>
-      <div className="flex flex-col gap-0.5 p-3">
-        <p className="truncate font-medium" style={{ color: "var(--md-sys-color-on-surface)" }}>
-          {mark.type_name}
-        </p>
-        <p className="text-sm" style={{ color: "var(--md-sys-color-on-surface-variant)" }}>
-          {formatFullRu(mark.date)}
         </p>
       </div>
     </button>

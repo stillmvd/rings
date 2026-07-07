@@ -211,11 +211,9 @@ export function AppShell({
             ) : mode === "gallery" ? (
               <GalleryView
                 events={liveEvents}
-                marks={liveMarks}
                 filter={filter}
                 onFilterChange={setFilter}
                 onEventClick={openView}
-                onMarkOpen={(date) => setDayDate(date)}
               />
             ) : mode === "calendar" ? (
               <CalendarView
