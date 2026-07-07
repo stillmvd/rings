@@ -10,26 +10,39 @@ import type { Person } from "@/db/queries/people";
 function Section({
   title,
   people,
+  showHeader,
   onPersonClick,
 }: {
   title: string;
   people: Person[];
+  showHeader: boolean;
   onPersonClick: (person: Person) => void;
 }) {
   return (
     <section>
-      <h2
-        className="sticky top-0 z-30 -mx-2 mb-4 px-2 py-2 text-lg font-semibold backdrop-blur"
-        style={{
-          background: "color-mix(in srgb, var(--md-sys-color-surface) 80%, transparent)",
-          color: "var(--md-sys-color-on-surface)",
-        }}
-      >
-        {title}
-        <span className="ml-2 text-sm font-normal" style={{ color: "var(--md-sys-color-on-surface-variant)" }}>
-          {people.length}
-        </span>
-      </h2>
+      {showHeader && (
+        <div className="sticky top-0 z-30 mb-4 flex justify-center">
+          <h2
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold backdrop-blur"
+            style={{
+              background: "color-mix(in srgb, var(--md-sys-color-surface-container-high) 85%, transparent)",
+              color: "var(--md-sys-color-on-surface)",
+              boxShadow: "0 1px 2px 0 color-mix(in srgb, var(--md-sys-color-shadow) 25%, transparent)",
+            }}
+          >
+            {title}
+            <span
+              className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
+              style={{
+                background: "var(--md-sys-color-secondary-container)",
+                color: "var(--md-sys-color-on-secondary-container)",
+              }}
+            >
+              {people.length}
+            </span>
+          </h2>
+        </div>
+      )}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5">
         {people.map((person) => (
           <BirthdayCard key={person.id} person={person} onClick={onPersonClick} />
@@ -79,10 +92,20 @@ export function BirthdaysView({
       <div className="h-full w-full overflow-y-auto px-6 py-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="mx-auto flex max-w-6xl flex-col gap-12">
           {today.length > 0 && (
-            <Section title="Сегодня" people={today} onPersonClick={onPersonClick} />
+            <Section
+              title="Сегодня"
+              people={today}
+              showHeader={upcoming.length > 0}
+              onPersonClick={onPersonClick}
+            />
           )}
           {upcoming.length > 0 && (
-            <Section title="Ближайшие дни рождения" people={upcoming} onPersonClick={onPersonClick} />
+            <Section
+              title="Ближайшие дни рождения"
+              people={upcoming}
+              showHeader={today.length > 0}
+              onPersonClick={onPersonClick}
+            />
           )}
         </div>
       </div>
