@@ -104,6 +104,13 @@
   visibility: hidden;
 }
 
+/* Ограничиваем высоту выпадающего меню select — иначе список категорий растёт за экран.
+   max-height наследуется внутрь md-menu до скроллируемого .items (overflow: auto). */
+md-outlined-select::part(menu),
+md-filled-select::part(menu) {
+  max-height: min(50vh, 360px);
+}
+
 :root {
   --md-ref-typeface-brand: var(--font-roboto-flex), "Roboto Flex", "Roboto", system-ui, sans-serif;
   --md-ref-typeface-plain: var(--font-roboto-flex), "Roboto Flex", "Roboto", system-ui, sans-serif;
