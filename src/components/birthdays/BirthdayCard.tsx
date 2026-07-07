@@ -11,6 +11,7 @@ import {
   formatTurningAge,
 } from "@/lib/birthday";
 import { useNowMs } from "@/components/tracking/clock";
+import { useLiveSeconds } from "./useLiveSeconds";
 import type { Person } from "@/db/queries/people";
 
 const ELEVATION_1 =
@@ -51,7 +52,8 @@ export function BirthdayCard({
   const days = daysUntilBirthday(person.birth_date);
   const today = days === 0;
 
-  const live = !today && days <= COUNTDOWN_THRESHOLD_DAYS;
+  const liveSecondsEnabled = useLiveSeconds();
+  const live = !today && days <= COUNTDOWN_THRESHOLD_DAYS && liveSecondsEnabled;
   const now = useNowMs(live);
   const countdown = live && now !== null ? countdownParts(nb, now) : null;
 
