@@ -7,7 +7,11 @@ export type SignificanceMeta = {
   color: string;
   /** Контрастный on-цвет для контента поверх color (--md-sig-N-on). */
   onColor: string;
-  /** Приглушённый container-тон для крупных заливок (плейсхолдеры) — не слепит в тёмной теме. */
+  /**
+   * Приглушённый тон для крупных заливок (плейсхолдеры без обложки).
+   * Не сырая M3 container-роль (на некоторых hue она уходит в грязный тёмный тон),
+   * а подмешивание --md-sig-N к поверхности — как для цвета категории.
+   */
   container: string;
   /** Насыщенный контент поверх container (--md-sig-N-on-container). */
   onContainer: string;
@@ -29,7 +33,7 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Обычное",
     color: "var(--md-sig-1)",
     onColor: "var(--md-sig-1-on)",
-    container: "var(--md-sig-1-container)",
+    container: "color-mix(in srgb, var(--md-sig-1) 20%, var(--md-sys-color-surface-container-high))",
     onContainer: "var(--md-sig-1-on-container)",
     dotRadius: 4,
     ring: false,
@@ -41,7 +45,7 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Важное",
     color: "var(--md-sig-2)",
     onColor: "var(--md-sig-2-on)",
-    container: "var(--md-sig-2-container)",
+    container: "color-mix(in srgb, var(--md-sig-2) 20%, var(--md-sys-color-surface-container-high))",
     onContainer: "var(--md-sig-2-on-container)",
     dotRadius: 6,
     ring: false,
@@ -53,7 +57,7 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Самое важное",
     color: "var(--md-sig-3)",
     onColor: "var(--md-sig-3-on)",
-    container: "var(--md-sig-3-container)",
+    container: "color-mix(in srgb, var(--md-sig-3) 20%, var(--md-sys-color-surface-container-high))",
     onContainer: "var(--md-sig-3-on-container)",
     dotRadius: 9,
     ring: true,

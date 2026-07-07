@@ -44,7 +44,6 @@ function significanceVars(seedHex: string, isDark: boolean): Vars {
     const g = isDark ? group.dark : group.light;
     vars[`--md-sig-${slug}`] = hexFromArgb(g.color);
     vars[`--md-sig-${slug}-on`] = hexFromArgb(g.onColor);
-    vars[`--md-sig-${slug}-container`] = hexFromArgb(g.colorContainer);
     vars[`--md-sig-${slug}-on-container`] = hexFromArgb(g.onColorContainer);
   }
   return vars;

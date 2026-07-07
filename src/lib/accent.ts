@@ -13,8 +13,8 @@ export type EventAccent = {
 };
 
 // Единый источник акцентных цветов события (M3). Цвет берём от категории (произвольный hex)
-// либо от роли значимости. Для категории container = подмешивание к surface (адаптивно к теме);
-// для значимости — готовые M3-роли --md-sig-N-container / -on-container.
+// либо от роли значимости. container в обоих случаях — подмешивание акцента к surface
+// (адаптивно к теме, не уходит в грязный тон на любом hue).
 export function eventAccent(event: {
   significance: number;
   category_color: string | null;
