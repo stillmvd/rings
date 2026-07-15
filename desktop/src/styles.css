@@ -27,8 +27,14 @@
   --color-muted: var(--rg-muted);
   --color-amber: var(--rg-amber);
   --color-rust: var(--rg-rust);
+  --color-ink: #0b0b0d;
   --font-sans: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
 }
+
+@utility bg-resin {
+  background: var(--rg-grad);
+}
+
 
 html,
 body {
