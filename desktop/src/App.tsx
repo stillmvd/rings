@@ -3,11 +3,12 @@ import { Titlebar } from "./components/Titlebar";
 import { NavigationRail } from "./components/nav/NavigationRail";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
-import { TimelinePage, SettingsPage } from "./pages/stubs";
+import { SettingsPage } from "./pages/stubs";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { TrackingPage } from "./pages/TrackingPage";
 import { BirthdaysPage } from "./pages/BirthdaysPage";
+import { TimelinePage } from "./pages/TimelinePage";
 
 const PAGES: Record<ViewMode, ComponentType> = {
   timeline: TimelinePage,

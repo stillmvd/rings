@@ -11,10 +11,6 @@ function PageStub({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
-export function TimelinePage() {
-  return <PageStub eyebrow="rings · ось времени" title="Таймлайн" />;
-}
-
 export function SettingsPage() {
   return <PageStub eyebrow="rings · приложение" title="Настройки" />;
 }
