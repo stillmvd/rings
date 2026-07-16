@@ -5,12 +5,12 @@ import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import {
   TimelinePage,
-  CalendarPage,
   TrackingPage,
   BirthdaysPage,
   SettingsPage,
 } from "./pages/stubs";
 import { GalleryPage } from "./pages/GalleryPage";
+import { CalendarPage } from "./pages/CalendarPage";
 
 const PAGES: Record<ViewMode, ComponentType> = {
   timeline: TimelinePage,

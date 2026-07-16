@@ -64,3 +64,382 @@ body {
   user-select: none;
   cursor: default;
 }
+
+/* === Календарь (react-day-picker + кастомные ячейки), палитра Rings ======= */
+
+.tl-calendar .rdp-root {
+  --rdp-accent-color: var(--rg-amber);
+  --rdp-accent-background-color: color-mix(in srgb, var(--rg-amber) 22%, var(--rg-surface));
+  --rdp-today-color: var(--rg-amber);
+  --rdp-day-width: 40px;
+  --rdp-day-height: 40px;
+  --rdp-day_button-width: 40px;
+  --rdp-day_button-height: 40px;
+  --rdp-day_button-border-radius: 9999px;
+  --rdp-nav_button-width: 2rem;
+  --rdp-nav_button-height: 2rem;
+  color: var(--rg-text);
+  margin: 0;
+}
+
+.tl-calendar .rdp-day_button:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--rg-text) 8%, transparent);
+}
+
+.tl-calendar .rdp-selected .rdp-day_button,
+.tl-calendar .rdp-selected .rdp-day_button:hover {
+  background-color: var(--rg-amber);
+  border-color: var(--rg-amber);
+  color: var(--rg-bg);
+}
+
+.tl-calendar .rdp-chevron {
+  fill: var(--rg-muted);
+}
+
+.tl-calendar .rdp-button_next:hover .rdp-chevron,
+.tl-calendar .rdp-button_previous:hover .rdp-chevron {
+  fill: var(--rg-text);
+}
+
+.tl-calendar .rdp-weekday {
+  color: var(--rg-muted);
+}
+
+.tl-calendar .rdp-caption_label {
+  color: var(--rg-text);
+}
+
+.tl-calendar .tl-cal-caption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: auto;
+  min-height: var(--rdp-nav-height);
+  font-size: 0.95rem;
+  /* Caption лежит поверх стрелок Nav — пропускаем клики сквозь пустые зоны к стрелкам. */
+  pointer-events: none;
+}
+
+.tl-cal-caption-fields,
+.tl-cal-today {
+  pointer-events: auto;
+}
+
+.tl-cal-caption-fields {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.tl-cal-wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 0.1rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  cursor: ns-resize;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.tl-cal-wheel:hover {
+  background: color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface));
+  border-color: var(--rg-line);
+}
+
+.tl-cal-wheel.is-month {
+  text-transform: capitalize;
+}
+
+.tl-cal-wheel-val {
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-cal-wheel-chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: 13px;
+  color: var(--rg-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.tl-cal-wheel:hover .tl-cal-wheel-chev {
+  opacity: 0.55;
+}
+
+.tl-cal-wheel-chev:hover {
+  opacity: 1;
+  color: var(--rg-amber);
+}
+
+/* Кнопка «Сегодня» — tonal amber, появляется вне текущего месяца. */
+.tl-cal-today {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  border: none;
+  background: color-mix(in srgb, var(--rg-amber) 16%, var(--rg-surface));
+  color: var(--rg-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.15s, filter 0.15s;
+}
+
+.tl-cal-today:hover {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+/* === Крупная сетка месяца (режим «Календарь») ============================ */
+
+.tl-calendar-lg .rdp-root {
+  --rdp-day-width: 152px;
+  /* fixedWeeks → всегда 6 рядов, поэтому высота ряда просто фиксирована и ужимается под окно.
+     ponytail: overhead 226px (titlebar+шапка+паддинги+бордер таблицы) прикинут; при ошибке — лишь
+     чуть скролла/пустоты, не прыжки. Точнее — считать при желании, пока не нужно. */
+  --rdp-day-height: clamp(76px, (100vh - 226px) / 6, 130px);
+  --rdp-day_button-width: 108px;
+  --rdp-day_button-height: 92px;
+  --rdp-day_button-border-radius: 0.75rem;
+  --rdp-nav_button-width: 2.25rem;
+  --rdp-nav_button-height: 2.25rem;
+  font-size: 1rem;
+}
+
+.tl-calendar-lg .tl-cal-caption {
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 0 0.25rem 0.6rem;
+}
+
+.tl-calendar-lg .tl-cal-today {
+  font-size: 0.85rem;
+}
+
+
+.tl-calendar-lg .rdp-weekday {
+  width: var(--rdp-day-width);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 0.5rem;
+}
+
+/* Плоская сетка: единые тонкие разделители между днями; table-layout: fixed — колонки строго по ширине. */
+.tl-calendar-lg .rdp-month_grid {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: calc(var(--rdp-day-width) * 7);
+}
+
+.tl-cal-td {
+  width: var(--rdp-day-width);
+  height: var(--rdp-day-height);
+  padding: 0;
+  vertical-align: top;
+  border: 1px solid var(--rg-line);
+}
+
+.tl-cal-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 5px 6px;
+  overflow: hidden;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+/* Выходные — приглушённый фон; праздники — акцент rust. */
+.tl-cal-cell.is-weekend:not(.is-today) {
+  background: color-mix(in srgb, var(--rg-muted) 11%, transparent);
+}
+
+.tl-cal-cell.is-holiday:not(.is-today) {
+  background: color-mix(in srgb, var(--rg-rust) 12%, transparent);
+}
+
+.tl-cal-cell.is-holiday:not(.is-today) .tl-cal-num {
+  color: var(--rg-rust);
+  font-weight: 700;
+}
+
+.tl-cal-cell:not(.is-disabled) {
+  cursor: pointer;
+}
+
+.tl-cal-cell:not(.is-disabled):hover {
+  background: color-mix(in srgb, var(--rg-text) 8%, transparent);
+}
+
+.tl-cal-cell.is-disabled {
+  opacity: 0.35;
+}
+
+.tl-cal-num {
+  align-self: flex-start;
+  padding: 1px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--rg-muted);
+}
+
+/* «Сегодня» — залитый amber-кружок на числе. */
+.tl-cal-cell.is-today .tl-cal-num {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 9999px;
+  background: var(--rg-amber);
+  color: var(--rg-bg);
+  font-weight: 700;
+}
+
+.tl-cal-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Чип события — залит цветом значимости, текст авто-контрастен (inline). */
+.tl-cal-chip {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.3;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.tl-cal-chip:hover {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.tl-cal-chip-thumb {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  object-fit: cover;
+}
+
+.tl-cal-chip-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-cal-more {
+  align-self: flex-start;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--rg-muted);
+  cursor: pointer;
+}
+
+.tl-cal-more:hover {
+  color: var(--rg-text);
+}
+
+/* Шапка ячейки: число дня слева, иконки отметок справа. */
+.tl-cal-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tl-cal-head .tl-cal-num {
+  align-self: center;
+}
+
+/* Отметки дня — круглые иконки-чипы без текста, прижаты к правому краю. */
+.tl-cal-marks {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.tl-cal-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.tl-cal-mark:hover {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+/* === Кастомный скроллбар (WebView2/Chromium) ============================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--rg-muted) 45%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--rg-muted) 45%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--rg-muted) 70%, transparent);
+  background-clip: padding-box;
+}
