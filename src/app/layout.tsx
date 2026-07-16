@@ -15,8 +15,8 @@ const robotoFlex = Roboto_Flex({
 });
 
 export const metadata: Metadata = {
-  title: "Timeline",
-  description: "Интерактивный таймлайн жизни",
+  title: "Rings",
+  description: "Личная летопись: вся жизнь на одной оси",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
