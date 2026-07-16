@@ -3,14 +3,11 @@ import { Titlebar } from "./components/Titlebar";
 import { NavigationRail } from "./components/nav/NavigationRail";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
-import {
-  TimelinePage,
-  TrackingPage,
-  BirthdaysPage,
-  SettingsPage,
-} from "./pages/stubs";
+import { TimelinePage, SettingsPage } from "./pages/stubs";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CalendarPage } from "./pages/CalendarPage";
+import { TrackingPage } from "./pages/TrackingPage";
+import { BirthdaysPage } from "./pages/BirthdaysPage";
 
 const PAGES: Record<ViewMode, ComponentType> = {
   timeline: TimelinePage,
@@ -31,7 +28,7 @@ export default function App() {
       <Titlebar />
       <div className="flex min-h-0 flex-1">
         <NavigationRail />
-        <main className="flex-1 overflow-auto">
+        <main className="min-h-0 flex-1 overflow-hidden">
           <Page />
         </main>
       </div>

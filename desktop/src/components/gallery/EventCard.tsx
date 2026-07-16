@@ -42,14 +42,7 @@ export function EventCard({
             style={{ opacity: future ? 0.6 : undefined }}
           />
         ) : (
-          <CoverPlaceholder
-            icon={Icon}
-            fill={accent.fill}
-            container={accent.container}
-            onContainer={accent.onContainer}
-            iconSize={48}
-            dimmed={future}
-          />
+          <CoverPlaceholder fill={accent.fill} container={accent.container} dimmed={future} />
         )}
         {future && (
           <span

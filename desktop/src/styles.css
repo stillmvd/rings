@@ -415,12 +415,9 @@ body {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
 }
 
-/* === Кастомный скроллбар (WebView2/Chromium) ============================= */
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--rg-muted) 45%, transparent) transparent;
-}
+/* === Кастомный скроллбар (WebView2/Chromium) =============================
+   Только legacy ::-webkit-scrollbar — без standard scrollbar-width/color,
+   иначе WebView2 рендерит оба механизма разом (двойной бар). */
 
 *::-webkit-scrollbar {
   width: 10px;
