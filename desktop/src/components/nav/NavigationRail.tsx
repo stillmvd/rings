@@ -58,9 +58,9 @@ function RailButton({
       aria-label={label}
       title={label}
       aria-current={active ? "page" : undefined}
-      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
+      className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors ${
         active
-          ? "bg-resin text-ink"
+          ? "bg-amber text-ink"
           : "text-muted hover:bg-surface-1 hover:text-app-text"
       }`}
     >

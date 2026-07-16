@@ -15,10 +15,6 @@ export function TimelinePage() {
   return <PageStub eyebrow="rings · ось времени" title="Таймлайн" />;
 }
 
-export function GalleryPage() {
-  return <PageStub eyebrow="rings · воспоминания" title="Галерея" />;
-}
-
 export function CalendarPage() {
   return <PageStub eyebrow="rings · месяцы" title="Календарь" />;
 }

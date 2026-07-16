@@ -1,15 +1,16 @@
 import type { ComponentType } from "react";
+import { Titlebar } from "./components/Titlebar";
 import { NavigationRail } from "./components/nav/NavigationRail";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import {
   TimelinePage,
-  GalleryPage,
   CalendarPage,
   TrackingPage,
   BirthdaysPage,
   SettingsPage,
 } from "./pages/stubs";
+import { GalleryPage } from "./pages/GalleryPage";
 
 const PAGES: Record<ViewMode, ComponentType> = {
   timeline: TimelinePage,
@@ -26,11 +27,14 @@ export default function App() {
   const Page = PAGES[mode];
 
   return (
-    <div className="flex h-screen bg-surface-0 text-app-text">
-      <NavigationRail />
-      <main className="flex-1 overflow-auto">
-        <Page />
-      </main>
+    <div className="flex h-screen flex-col bg-surface-0 text-app-text">
+      <Titlebar />
+      <div className="flex min-h-0 flex-1">
+        <NavigationRail />
+        <main className="flex-1 overflow-auto">
+          <Page />
+        </main>
+      </div>
     </div>
   );
 }
