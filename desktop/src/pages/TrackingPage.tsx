@@ -2,10 +2,12 @@ import { TrackingView } from "@/components/tracking/TrackingView";
 import { getEventsInRange } from "@/db/queries/events";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { useQuery } from "@/lib/useQuery";
+import { useEvents } from "@/components/events/EventsProvider";
 
 const loadEvents = () => getEventsInRange(TIMELINE_MIN_DATE, TIMELINE_MAX_DATE);
 
 export function TrackingPage() {
+  const { openView } = useEvents();
   const { data: events, error } = useQuery(loadEvents);
 
   if (error) {
@@ -17,5 +19,5 @@ export function TrackingPage() {
   }
   if (!events) return null;
 
-  return <TrackingView events={events} onEventClick={() => {}} />;
+  return <TrackingView events={events} onEventClick={openView} />;
 }

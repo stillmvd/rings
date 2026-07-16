@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { subscribeDataVersion, getDataVersion } from "./dataVersion";
 
 export function useQuery<T>(fn: () => Promise<T>): {
   data: T | null;
@@ -8,6 +9,7 @@ export function useQuery<T>(fn: () => Promise<T>): {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const version = useSyncExternalStore(subscribeDataVersion, getDataVersion);
 
   useEffect(() => {
     let alive = true;
@@ -18,7 +20,7 @@ export function useQuery<T>(fn: () => Promise<T>): {
     return () => {
       alive = false;
     };
-  }, [fn, tick]);
+  }, [fn, tick, version]);
 
   const reload = useCallback(() => setTick((t) => t + 1), []);
   return { data, error, reload };

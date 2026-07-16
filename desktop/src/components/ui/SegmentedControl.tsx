@@ -28,12 +28,12 @@ export function SegmentedControl<T extends string>({
               key={s.value}
               type="button"
               onClick={() => onChange(s.value)}
-              className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+              className={`flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md px-1.5 py-1.5 text-xs font-medium transition-colors ${
                 active ? "bg-amber text-ink" : "text-muted hover:bg-surface-1 hover:text-app-text"
               }`}
             >
-              {s.icon}
-              {s.label}
+              {s.icon && <span className="shrink-0">{s.icon}</span>}
+              <span className="truncate">{s.label}</span>
             </button>
           );
         })}

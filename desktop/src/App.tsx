@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 import { Titlebar } from "./components/Titlebar";
 import { NavigationRail } from "./components/nav/NavigationRail";
+import { ToastProvider } from "./components/ui/Toast";
+import { EventsProvider } from "./components/events/EventsProvider";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import { SettingsPage } from "./pages/stubs";
@@ -25,14 +27,18 @@ export default function App() {
   const Page = PAGES[mode];
 
   return (
-    <div className="flex h-screen flex-col bg-surface-0 text-app-text">
-      <Titlebar />
-      <div className="flex min-h-0 flex-1">
-        <NavigationRail />
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <Page />
-        </main>
-      </div>
-    </div>
+    <ToastProvider>
+      <EventsProvider>
+        <div className="flex h-screen flex-col bg-surface-0 text-app-text">
+          <Titlebar />
+          <div className="flex min-h-0 flex-1">
+            <NavigationRail />
+            <main className="min-h-0 flex-1 overflow-hidden">
+              <Page />
+            </main>
+          </div>
+        </div>
+      </EventsProvider>
+    </ToastProvider>
   );
 }
