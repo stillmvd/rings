@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { CATEGORY_COLORS } from "@/lib/colors";
+import { CATEGORY_COLORS, onColorFor } from "@/lib/colors";
 
 export function ColorPicker({
   value,
@@ -31,7 +31,7 @@ export function ColorPicker({
                   : undefined,
               }}
             >
-              {active && <Check size={14} strokeWidth={3} className="text-white" />}
+              {active && <Check size={14} strokeWidth={3} style={{ color: onColorFor(color) }} />}
             </button>
           );
         })}

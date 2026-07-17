@@ -58,8 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="pointer-events-auto flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm shadow-lg"
-                  style={{ background: "var(--rg-text)", color: "var(--rg-bg)" }}
+                  className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-line bg-surface-1 px-4 py-3 text-sm text-app-text shadow-lg"
                 >
                   <Icon size={18} style={{ color: META[t.type].color }} />
                   <span className="max-w-xs">{t.message}</span>
