@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div className="flex flex-col gap-1">
       {label && <span className="text-xs font-medium text-muted">{label}</span>}
-      <div className="flex gap-1 rounded-lg border border-line bg-surface-0 p-1">
+      <div className="flex gap-1 rounded-full bg-surface-0 p-1">
         {segments.map((s) => {
           const active = s.value === value;
           return (
@@ -28,7 +28,7 @@ export function SegmentedControl<T extends string>({
               key={s.value}
               type="button"
               onClick={() => onChange(s.value)}
-              className={`flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-md px-1.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 active ? "bg-amber text-ink" : "text-muted hover:bg-surface-1 hover:text-app-text"
               }`}
             >

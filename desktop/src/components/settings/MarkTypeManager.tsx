@@ -63,7 +63,7 @@ export function MarkTypeManager() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-app-text">Типы отметок</h3>
+        <h3 className="text-base font-semibold text-app-text">Типы отметок</h3>
         <Button variant="secondary" onClick={() => setEdit({ mode: "create" })}>
           <Plus size={15} /> Добавить
         </Button>

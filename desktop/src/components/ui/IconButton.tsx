@@ -17,7 +17,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`grid h-7 w-7 cursor-pointer place-items-center rounded-lg text-muted transition-colors hover:bg-surface-0 ${
+      className={`grid h-7 w-7 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-0 ${
         danger ? "hover:text-rust" : "hover:text-app-text"
       }`}
     >

@@ -49,6 +49,16 @@
   background: var(--rg-grad);
 }
 
+/* Тональная заливка вторичных действий: кнопка обязана отличаться от поля ввода
+   формой и фоном, а не обводкой — иначе Button и Input выглядят одинаково. */
+@utility bg-tonal {
+  background: color-mix(in srgb, var(--rg-amber) 14%, var(--rg-surface));
+}
+
+@utility bg-tonal-hover {
+  background: color-mix(in srgb, var(--rg-amber) 24%, var(--rg-surface));
+}
+
 
 html,
 body {
