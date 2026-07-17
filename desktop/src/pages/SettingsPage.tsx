@@ -5,12 +5,14 @@ import { appDataDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { Mark } from "@/components/brand/Mark";
+import { MarkMono } from "@/components/brand/MarkMono";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/Switch";
 import { useToast } from "@/components/ui/Toast";
 import { CategoryManager } from "@/components/settings/CategoryManager";
 import { MarkTypeManager } from "@/components/settings/MarkTypeManager";
+import { BackupPanel } from "@/components/settings/BackupPanel";
 import { useLiveSeconds, setLiveSeconds } from "@/components/birthdays/useLiveSeconds";
 import { themeStore, type ThemePref } from "@/lib/theme";
 import { closeToTrayStore, trayIconStore, type TrayIconPref } from "@/lib/behavior";
@@ -23,9 +25,15 @@ const THEME_SEGMENTS: { value: ThemePref; label: string }[] = [
   { value: "dark", label: "Тёмная" },
 ];
 
-const TRAY_ICON_SEGMENTS: { value: TrayIconPref; label: string }[] = [
-  { value: "white", label: "Тёмная панель" },
-  { value: "black", label: "Светлая панель" },
+// Превью имитирует панель задач: марка показана на том фоне, ради которого её выбирают.
+const TRAY_ICON_OPTIONS: {
+  value: TrayIconPref;
+  label: string;
+  bg: string;
+  fg: string;
+}[] = [
+  { value: "white", label: "Тёмная панель", bg: "#1f1f23", fg: "#ffffff" },
+  { value: "black", label: "Светлая панель", bg: "#f3f3f3", fg: "#000000" },
 ];
 
 function Section({
@@ -40,8 +48,8 @@ function Section({
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-6 first:border-t-0 first:pt-0">
       <div>
-        <h2 className="text-base font-semibold text-app-text">{title}</h2>
-        {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
+        <h2 className="text-xl font-semibold tracking-tight text-app-text">{title}</h2>
+        {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       </div>
       {children}
     </section>
@@ -138,14 +146,33 @@ export function SettingsPage() {
           <div className="flex flex-col gap-1.5 pt-1">
             <span className="text-sm text-app-text">Иконка в трее</span>
             <span className="text-xs text-muted">
-              Белая марка для тёмной панели задач, чёрная — для светлой
+              Выберите марку под цвет своей панели задач
             </span>
-            <div className="mt-1">
-              <SegmentedControl
-                segments={TRAY_ICON_SEGMENTS}
-                value={trayIcon}
-                onChange={(v) => trayIconStore.set(v)}
-              />
+            <div className="mt-1.5 flex gap-3">
+              {TRAY_ICON_OPTIONS.map((opt) => {
+                const active = trayIcon === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => trayIconStore.set(opt.value)}
+                    className="flex cursor-pointer flex-col items-center gap-1.5"
+                  >
+                    <span
+                      className={`grid h-16 w-24 place-items-center rounded-xl border-2 transition-colors ${
+                        active ? "border-amber" : "border-line hover:border-muted"
+                      }`}
+                      style={{ background: opt.bg, color: opt.fg }}
+                    >
+                      <MarkMono size={28} />
+                    </span>
+                    <span className={`text-xs ${active ? "text-app-text" : "text-muted"}`}>
+                      {opt.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </Section>
@@ -174,6 +201,10 @@ export function SettingsPage() {
               label="Живой отсчёт секунд"
             />
           </Row>
+        </Section>
+
+        <Section title="Бэкап" description="Архив с базой и фотографиями в выбранной папке.">
+          <BackupPanel />
         </Section>
 
         <Section title="Данные" description="База и медиа хранятся в папке приложения.">

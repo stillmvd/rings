@@ -43,6 +43,127 @@ fn disable_browser_accelerator_keys(window: &tauri::WebviewWindow) {
     });
 }
 
+// Бэкап: снимок БД делает JS (VACUUM INTO — консистентная копия при открытом коннекте),
+// Rust получает готовый файл и пакует его вместе с media/ в zip.
+#[tauri::command]
+fn create_backup(
+    app: tauri::AppHandle,
+    db_snapshot: String,
+    dest: String,
+    keep: usize,
+) -> Result<String, String> {
+    use std::io::{Read, Write};
+    use zip::write::SimpleFileOptions;
+
+    let snapshot = std::path::PathBuf::from(&db_snapshot);
+    let result = (|| -> Result<String, String> {
+        if let Some(parent) = std::path::Path::new(&dest).parent() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        let file = fs::File::create(&dest).map_err(|e| e.to_string())?;
+        let mut zip = zip::ZipWriter::new(file);
+        let opts = SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+
+        let mut buf = Vec::new();
+        fs::File::open(&snapshot)
+            .and_then(|mut f| f.read_to_end(&mut buf))
+            .map_err(|e| format!("снимок БД: {e}"))?;
+        zip.start_file("timeline.db", opts).map_err(|e| e.to_string())?;
+        zip.write_all(&buf).map_err(|e| e.to_string())?;
+
+        let media = app
+            .path()
+            .app_data_dir()
+            .map_err(|e| e.to_string())?
+            .join("media");
+        if media.is_dir() {
+            for entry in fs::read_dir(&media).map_err(|e| e.to_string())? {
+                let entry = entry.map_err(|e| e.to_string())?;
+                if !entry.path().is_file() {
+                    continue;
+                }
+                let name = entry.file_name().to_string_lossy().to_string();
+                let mut data = Vec::new();
+                fs::File::open(entry.path())
+                    .and_then(|mut f| f.read_to_end(&mut data))
+                    .map_err(|e| e.to_string())?;
+                zip.start_file(format!("media/{name}"), opts)
+                    .map_err(|e| e.to_string())?;
+                zip.write_all(&data).map_err(|e| e.to_string())?;
+            }
+        }
+        zip.finish().map_err(|e| e.to_string())?;
+        Ok(dest.clone())
+    })();
+
+    let _ = fs::remove_file(&snapshot);
+    let created = result?;
+    rotate_backups(&dest, keep)?;
+    Ok(created)
+}
+
+// Оставляем keep свежих архивов; 0 — ротация выключена.
+fn rotate_backups(dest: &str, keep: usize) -> Result<(), String> {
+    if keep == 0 {
+        return Ok(());
+    }
+    let dir = match std::path::Path::new(dest).parent() {
+        Some(d) => d.to_path_buf(),
+        None => return Ok(()),
+    };
+    let mut backups: Vec<_> = fs::read_dir(&dir)
+        .map_err(|e| e.to_string())?
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            let name = e.file_name().to_string_lossy().to_string();
+            name.starts_with("timeline-backup-") && name.ends_with(".zip")
+        })
+        .collect();
+    if backups.len() <= keep {
+        return Ok(());
+    }
+    backups.sort_by_key(|e| e.file_name());
+    for old in &backups[..backups.len() - keep] {
+        let _ = fs::remove_file(old.path());
+    }
+    Ok(())
+}
+
+// Восстановление затирает боевые файлы, поэтому вызывающая сторона обязана подтвердить
+// действие у пользователя и перезапустить приложение — коннект к старой БД уже невалиден.
+#[tauri::command]
+fn restore_backup(app: tauri::AppHandle, zip_path: String) -> Result<(), String> {
+    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let file = fs::File::open(&zip_path).map_err(|e| e.to_string())?;
+    let mut archive = zip::ZipArchive::new(file).map_err(|e| format!("не архив: {e}"))?;
+
+    if archive.by_name("timeline.db").is_err() {
+        return Err("в архиве нет timeline.db — это не бэкап Rings".into());
+    }
+
+    for i in 0..archive.len() {
+        let mut entry = archive.by_index(i).map_err(|e| e.to_string())?;
+        let Some(rel) = entry.enclosed_name() else {
+            continue;
+        };
+        let name = rel.to_string_lossy().replace('\\', "/");
+        if name != "timeline.db" && !name.starts_with("media/") {
+            continue;
+        }
+        let out = data_dir.join(&rel);
+        if let Some(parent) = out.parent() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        let mut dst = fs::File::create(&out).map_err(|e| e.to_string())?;
+        std::io::copy(&mut entry, &mut dst).map_err(|e| e.to_string())?;
+    }
+
+    // WAL/SHM от прежней БД противоречат восстановленному файлу.
+    let _ = fs::remove_file(data_dir.join("timeline.db-wal"));
+    let _ = fs::remove_file(data_dir.join("timeline.db-shm"));
+    Ok(())
+}
+
 const TRAY_WHITE: &[u8] = include_bytes!("../icons/tray-white.png");
 const TRAY_BLACK: &[u8] = include_bytes!("../icons/tray-black.png");
 
@@ -116,10 +237,18 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--minimized"]),
         ))
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![save_media, delete_media, set_tray_icon])
+        .invoke_handler(tauri::generate_handler![
+            save_media,
+            delete_media,
+            set_tray_icon,
+            create_backup,
+            restore_backup
+        ])
         .setup(|app| {
             setup_tray(app)?;
 
