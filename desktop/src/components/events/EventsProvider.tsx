@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ContextMenu } from "@/components/ui/ContextMenu";
 import { EventSheet, type EventSheetState } from "@/components/timeline/EventSheet";
 import { DayEventsDialog } from "@/components/timeline/DayEventsDialog";
 import type { EventFormPayload } from "@/components/timeline/EventForm";
@@ -32,6 +34,7 @@ type EventsCtx = {
   openCreate: (dateISO: string) => void;
   openView: (event: TimelineEvent) => void;
   openDay: (dateISO: string) => void;
+  openMarkMenu: (mark: Mark, x: number, y: number) => void;
 };
 
 const Context = createContext<EventsCtx | null>(null);
@@ -72,6 +75,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
   const [sheet, setSheet] = useState<EventSheetState | null>(null);
   const [day, setDay] = useState<DayState | null>(null);
   const [confirmEvent, setConfirmEvent] = useState<number | null>(null);
+  const [markMenu, setMarkMenu] = useState<{ mark: Mark; x: number; y: number } | null>(null);
 
   const finalizeMedia = async (eventId: number, media: EventFormPayload["media"]) => {
     for (const mediaId of media.removedIds) {
@@ -157,8 +161,12 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     show("Отметка удалена", "success");
   };
 
+  const openMarkMenu = useCallback((mark: Mark, x: number, y: number) => {
+    setMarkMenu({ mark, x, y });
+  }, []);
+
   return (
-    <Context.Provider value={{ openCreate, openView, openDay }}>
+    <Context.Provider value={{ openCreate, openView, openDay, openMarkMenu }}>
       {children}
 
       <EventSheet
@@ -191,6 +199,25 @@ export function EventsProvider({ children }: { children: ReactNode }) {
         message="Удалить это событие? Действие необратимо."
         onConfirm={() => confirmEvent !== null && doDelete(confirmEvent)}
         onClose={() => setConfirmEvent(null)}
+      />
+
+      <ContextMenu
+        open={markMenu !== null}
+        x={markMenu?.x ?? 0}
+        y={markMenu?.y ?? 0}
+        onClose={() => setMarkMenu(null)}
+        items={
+          markMenu
+            ? [
+                {
+                  label: "Удалить отметку",
+                  icon: <Trash2 size={16} />,
+                  danger: true,
+                  onSelect: () => doDeleteMark(markMenu.mark),
+                },
+              ]
+            : []
+        }
       />
     </Context.Provider>
   );

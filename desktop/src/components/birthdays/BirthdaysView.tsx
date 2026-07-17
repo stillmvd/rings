@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { Cake } from "lucide-react";
+import { Cake, Plus } from "lucide-react";
 import { BirthdayCard } from "./BirthdayCard";
+import { Button } from "@/components/ui/Button";
 import { useTodayISO } from "@/components/tracking/clock";
 import { daysUntilBirthday } from "@/lib/birthday";
 import type { Person } from "@/db/queries/people";
@@ -49,9 +50,11 @@ function Section({
 export function BirthdaysView({
   people,
   onPersonClick,
+  onAdd,
 }: {
   people: Person[];
   onPersonClick: (person: Person) => void;
+  onAdd: () => void;
 }) {
   // Реактивный «сегодня»: в полночь именинник сам уезжает из «Сегодня» в «Ближайшие».
   useTodayISO();
@@ -74,12 +77,24 @@ export function BirthdaysView({
           Пока никого нет. Добавьте близких людей — и здесь появятся их дни рождения с отсчётом и
           возрастом.
         </p>
+        <Button onClick={onAdd}>
+          <Plus size={16} />
+          Добавить человека
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="relative h-full w-full">
+      <button
+        type="button"
+        onClick={onAdd}
+        aria-label="Добавить человека"
+        className="absolute bottom-6 right-6 z-30 flex h-14 w-14 cursor-pointer items-center justify-center rounded-2xl bg-amber text-ink shadow-lg transition-transform hover:scale-105"
+      >
+        <Plus size={24} />
+      </button>
       <div className="h-full w-full overflow-y-auto px-6 py-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="mx-auto flex max-w-6xl flex-col gap-12">
           {today.length > 0 && (

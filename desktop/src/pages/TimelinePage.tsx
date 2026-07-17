@@ -14,7 +14,7 @@ const loadTimeline = async () => {
 };
 
 export function TimelinePage() {
-  const { openView, openDay, openCreate } = useEvents();
+  const { openView, openDay, openCreate, openMarkMenu } = useEvents();
   const { data, error } = useQuery(loadTimeline);
 
   if (error) {
@@ -33,7 +33,7 @@ export function TimelinePage() {
       onCreateAt={openCreate}
       onEventOpen={openView}
       onMarkOpen={openDay}
-      onMarkMenu={(mark) => openDay(mark.date)}
+      onMarkMenu={openMarkMenu}
     />
   );
 }
