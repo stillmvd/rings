@@ -1,21 +1,12 @@
 node_modules
-.next
-out
 dist
+out
 .env*
 !.env.example
 *.log
 .DS_Store
 
-# typescript
 *.tsbuildinfo
-next-env.d.ts
-
-data/*.db
-data/*.db-journal
-data/*.db-wal
-data/*.db-shm
-data/media/
 
 .idea
 .vscode
