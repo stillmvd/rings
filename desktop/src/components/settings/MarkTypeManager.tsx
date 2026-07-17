@@ -85,7 +85,7 @@ export function MarkTypeManager() {
               {createElement(resolveIcon(t.icon), { size: 15, style: { color: t.color } })}
             </span>
             <span className="flex-1 truncate text-sm text-app-text">{t.name}</span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <IconButton label="Редактировать" onClick={() => setEdit({ mode: "edit", type: t })}>
                 <Pencil size={15} />
               </IconButton>

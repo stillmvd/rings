@@ -190,7 +190,7 @@ function CategoryRow({
           по умолчанию
         </span>
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {onAddChild && (
           <IconButton label="Добавить подкатегорию" onClick={onAddChild}>
             <Plus size={15} />

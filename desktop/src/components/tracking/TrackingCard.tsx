@@ -48,7 +48,7 @@ function Metric({
         {icon}
         {label}
       </span>
-      <span className="text-sm font-semibold text-app-text">{value}</span>
+      <span className="text-sm font-semibold tabular-nums text-app-text">{value}</span>
     </div>
   );
 }
@@ -80,7 +80,7 @@ export function TrackingCard({
     <button
       type="button"
       onClick={() => onClick(event)}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[16px] bg-surface-1 text-left text-app-text transition-shadow duration-200"
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[16px] bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
       style={{ boxShadow: ELEVATION_1 }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}

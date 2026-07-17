@@ -44,7 +44,7 @@ export function SideSheet({
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
+            transition={{ type: "spring", duration: 0.3, bounce: 0 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <header className="flex shrink-0 items-center justify-between gap-3 px-6 pb-2 pt-5">
@@ -53,7 +53,7 @@ export function SideSheet({
                 type="button"
                 aria-label="Закрыть"
                 onClick={onClose}
-                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-0 hover:text-app-text active:scale-[0.96]"
               >
                 <X size={20} />
               </button>

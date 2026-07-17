@@ -28,7 +28,7 @@ export function SegmentedControl<T extends string>({
               key={s.value}
               type="button"
               onClick={() => onChange(s.value)}
-              className={`flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-xs font-medium transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
                 active ? "bg-amber text-ink" : "text-muted hover:bg-surface-1 hover:text-app-text"
               }`}
             >

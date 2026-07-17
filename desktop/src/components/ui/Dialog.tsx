@@ -42,8 +42,8 @@ export function Dialog({
             style={{ maxWidth: width }}
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.18, ease: [0.2, 0, 0, 1] }}
+            exit={{ opacity: 0, scale: 0.96, y: 4 }}
+            transition={{ type: "spring", duration: 0.3, bounce: 0 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
             {title && (
@@ -53,7 +53,7 @@ export function Dialog({
                   type="button"
                   aria-label="Закрыть"
                   onClick={onClose}
-                  className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                  className="relative grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-surface-0 hover:text-app-text active:scale-[0.96]"
                 >
                   <X size={18} />
                 </button>

@@ -194,7 +194,7 @@ function EventRow({
           alt=""
           loading="lazy"
           decoding="async"
-          className="h-16 w-16 shrink-0 rounded-xl object-cover"
+          className="img-outline h-16 w-16 shrink-0 rounded-xl object-cover"
         />
       ) : (
         <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-xl">

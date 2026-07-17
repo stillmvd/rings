@@ -25,7 +25,7 @@ export function useToast() {
 }
 
 const META: Record<ToastType, { icon: typeof Info; color: string }> = {
-  success: { icon: CheckCircle2, color: "#34d399" },
+  success: { icon: CheckCircle2, color: "oklch(0.773 0.153 163.223)" },
   error: { icon: AlertCircle, color: "var(--rg-rust)" },
   info: { icon: Info, color: "var(--rg-amber)" },
 };
@@ -54,18 +54,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <motion.div
                   key={t.id}
                   layout
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  initial={{ opacity: 0, y: 16, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                   className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-line bg-surface-1 px-4 py-3 text-sm text-app-text shadow-lg"
                 >
                   <Icon size={18} style={{ color: META[t.type].color }} />
-                  <span className="max-w-xs">{t.message}</span>
+                  <span className="max-w-xs text-pretty">{t.message}</span>
                   <button
                     type="button"
+                    aria-label="Закрыть уведомление"
                     onClick={() => dismiss(t.id)}
-                    className="ml-1 cursor-pointer opacity-70 transition-opacity hover:opacity-100"
+                    className="relative ml-1 cursor-pointer opacity-70 transition-[opacity,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:opacity-100 active:scale-[0.96]"
                   >
                     <X size={16} />
                   </button>

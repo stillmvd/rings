@@ -38,7 +38,7 @@ function RailButton({
       aria-label={label}
       title={label}
       aria-current={active ? "page" : undefined}
-      className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors ${
+      className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
         active
           ? "bg-amber text-ink"
           : "text-muted hover:bg-surface-1 hover:text-app-text"

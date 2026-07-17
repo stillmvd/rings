@@ -79,7 +79,7 @@ export function GalleryView({
                   {group.label}
                 </h2>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 [contain-intrinsic-size:auto_400px] [content-visibility:auto]">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
                 {group.events.map((event) => (
                   <EventCard key={event.id} event={event} onClick={onEventClick} />
                 ))}

@@ -1,36 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --rg-bg: #0b0b0d;
-  --rg-surface: #131316;
-  --rg-line: #232327;
-  --rg-text: #f5f1ea;
-  --rg-muted: #8d897e;
-  --rg-amber: #ffb224;
-  --rg-rust: #e8590c;
-  --rg-grad: linear-gradient(100deg, #ffb224, #e8590c);
+  --rg-bg: oklch(0.151 0.004 285.878);
+  --rg-surface: oklch(0.188 0.006 285.806);
+  --rg-line: oklch(0.258 0.007 285.867);
+  --rg-text: oklch(0.959 0.01 81.795);
+  --rg-muted: oklch(0.63 0.017 90.301);
+  --rg-amber: oklch(0.817 0.164 75.837);
+  --rg-rust: oklch(0.644 0.192 41.687);
+  --rg-grad: linear-gradient(100deg in oklch, var(--rg-amber), var(--rg-rust));
 
-  --rg-sig-1: #8d897e;
-  --rg-sig-1-on: #0b0b0d;
-  --rg-sig-1-on-container: #c9c4b8;
-  --rg-sig-2: #e8590c;
-  --rg-sig-2-on: #ffffff;
-  --rg-sig-2-on-container: #ff8a50;
-  --rg-sig-3: #ffb224;
-  --rg-sig-3-on: #0b0b0d;
-  --rg-sig-3-on-container: #ffc85c;
+  /* Обводка изображений — чистый белый/чёрный, без подмеса тона поверхности:
+     тонированная кайма читается как грязь по краю фото. */
+  --rg-outline: oklch(1 0 0 / 0.1);
+
+  --rg-sig-1: oklch(0.63 0.017 90.301);
+  --rg-sig-1-on: oklch(0.151 0.004 285.878);
+  --rg-sig-1-on-container: oklch(0.821 0.017 88.015);
+  --rg-sig-2: oklch(0.644 0.192 41.687);
+  --rg-sig-2-on: oklch(1 0 0);
+  --rg-sig-2-on-container: oklch(0.752 0.159 45.59);
+  --rg-sig-3: oklch(0.817 0.164 75.837);
+  --rg-sig-3-on: oklch(0.151 0.004 285.878);
+  --rg-sig-3-on-container: oklch(0.862 0.139 81.853);
+
+  /* Единый язык движения: spring без отскока для интерактива, стандартная кривая
+     для входов/выходов. Держим в одном месте, чтобы CSS и motion не разъезжались. */
+  --rg-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 [data-theme="light"] {
-  --rg-bg: #f5f1ea;
-  --rg-surface: #fdfbf7;
-  --rg-line: #e2dccf;
-  --rg-text: #0b0b0d;
-  --rg-muted: #8d897e;
+  --rg-bg: oklch(0.959 0.01 81.795);
+  --rg-surface: oklch(0.989 0.006 84.566);
+  --rg-line: oklch(0.896 0.019 86.151);
+  --rg-text: oklch(0.151 0.004 285.878);
+  /* На светлом фоне тёмный muted обязателен: прежний L=0.63 давал 3.1:1 — ниже AA.
+     L=0.514 — тот же тон, что sig-1-on-container, 5.0:1. */
+  --rg-muted: oklch(0.514 0.016 88.76);
 
-  --rg-sig-1-on-container: #6b675d;
-  --rg-sig-2-on-container: #c24a0a;
-  --rg-sig-3-on-container: #a36a00;
+  --rg-outline: oklch(0 0 0 / 0.1);
+
+  --rg-sig-1-on-container: oklch(0.514 0.016 88.76);
+  --rg-sig-2-on-container: oklch(0.564 0.167 41.859);
+  --rg-sig-3-on-container: oklch(0.571 0.122 72.423);
 }
 
 @theme inline {
@@ -41,12 +53,18 @@
   --color-muted: var(--rg-muted);
   --color-amber: var(--rg-amber);
   --color-rust: var(--rg-rust);
-  --color-ink: #0b0b0d;
+  --color-ink: oklch(0.151 0.004 285.878);
   --font-sans: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
 }
 
 @utility bg-resin {
   background: var(--rg-grad);
+}
+
+/* Фото по краю сливается с поверхностью — тонкая обводка возвращает границу.
+   Лежит внутри контура (inset), поэтому не сдвигает раскладку. */
+@utility img-outline {
+  box-shadow: inset 0 0 0 1px var(--rg-outline);
 }
 
 /* Тональная заливка вторичных действий: кнопка обязана отличаться от поля ввода
@@ -71,8 +89,29 @@ body {
   color: var(--rg-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Segoe UI Variable покрывает все веса — фальшивый bold/italic только испортит форму. */
+  font-synthesis: none;
   user-select: none;
   cursor: default;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--rg-amber) 30%, transparent);
+  color: var(--rg-text);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* Крупные заголовки на дефолтном трекинге выглядят разреженными. */
+h1,
+h2 {
+  letter-spacing: -0.015em;
 }
 
 /* === Календарь (react-day-picker + кастомные ячейки), палитра Rings ======= */

@@ -366,7 +366,7 @@ export function EventLayer({
                   <img
                     src={mediaSrc(hovered.events[0].cover)}
                     alt=""
-                    className="mb-1.5 h-24 w-full rounded-md object-cover"
+                    className="img-outline mb-1.5 h-24 w-full rounded-md object-cover"
                   />
                 )}
                 <div className="text-sm font-semibold text-app-text">
