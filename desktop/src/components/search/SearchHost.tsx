@@ -21,10 +21,10 @@ export function SearchHost() {
       const t = e.target as HTMLElement | null;
       const editable =
         t?.tagName === "INPUT" || t?.tagName === "TEXTAREA" || t?.isContentEditable;
-      if ((e.ctrlKey || e.metaKey) && (e.key === "f" || e.key === "F")) {
+      if ((e.ctrlKey || e.metaKey) && e.code === "KeyF") {
         e.preventDefault();
         searchOpenStore.set(true);
-      } else if (e.key === "/" && !editable && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      } else if (e.code === "Slash" && !editable && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         searchOpenStore.set(true);
       }
