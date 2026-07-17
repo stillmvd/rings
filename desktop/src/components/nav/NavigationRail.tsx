@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Target,
   Cake,
+  Search,
   Settings,
   Sun,
   Moon,
@@ -13,6 +14,7 @@ import {
 import { Mark } from "../brand/Mark";
 import { modeStore, type ViewMode } from "../../lib/mode";
 import { themeStore, type ThemePref } from "../../lib/theme";
+import { searchOpenStore } from "../../lib/search";
 
 const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "timeline", label: "Таймлайн", icon: Waypoints },
@@ -94,6 +96,11 @@ export function NavigationRail() {
 
       <div className="flex-1" />
 
+      <RailButton
+        label="Поиск (/)"
+        icon={Search}
+        onClick={() => searchOpenStore.set(true)}
+      />
       <RailButton
         label={THEME_LABEL[theme]}
         icon={THEME_ICON[theme]}

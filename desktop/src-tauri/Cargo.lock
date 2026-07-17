@@ -844,6 +844,8 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tauri-plugin-sql",
+ "webview2-com",
+ "windows",
 ]
 
 [[package]]

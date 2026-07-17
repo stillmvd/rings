@@ -4,6 +4,7 @@ import { getMarksInRange } from "@/db/queries/marks";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { useQuery } from "@/lib/useQuery";
 import { useEvents } from "@/components/events/EventsProvider";
+import { filterStore } from "@/lib/search";
 
 const loadTimeline = async () => {
   const [events, marks] = await Promise.all([
@@ -15,6 +16,7 @@ const loadTimeline = async () => {
 
 export function TimelinePage() {
   const { openView, openDay, openCreate, openMarkMenu } = useEvents();
+  const filter = filterStore.use();
   const { data, error } = useQuery(loadTimeline);
 
   if (error) {
@@ -30,6 +32,8 @@ export function TimelinePage() {
     <TimelineStage
       events={data.events}
       marks={data.marks}
+      filter={filter}
+      onFilterChange={filterStore.set}
       onCreateAt={openCreate}
       onEventOpen={openView}
       onMarkOpen={openDay}

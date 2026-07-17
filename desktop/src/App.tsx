@@ -4,6 +4,7 @@ import { NavigationRail } from "./components/nav/NavigationRail";
 import { ToastProvider } from "./components/ui/Toast";
 import { EventsProvider } from "./components/events/EventsProvider";
 import { PeopleProvider } from "./components/events/PeopleProvider";
+import { SearchHost } from "./components/search/SearchHost";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import { SettingsPage } from "./pages/stubs";
@@ -40,6 +41,7 @@ export default function App() {
               </main>
             </div>
           </div>
+          <SearchHost />
         </PeopleProvider>
       </EventsProvider>
     </ToastProvider>

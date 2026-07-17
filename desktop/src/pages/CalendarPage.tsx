@@ -6,6 +6,7 @@ import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import { useQuery } from "@/lib/useQuery";
 import { useEvents } from "@/components/events/EventsProvider";
 import { usePeople } from "@/components/events/PeopleProvider";
+import { filterStore } from "@/lib/search";
 
 const loadCalendar = async () => {
   const [events, marks, people] = await Promise.all([
@@ -19,6 +20,7 @@ const loadCalendar = async () => {
 export function CalendarPage() {
   const { openView, openDay, openCreate, openMarkMenu } = useEvents();
   const { openViewPerson } = usePeople();
+  const filter = filterStore.use();
   const { data, error } = useQuery(loadCalendar);
 
   if (error) {
@@ -35,6 +37,8 @@ export function CalendarPage() {
       events={data.events}
       marks={data.marks}
       people={data.people}
+      filter={filter}
+      onFilterChange={filterStore.set}
       onEventClick={openView}
       onDayOpen={openDay}
       onCreateRequest={(iso) => openCreate(iso)}
