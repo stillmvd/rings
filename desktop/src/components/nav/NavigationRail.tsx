@@ -6,14 +6,10 @@ import {
   Cake,
   Search,
   Settings,
-  Sun,
-  Moon,
-  Monitor,
   type LucideIcon,
 } from "lucide-react";
 import { Mark } from "../brand/Mark";
 import { modeStore, type ViewMode } from "../../lib/mode";
-import { themeStore, type ThemePref } from "../../lib/theme";
 import { searchOpenStore } from "../../lib/search";
 
 const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
@@ -23,24 +19,6 @@ const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "tracking", label: "Отслеживание", icon: Target },
   { value: "birthdays", label: "Дни рождения", icon: Cake },
 ];
-
-const THEME_CYCLE: Record<ThemePref, ThemePref> = {
-  system: "light",
-  light: "dark",
-  dark: "system",
-};
-
-const THEME_ICON: Record<ThemePref, LucideIcon> = {
-  system: Monitor,
-  light: Sun,
-  dark: Moon,
-};
-
-const THEME_LABEL: Record<ThemePref, string> = {
-  system: "Тема: системная",
-  light: "Тема: светлая",
-  dark: "Тема: тёмная",
-};
 
 function RailButton({
   label,
@@ -73,7 +51,6 @@ function RailButton({
 
 export function NavigationRail() {
   const mode = modeStore.use();
-  const theme = themeStore.use();
 
   return (
     <nav
@@ -100,11 +77,6 @@ export function NavigationRail() {
         label="Поиск (/)"
         icon={Search}
         onClick={() => searchOpenStore.set(true)}
-      />
-      <RailButton
-        label={THEME_LABEL[theme]}
-        icon={THEME_ICON[theme]}
-        onClick={() => themeStore.set(THEME_CYCLE[theme])}
       />
       <RailButton
         label="Настройки"

@@ -7,7 +7,8 @@ import { PeopleProvider } from "./components/events/PeopleProvider";
 import { SearchHost } from "./components/search/SearchHost";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
-import { SettingsPage } from "./pages/stubs";
+import { useCloseToTray, useApplyTrayIcon } from "./lib/behavior";
+import { SettingsPage } from "./pages/SettingsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { TrackingPage } from "./pages/TrackingPage";
@@ -25,6 +26,8 @@ const PAGES: Record<ViewMode, ComponentType> = {
 
 export default function App() {
   useApplyTheme();
+  useCloseToTray();
+  useApplyTrayIcon();
   const mode = modeStore.use();
   const Page = PAGES[mode];
 
