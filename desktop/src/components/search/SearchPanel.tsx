@@ -1,4 +1,4 @@
-import { createElement, useEffect, useRef } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Search, X } from "lucide-react";
@@ -30,6 +30,7 @@ export function SearchPanel({
   onClose: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [allFor, setAllFor] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -68,7 +69,7 @@ export function SearchPanel({
   const query = filter.query.trim();
   const matched = query ? events.filter((e) => matchesFilter(e, filter)) : [];
   matched.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id));
-  const results = matched.slice(0, MAX_RESULTS);
+  const results = allFor === query ? matched : matched.slice(0, MAX_RESULTS);
 
   return createPortal(
     <AnimatePresence>
@@ -144,8 +145,14 @@ export function SearchPanel({
                       </li>
                     ))}
                     {matched.length > results.length && (
-                      <li className="px-3 py-2 text-center text-xs text-muted">
-                        …ещё {matched.length - results.length}
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => setAllFor(query)}
+                          className="w-full cursor-pointer px-3 py-2 text-center text-xs text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                        >
+                          Показать все ({matched.length})
+                        </button>
                       </li>
                     )}
                   </ul>
