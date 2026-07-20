@@ -16,7 +16,7 @@ import { BackupPanel } from "@/components/settings/BackupPanel";
 import { useLiveSeconds, setLiveSeconds } from "@/components/birthdays/useLiveSeconds";
 import { themeStore, type ThemePref } from "@/lib/theme";
 import { closeToTrayStore, trayIconStore, type TrayIconPref } from "@/lib/behavior";
-import { notifyBirthdaysStore } from "@/lib/notifications";
+import { notifyBirthdaysStore, notifyRemindersStore } from "@/lib/notifications";
 import { useQuery } from "@/lib/useQuery";
 
 const THEME_SEGMENTS: { value: ThemePref; label: string }[] = [
@@ -82,6 +82,7 @@ export function SettingsPage() {
   const closeToTray = closeToTrayStore.use() === "1";
   const trayIcon = trayIconStore.use();
   const notifyBirthdays = notifyBirthdaysStore.use() === "1";
+  const notifyReminders = notifyRemindersStore.use() === "1";
   const { show } = useToast();
   const { data: version } = useQuery(getVersion);
   const { data: autostart, reload: reloadAutostart } = useQuery(isEnabled);
@@ -186,6 +187,16 @@ export function SettingsPage() {
               checked={notifyBirthdays}
               onChange={(v) => notifyBirthdaysStore.set(v ? "1" : "0")}
               label="Напоминать о днях рождения"
+            />
+          </Row>
+          <Row
+            title="Уведомления о напоминаниях"
+            description="Срабатывания, пропущенные и предварительные оповещения раздела «Напоминания»"
+          >
+            <Switch
+              checked={notifyReminders}
+              onChange={(v) => notifyRemindersStore.set(v ? "1" : "0")}
+              label="Уведомления о напоминаниях"
             />
           </Row>
         </Section>

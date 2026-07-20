@@ -9,7 +9,7 @@ import { SearchHost } from "./components/search/SearchHost";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import { useCloseToTray, useApplyTrayIcon } from "./lib/behavior";
-import { useBirthdayNotifications } from "./lib/notifications";
+import { useNotifications } from "./lib/notifications";
 import { useAutoBackup } from "./lib/backup";
 import { SettingsPage } from "./pages/SettingsPage";
 import { GalleryPage } from "./pages/GalleryPage";
@@ -33,7 +33,7 @@ export default function App() {
   useApplyTheme();
   useCloseToTray();
   useApplyTrayIcon();
-  useBirthdayNotifications();
+  useNotifications();
   useAutoBackup();
   const mode = modeStore.use();
   const Page = PAGES[mode];
