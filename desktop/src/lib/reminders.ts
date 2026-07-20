@@ -17,6 +17,12 @@ export function nowLocalMinuteISO(): string {
   return format(new Date(), "yyyy-MM-dd'T'HH:mm");
 }
 
+// День, в котором напоминание фактически всплывает: snooze сдвигает его вперёд.
+export function effectiveDateISO(r: { date: string; snoozed_until: string | null }): string {
+  const snoozeDay = r.snoozed_until?.slice(0, 10);
+  return snoozeDay && snoozeDay > r.date ? snoozeDay : r.date;
+}
+
 // Первое вхождение повтора строго позже afterISO; для разовых — null.
 export function nextOccurrence(
   dateISO: string,

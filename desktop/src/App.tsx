@@ -4,6 +4,7 @@ import { NavigationRail } from "./components/nav/NavigationRail";
 import { ToastProvider } from "./components/ui/Toast";
 import { EventsProvider } from "./components/events/EventsProvider";
 import { PeopleProvider } from "./components/events/PeopleProvider";
+import { RemindersProvider } from "./components/events/RemindersProvider";
 import { SearchHost } from "./components/search/SearchHost";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
@@ -14,6 +15,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { TrackingPage } from "./pages/TrackingPage";
+import { RemindersPage } from "./pages/RemindersPage";
 import { BirthdaysPage } from "./pages/BirthdaysPage";
 import { TimelinePage } from "./pages/TimelinePage";
 
@@ -22,6 +24,7 @@ const PAGES: Record<ViewMode, ComponentType> = {
   gallery: GalleryPage,
   calendar: CalendarPage,
   tracking: TrackingPage,
+  reminders: RemindersPage,
   birthdays: BirthdaysPage,
   settings: SettingsPage,
 };
@@ -39,16 +42,18 @@ export default function App() {
     <ToastProvider>
       <EventsProvider>
         <PeopleProvider>
-          <div className="flex h-screen flex-col bg-surface-0 text-app-text">
-            <Titlebar />
-            <div className="flex min-h-0 flex-1">
-              <NavigationRail />
-              <main className="min-h-0 flex-1 overflow-hidden">
-                <Page />
-              </main>
+          <RemindersProvider>
+            <div className="flex h-screen flex-col bg-surface-0 text-app-text">
+              <Titlebar />
+              <div className="flex min-h-0 flex-1">
+                <NavigationRail />
+                <main className="min-h-0 flex-1 overflow-hidden">
+                  <Page />
+                </main>
+              </div>
             </div>
-          </div>
-          <SearchHost />
+            <SearchHost />
+          </RemindersProvider>
         </PeopleProvider>
       </EventsProvider>
     </ToastProvider>

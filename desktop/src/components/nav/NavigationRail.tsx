@@ -3,6 +3,7 @@ import {
   LayoutGrid,
   CalendarDays,
   Target,
+  Bell,
   Cake,
   Search,
   Settings,
@@ -17,6 +18,7 @@ const DESTINATIONS: { value: ViewMode; label: string; icon: LucideIcon }[] = [
   { value: "gallery", label: "Галерея", icon: LayoutGrid },
   { value: "calendar", label: "Календарь", icon: CalendarDays },
   { value: "tracking", label: "Отслеживание", icon: Target },
+  { value: "reminders", label: "Напоминания", icon: Bell },
   { value: "birthdays", label: "Дни рождения", icon: Cake },
 ];
 

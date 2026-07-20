@@ -5,6 +5,7 @@ export type ViewMode =
   | "gallery"
   | "calendar"
   | "tracking"
+  | "reminders"
   | "birthdays"
   | "settings";
 
