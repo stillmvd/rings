@@ -1,4 +1,4 @@
-import { addDays, addWeeks, addMonths, addYears, format, parseISO } from "date-fns";
+import { addDays, addHours, addWeeks, addMonths, addYears, format, parseISO } from "date-fns";
 import { toISO } from "./dates";
 
 export type RepeatKind = "none" | "daily" | "weekly" | "monthly" | "yearly" | "custom";
@@ -15,6 +15,20 @@ export const REPEAT_OPTIONS: { value: RepeatKind; label: string }[] = [
 
 export function nowLocalMinuteISO(): string {
   return format(new Date(), "yyyy-MM-dd'T'HH:mm");
+}
+
+export function snoozePlusHour(): string {
+  return format(addHours(new Date(), 1), "yyyy-MM-dd'T'HH:mm");
+}
+
+export function snoozeEvening(): string {
+  const now = new Date();
+  const base = now.getHours() >= 19 ? addDays(now, 1) : now;
+  return `${toISO(base)}T19:00`;
+}
+
+export function snoozeTomorrow(): string {
+  return `${toISO(addDays(new Date(), 1))}T09:00`;
 }
 
 // День, в котором напоминание фактически всплывает: snooze сдвигает его вперёд.

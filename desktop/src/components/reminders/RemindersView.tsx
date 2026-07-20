@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
-import { Bell, Cake, ChevronRight, Trash2 } from "lucide-react";
+import { AlarmClock, Bell, Cake, ChevronRight, Moon, Sunset, Trash2 } from "lucide-react";
 import { addDays, parseISO } from "date-fns";
 import {
   toISO,
@@ -9,7 +9,13 @@ import {
   formatWeekdayShortRu,
   formatWeekdayFullRu,
 } from "@/lib/dates";
-import { effectiveDateISO } from "@/lib/reminders";
+import {
+  effectiveDateISO,
+  snoozePlusHour,
+  snoozeEvening,
+  snoozeTomorrow,
+} from "@/lib/reminders";
+import { ContextMenu } from "@/components/ui/ContextMenu";
 import { isBirthdayToday, formatTurningAge } from "@/lib/birthday";
 import { useTodayISO } from "@/components/tracking/clock";
 import { useReminders } from "@/components/events/RemindersProvider";
@@ -34,11 +40,13 @@ function Rows({
   dateLabelFor,
   onToggle,
   onOpen,
+  onMenu,
 }: {
   items: Reminder[];
   dateLabelFor?: (r: Reminder) => string | undefined;
   onToggle: (id: number) => void;
   onOpen?: (r: Reminder) => void;
+  onMenu?: (r: Reminder, x: number, y: number) => void;
 }) {
   return (
     <ul className="flex flex-col gap-0.5">
@@ -50,6 +58,7 @@ function Rows({
             dateLabel={dateLabelFor?.(r)}
             onToggle={onToggle}
             onOpen={onOpen}
+            onMenu={onMenu}
           />
         ))}
       </AnimatePresence>
@@ -61,16 +70,19 @@ export function RemindersView({
   reminders,
   people,
   onPersonClick,
-  onReminderOpen,
 }: {
   reminders: Reminder[];
   people: Person[];
   onPersonClick: (person: Person) => void;
-  onReminderOpen?: (reminder: Reminder) => void;
 }) {
   const today = useTodayISO();
-  const { finishReminder, purgeCompleted } = useReminders();
+  const { finishReminder, purgeCompleted, postponeReminder, removeReminder, openEditReminder } =
+    useReminders();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [menu, setMenu] = useState<{ reminder: Reminder; x: number; y: number } | null>(null);
+
+  const onReminderOpen = openEditReminder;
+  const openMenu = (reminder: Reminder, x: number, y: number) => setMenu({ reminder, x, y });
 
   const birthdays = useMemo(() => people.filter((p) => isBirthdayToday(p.birth_date)), [people]);
 
@@ -124,6 +136,7 @@ export function RemindersView({
                   dateLabelFor={(r) => formatDayMonthRu(r.date)}
                   onToggle={finishReminder}
                   onOpen={onReminderOpen}
+                  onMenu={openMenu}
                 />
               </section>
             )}
@@ -163,7 +176,12 @@ export function RemindersView({
                 )}
 
                 {groups.today.length > 0 ? (
-                  <Rows items={groups.today} onToggle={finishReminder} onOpen={onReminderOpen} />
+                  <Rows
+                    items={groups.today}
+                    onToggle={finishReminder}
+                    onOpen={onReminderOpen}
+                    onMenu={openMenu}
+                  />
                 ) : (
                   birthdays.length === 0 && (
                     <p className="text-sm text-muted">На сегодня напоминаний нет.</p>
@@ -179,7 +197,12 @@ export function RemindersView({
                     {groups.tomorrow.length > 0 && (
                       <div>
                         <h3 className="mb-1.5 text-xs font-medium text-muted">Завтра</h3>
-                        <Rows items={groups.tomorrow} onToggle={finishReminder} onOpen={onReminderOpen} />
+                        <Rows
+                          items={groups.tomorrow}
+                          onToggle={finishReminder}
+                          onOpen={onReminderOpen}
+                          onMenu={openMenu}
+                        />
                       </div>
                     )}
                     {groups.week.length > 0 && (
@@ -190,6 +213,7 @@ export function RemindersView({
                           dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
                           onToggle={finishReminder}
                           onOpen={onReminderOpen}
+                          onMenu={openMenu}
                         />
                       </div>
                     )}
@@ -201,6 +225,7 @@ export function RemindersView({
                           dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
                           onToggle={finishReminder}
                           onOpen={onReminderOpen}
+                          onMenu={openMenu}
                         />
                       </div>
                     )}
@@ -249,6 +274,40 @@ export function RemindersView({
           </>
         )}
       </div>
+
+      <ContextMenu
+        open={menu !== null}
+        x={menu?.x ?? 0}
+        y={menu?.y ?? 0}
+        onClose={() => setMenu(null)}
+        items={
+          menu
+            ? [
+                {
+                  label: "Отложить на час",
+                  icon: <AlarmClock size={15} />,
+                  onSelect: () => postponeReminder(menu.reminder.id, snoozePlusHour()),
+                },
+                {
+                  label: "Отложить до вечера",
+                  icon: <Sunset size={15} />,
+                  onSelect: () => postponeReminder(menu.reminder.id, snoozeEvening()),
+                },
+                {
+                  label: "Отложить до завтра",
+                  icon: <Moon size={15} />,
+                  onSelect: () => postponeReminder(menu.reminder.id, snoozeTomorrow()),
+                },
+                {
+                  label: "Удалить",
+                  icon: <Trash2 size={15} />,
+                  danger: true,
+                  onSelect: () => removeReminder(menu.reminder.id),
+                },
+              ]
+            : []
+        }
+      />
     </div>
   );
 }

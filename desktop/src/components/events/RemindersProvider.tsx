@@ -4,12 +4,18 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { bumpDataVersion } from "@/lib/dataVersion";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import {
+  ReminderSheet,
+  type ReminderSheetState,
+} from "@/components/reminders/ReminderSheet";
+import type { ReminderFormValues } from "@/components/reminders/ReminderForm";
+import {
   createReminder,
   updateReminder,
   deleteReminder,
   completeReminder,
   snoozeReminder,
   clearCompleted,
+  type Reminder,
   type ReminderInput,
 } from "@/db/queries/reminders";
 
@@ -20,6 +26,8 @@ type RemindersCtx = {
   finishReminder: (id: number) => Promise<void>;
   postponeReminder: (id: number, untilISO: string) => Promise<void>;
   purgeCompleted: () => Promise<void>;
+  openCreateReminder: (prefill?: Partial<ReminderFormValues>) => void;
+  openEditReminder: (reminder: Reminder) => void;
 };
 
 const Context = createContext<RemindersCtx | null>(null);
@@ -41,6 +49,16 @@ function validate(input: ReminderInput): string | null {
 export function RemindersProvider({ children }: { children: ReactNode }) {
   const { show } = useToast();
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [sheet, setSheet] = useState<ReminderSheetState | null>(null);
+
+  const openCreateReminder = useCallback(
+    (prefill?: Partial<ReminderFormValues>) => setSheet({ mode: "create", prefill }),
+    [],
+  );
+  const openEditReminder = useCallback(
+    (reminder: Reminder) => setSheet({ mode: "edit", reminder }),
+    [],
+  );
 
   const addReminder = useCallback(
     async (input: ReminderInput) => {
@@ -104,9 +122,26 @@ export function RemindersProvider({ children }: { children: ReactNode }) {
         finishReminder,
         postponeReminder,
         purgeCompleted,
+        openCreateReminder,
+        openEditReminder,
       }}
     >
       {children}
+
+      <ReminderSheet
+        state={sheet}
+        onCreate={async (payload) => {
+          if (await addReminder(payload)) setSheet(null);
+        }}
+        onUpdate={async (id, payload) => {
+          if (await saveReminder(id, payload)) setSheet(null);
+        }}
+        onDelete={(id) => {
+          setSheet(null);
+          setConfirmId(id);
+        }}
+        onClose={() => setSheet(null)}
+      />
 
       <ConfirmDialog
         open={confirmId !== null}

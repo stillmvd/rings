@@ -10,12 +10,14 @@ export function ReminderRow({
   completed = false,
   onToggle,
   onOpen,
+  onMenu,
 }: {
   reminder: Reminder;
   dateLabel?: string;
   completed?: boolean;
   onToggle?: (id: number) => void;
   onOpen?: (reminder: Reminder) => void;
+  onMenu?: (reminder: Reminder, x: number, y: number) => void;
 }) {
   const Icon = resolveIconOrNull(reminder.icon);
   return (
@@ -43,6 +45,11 @@ export function ReminderRow({
       <button
         type="button"
         onClick={() => onOpen?.(reminder)}
+        onContextMenu={(e) => {
+          if (!onMenu) return;
+          e.preventDefault();
+          onMenu(reminder, e.clientX, e.clientY);
+        }}
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-0"
       >
         {Icon &&
