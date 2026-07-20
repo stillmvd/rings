@@ -233,6 +233,17 @@ pub fn run() {
     }
 
     builder
+        .plugin(
+            // Только геометрия — без VISIBLE, иначе автостарт в трей (--minimized) восстановил бы
+            // показанное окно.
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(
+                    tauri_plugin_window_state::StateFlags::SIZE
+                        | tauri_plugin_window_state::StateFlags::POSITION
+                        | tauri_plugin_window_state::StateFlags::MAXIMIZED,
+                )
+                .build(),
+        )
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--minimized"]),
