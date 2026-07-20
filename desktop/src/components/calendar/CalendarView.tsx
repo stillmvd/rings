@@ -14,8 +14,8 @@ import { ru } from "date-fns/locale";
 import { parseISO, format, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ChevronUp, ChevronDown, CalendarDays, Cake } from "lucide-react";
 import "react-day-picker/style.css";
-import { getSignificanceMeta } from "@/lib/significance";
 import { onColorFor } from "@/lib/colors";
+import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { mediaSrc } from "@/lib/paths";
 import {
@@ -268,24 +268,24 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
         {shown.length > 0 && (
           <div className="tl-cal-chips" style={{ opacity: future ? 0.5 : undefined }}>
             {shown.map((e) => {
-              const sig = getSignificanceMeta(e.significance);
+              const accent = eventAccent(e);
               return (
                 <button
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{
-                    background: sig.color,
-                    color: sig.onColor,
-                    borderLeft: e.category_color ? `4px solid ${e.category_color}` : undefined,
-                  }}
+                  style={{ background: accent.container }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();
                     onEventOpen(e);
                   }}
                 >
-                  <EventMarker event={e} />
+                  {e.cover ? (
+                    <EventMarker event={e} />
+                  ) : (
+                    <span className="tl-cal-chip-dot" style={{ background: accent.fill }} />
+                  )}
                   <span className="tl-cal-chip-title">{e.title}</span>
                 </button>
               );
@@ -530,10 +530,10 @@ export function CalendarView({
 
   return (
     <div className="h-full w-full overflow-auto">
-      <div className="flex min-h-full min-w-max items-center justify-center p-6">
+      <div className="flex min-h-full items-center justify-center p-6">
         <div
           ref={cardRef}
-          className="tl-calendar tl-calendar-lg w-max p-5"
+          className="tl-calendar tl-calendar-lg w-full max-w-[1500px] p-5"
           style={{
             background: "var(--rg-surface)",
             borderRadius: "1rem",

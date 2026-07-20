@@ -1,23 +1,25 @@
+// Категорийная шкала: единые L=0.7 и C≈0.125 в OKLCH, оттенок равномерно по кругу.
+// Перцептивно равные и приглушённые — не кислотные, читаются как точка-метка в обеих темах.
 export const CATEGORY_COLORS = [
-  "#ef4444", // red
-  "#f97316", // orange
-  "#f59e0b", // amber
-  "#eab308", // yellow
-  "#84cc16", // lime
-  "#22c55e", // green
-  "#10b981", // emerald
-  "#06b6d4", // cyan
-  "#3b82f6", // blue
-  "#6366f1", // indigo
-  "#8b5cf6", // violet
-  "#d946ef", // fuchsia
-  "#ec4899", // pink
-  "#64748b", // slate
-  "#78716c", // stone
-  "#0ea5e9", // sky
+  "#e27e76", // red
+  "#dd8556", // orange
+  "#d08f3c", // amber
+  "#ba9c32", // yellow
+  "#9ca743", // lime
+  "#77b061", // green
+  "#4ab683", // emerald
+  "#00b7a5", // teal
+  "#00b3c2", // cyan
+  "#2caddb", // sky
+  "#5da3e9", // blue
+  "#8498ec", // indigo
+  "#a48ee4", // violet
+  "#be85d1", // purple
+  "#d27eb7", // pink
+  "#de7b98", // rose
 ] as const;
 
-export const DEFAULT_CATEGORY_COLOR = "#64748b";
+export const DEFAULT_CATEGORY_COLOR = "#9aa0a6";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 

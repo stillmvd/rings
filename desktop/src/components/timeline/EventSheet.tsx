@@ -134,19 +134,18 @@ export function EventSheet({
         )}
 
         {state?.mode === "view" && (
-          <EventView event={state.event} media={state.media} onLightbox={setLbIndex} />
-        )}
-
-        {state?.mode === "view" && (
-          <div className="mt-4 flex items-center justify-between gap-2">
-            <Button variant="danger" onClick={() => onDelete(state.event.id)}>
-              <Trash2 size={16} />
-              Удалить
-            </Button>
-            <Button variant="secondary" onClick={onStartEdit}>
-              <Pencil size={16} />
-              Редактировать
-            </Button>
+          <div className="flex min-h-full flex-col">
+            <EventView event={state.event} media={state.media} onLightbox={setLbIndex} />
+            <div className="mt-auto flex items-center justify-between gap-2 pt-4">
+              <Button variant="danger" onClick={() => onDelete(state.event.id)}>
+                <Trash2 size={16} />
+                Удалить
+              </Button>
+              <Button variant="secondary" onClick={onStartEdit}>
+                <Pencil size={16} />
+                Редактировать
+              </Button>
+            </div>
           </div>
         )}
       </SideSheet>
@@ -224,7 +223,7 @@ function EventView({
         <p className="mt-0.5 text-sm text-muted">{dateLabel}</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-sm">
+      <div className="flex flex-col items-start gap-2 text-sm">
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
           style={{ background: accent.fill, color: accent.onFill }}
