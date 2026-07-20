@@ -1,6 +1,6 @@
 import { createElement } from "react";
 import { motion } from "motion/react";
-import { Check } from "lucide-react";
+import { ArrowUpRight, Check } from "lucide-react";
 import { resolveIconOrNull } from "@/lib/icons";
 import type { Reminder } from "@/db/queries/reminders";
 
@@ -11,6 +11,7 @@ export function ReminderRow({
   onToggle,
   onOpen,
   onMenu,
+  onEventJump,
 }: {
   reminder: Reminder;
   dateLabel?: string;
@@ -18,6 +19,7 @@ export function ReminderRow({
   onToggle?: (id: number) => void;
   onOpen?: (reminder: Reminder) => void;
   onMenu?: (reminder: Reminder, x: number, y: number) => void;
+  onEventJump?: (eventId: number) => void;
 }) {
   const Icon = resolveIconOrNull(reminder.icon);
   return (
@@ -71,6 +73,17 @@ export function ReminderRow({
           </span>
         )}
       </button>
+      {reminder.event_id !== null && onEventJump && (
+        <button
+          type="button"
+          aria-label="Открыть связанное событие"
+          title="Открыть связанное событие"
+          onClick={() => onEventJump(reminder.event_id!)}
+          className="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-muted opacity-0 transition-[opacity,color,background-color] duration-150 hover:bg-surface-0 hover:text-app-text group-hover:opacity-100"
+        >
+          <ArrowUpRight size={14} />
+        </button>
+      )}
     </motion.li>
   );
 }

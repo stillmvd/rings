@@ -40,9 +40,9 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <EventsProvider>
-        <PeopleProvider>
-          <RemindersProvider>
+      <RemindersProvider>
+        <EventsProvider>
+          <PeopleProvider>
             <div className="flex h-screen flex-col bg-surface-0 text-app-text">
               <Titlebar />
               <div className="flex min-h-0 flex-1">
@@ -53,9 +53,9 @@ export default function App() {
               </div>
             </div>
             <SearchHost />
-          </RemindersProvider>
-        </PeopleProvider>
-      </EventsProvider>
+          </PeopleProvider>
+        </EventsProvider>
+      </RemindersProvider>
     </ToastProvider>
   );
 }

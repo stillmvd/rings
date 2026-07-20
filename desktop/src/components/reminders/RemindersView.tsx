@@ -41,12 +41,14 @@ function Rows({
   onToggle,
   onOpen,
   onMenu,
+  onEventJump,
 }: {
   items: Reminder[];
   dateLabelFor?: (r: Reminder) => string | undefined;
   onToggle: (id: number) => void;
   onOpen?: (r: Reminder) => void;
   onMenu?: (r: Reminder, x: number, y: number) => void;
+  onEventJump?: (eventId: number) => void;
 }) {
   return (
     <ul className="flex flex-col gap-0.5">
@@ -59,6 +61,7 @@ function Rows({
             onToggle={onToggle}
             onOpen={onOpen}
             onMenu={onMenu}
+            onEventJump={onEventJump}
           />
         ))}
       </AnimatePresence>
@@ -70,10 +73,12 @@ export function RemindersView({
   reminders,
   people,
   onPersonClick,
+  onEventJump,
 }: {
   reminders: Reminder[];
   people: Person[];
   onPersonClick: (person: Person) => void;
+  onEventJump?: (eventId: number) => void;
 }) {
   const today = useTodayISO();
   const { finishReminder, purgeCompleted, postponeReminder, removeReminder, openEditReminder } =
@@ -136,7 +141,7 @@ export function RemindersView({
                   dateLabelFor={(r) => formatDayMonthRu(r.date)}
                   onToggle={finishReminder}
                   onOpen={onReminderOpen}
-                  onMenu={openMenu}
+                  onMenu={openMenu} onEventJump={onEventJump}
                 />
               </section>
             )}
@@ -180,7 +185,7 @@ export function RemindersView({
                     items={groups.today}
                     onToggle={finishReminder}
                     onOpen={onReminderOpen}
-                    onMenu={openMenu}
+                    onMenu={openMenu} onEventJump={onEventJump}
                   />
                 ) : (
                   birthdays.length === 0 && (
@@ -201,7 +206,7 @@ export function RemindersView({
                           items={groups.tomorrow}
                           onToggle={finishReminder}
                           onOpen={onReminderOpen}
-                          onMenu={openMenu}
+                          onMenu={openMenu} onEventJump={onEventJump}
                         />
                       </div>
                     )}
@@ -213,7 +218,7 @@ export function RemindersView({
                           dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
                           onToggle={finishReminder}
                           onOpen={onReminderOpen}
-                          onMenu={openMenu}
+                          onMenu={openMenu} onEventJump={onEventJump}
                         />
                       </div>
                     )}
@@ -225,7 +230,7 @@ export function RemindersView({
                           dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
                           onToggle={finishReminder}
                           onOpen={onReminderOpen}
-                          onMenu={openMenu}
+                          onMenu={openMenu} onEventJump={onEventJump}
                         />
                       </div>
                     )}

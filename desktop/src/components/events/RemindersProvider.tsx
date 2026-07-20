@@ -1,7 +1,9 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { useToast } from "@/components/ui/Toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { bumpDataVersion } from "@/lib/dataVersion";
+import { modeStore } from "@/lib/mode";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import {
   ReminderSheet,
@@ -59,6 +61,16 @@ export function RemindersProvider({ children }: { children: ReactNode }) {
     (reminder: Reminder) => setSheet({ mode: "edit", reminder }),
     [],
   );
+
+  useEffect(() => {
+    const unlisten = listen("add-reminder", () => {
+      modeStore.set("reminders");
+      setSheet({ mode: "create" });
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []);
 
   const addReminder = useCallback(
     async (input: ReminderInput) => {

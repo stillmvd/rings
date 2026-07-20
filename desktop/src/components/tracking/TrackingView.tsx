@@ -97,7 +97,7 @@ export function TrackingView({
           )}
           {future.length > 0 && (
             <Section
-              title="Напоминания"
+              title="Предстоящее"
               events={future}
               variant="future"
               showHeader={past.length > 0}

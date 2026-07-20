@@ -1,5 +1,6 @@
 import { createElement, useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Bell, Pencil, Trash2 } from "lucide-react";
+import { useReminders } from "@/components/events/RemindersProvider";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
@@ -62,6 +63,7 @@ export function EventSheet({
 }: Props) {
   const [lbIndex, setLbIndex] = useState(-1);
   const [createKind, setCreateKind] = useState<"event" | "mark">("event");
+  const { openCreateReminder } = useReminders();
 
   const close = () => {
     setLbIndex(-1);
@@ -141,10 +143,26 @@ export function EventSheet({
                 <Trash2 size={16} />
                 Удалить
               </Button>
-              <Button variant="secondary" onClick={onStartEdit}>
-                <Pencil size={16} />
-                Редактировать
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    close();
+                    openCreateReminder({
+                      title: state.event.title,
+                      date: state.event.date,
+                      eventId: state.event.id,
+                    });
+                  }}
+                >
+                  <Bell size={16} />
+                  Напомнить…
+                </Button>
+                <Button variant="secondary" onClick={onStartEdit}>
+                  <Pencil size={16} />
+                  Редактировать
+                </Button>
+              </div>
             </div>
           </div>
         )}
