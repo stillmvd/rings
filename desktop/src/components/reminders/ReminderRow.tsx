@@ -27,7 +27,7 @@ export function ReminderRow({
       layout
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: 24 }}
+      exit={{ opacity: 0, x: 16 }}
       transition={{ type: "spring", duration: 0.35, bounce: 0 }}
       className="group flex items-center gap-2.5"
     >
@@ -36,7 +36,7 @@ export function ReminderRow({
         aria-label={completed ? "Выполнено" : "Отметить выполненным"}
         disabled={completed}
         onClick={() => onToggle?.(reminder.id)}
-        className={`grid h-5 w-5 shrink-0 cursor-pointer place-items-center rounded-full border transition-[background-color,border-color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.9] disabled:cursor-default ${
+        className={`relative grid h-5 w-5 shrink-0 cursor-pointer place-items-center rounded-full border transition-[background-color,border-color,scale] duration-150 ease-[var(--rg-ease)] after:absolute after:-inset-x-2 after:-inset-y-1.5 active:scale-[0.96] disabled:cursor-default ${
           completed
             ? "border-amber bg-amber text-ink"
             : "border-line text-transparent hover:border-amber hover:text-amber"
@@ -68,7 +68,7 @@ export function ReminderRow({
           {reminder.title}
         </span>
         {(dateLabel || reminder.time) && (
-          <span className="shrink-0 text-xs text-muted">
+          <span className="shrink-0 text-xs tabular-nums text-muted">
             {[dateLabel, reminder.time].filter(Boolean).join(" · ")}
           </span>
         )}
@@ -79,7 +79,7 @@ export function ReminderRow({
           aria-label="Открыть связанное событие"
           title="Открыть связанное событие"
           onClick={() => onEventJump(reminder.event_id!)}
-          className="grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-muted opacity-0 transition-[opacity,color,background-color] duration-150 hover:bg-surface-0 hover:text-app-text group-hover:opacity-100"
+          className="relative grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-muted opacity-0 transition-[opacity,color,background-color] duration-150 after:absolute after:-inset-x-1.5 after:-inset-y-1 hover:bg-surface-0 hover:text-app-text group-hover:opacity-100"
         >
           <ArrowUpRight size={14} />
         </button>

@@ -51,13 +51,13 @@ export function QuickAdd() {
         value={time}
         onChange={(e) => setTime(e.target.value)}
         aria-label="Время"
-        className="h-9 shrink-0 rounded-lg border border-line bg-surface-0 px-2 text-sm text-app-text outline-none transition focus:border-amber"
+        className="h-9 shrink-0 rounded-lg border border-line bg-surface-0 px-2 text-sm tabular-nums text-app-text outline-none transition-colors focus:border-amber"
       />
       <button
         type="button"
         aria-label="Добавить"
         onClick={submit}
-        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.94]"
+        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.96]"
       >
         <Plus size={18} />
       </button>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { AlarmClock, Bell, Cake, ChevronRight, Moon, Sunset, Trash2 } from "lucide-react";
 import { addDays, parseISO } from "date-fns";
 import {
@@ -25,6 +25,12 @@ import type { Reminder } from "@/db/queries/reminders";
 import type { Person } from "@/db/queries/people";
 
 const CARD_SHADOW = "shadow-[0_1px_2px_0_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]";
+
+const appear = (i: number) => ({
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { type: "spring" as const, duration: 0.4, bounce: 0, delay: i * 0.06 },
+});
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -116,20 +122,26 @@ export function RemindersView({
   return (
     <div className="h-full w-full overflow-y-auto">
       <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-10">
-        <QuickAdd />
+        <motion.div {...appear(0)}>
+          <QuickAdd />
+        </motion.div>
 
         {empty ? (
-          <div className="flex flex-col items-center gap-3 px-6 py-24 text-center text-muted">
+          <motion.div
+            {...appear(1)}
+            className="flex flex-col items-center gap-3 px-6 py-24 text-center text-muted"
+          >
             <Bell size={40} strokeWidth={1.5} />
             <p className="max-w-sm">
               Пока ни одного напоминания. Добавьте первое в строке выше — с датой и, если нужно,
               временем.
             </p>
-          </div>
+          </motion.div>
         ) : (
           <>
             {groups.overdue.length > 0 && (
-              <section
+              <motion.section
+                {...appear(1)}
                 className={`rounded-2xl p-5 ${CARD_SHADOW}`}
                 style={{ background: "color-mix(in srgb, var(--rg-rust) 10%, var(--rg-surface))" }}
               >
@@ -143,10 +155,10 @@ export function RemindersView({
                   onOpen={onReminderOpen}
                   onMenu={openMenu} onEventJump={onEventJump}
                 />
-              </section>
+              </motion.section>
             )}
 
-            <div className="grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+            <motion.div {...appear(2)} className="grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
               <section className={`rounded-2xl bg-surface-1 p-6 ${CARD_SHADOW}`}>
                 <h2 className="text-2xl font-semibold text-app-text">
                   Сегодня, {formatRu(today, "d MMMM")}
@@ -237,10 +249,13 @@ export function RemindersView({
                   </div>
                 )}
               </Card>
-            </div>
+            </motion.div>
 
             {groups.completed.length > 0 && (
-              <section className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}>
+              <motion.section
+                {...appear(3)}
+                className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}
+              >
                 <div className="flex items-center justify-between gap-2">
                   <button
                     type="button"
@@ -274,7 +289,7 @@ export function RemindersView({
                     />
                   </div>
                 )}
-              </section>
+              </motion.section>
             )}
           </>
         )}
