@@ -7,6 +7,7 @@ import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { mediaSrc } from "@/lib/paths";
 import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Lightbox } from "@/components/ui/Lightbox";
 import { SideSheet } from "@/components/ui/SideSheet";
@@ -143,9 +144,9 @@ export function EventSheet({
                 <Trash2 size={16} />
                 Удалить
               </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
+              <div className="flex items-center gap-2">
+                <IconButton
+                  label="Напомнить об этом событии"
                   onClick={() => {
                     close();
                     openCreateReminder({
@@ -155,9 +156,8 @@ export function EventSheet({
                     });
                   }}
                 >
-                  <Bell size={16} />
-                  Напомнить…
-                </Button>
+                  <Bell size={17} />
+                </IconButton>
                 <Button variant="secondary" onClick={onStartEdit}>
                   <Pencil size={16} />
                   Редактировать
