@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS reminders (
   repeat TEXT NOT NULL DEFAULT 'none',             -- none|daily|weekly|monthly|yearly|custom
   repeat_every INTEGER,                            -- шаг custom-повтора («каждые N»)
   repeat_unit TEXT,                                -- day|week для custom
-  pre_notify_days INTEGER NOT NULL DEFAULT 0,      -- 0 = без предварительного оповещения
+  pre_notify_min INTEGER NOT NULL DEFAULT 0,       -- за сколько минут предупредить, 0 = выкл
   nag INTEGER NOT NULL DEFAULT 0,                  -- 1 = повторять уведомление до выполнения
   nag_interval_min INTEGER,
   icon TEXT,

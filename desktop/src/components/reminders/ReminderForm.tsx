@@ -20,7 +20,7 @@ export interface ReminderFormValues {
   repeat: RepeatKind;
   repeatEvery: number;
   repeatUnit: RepeatUnit;
-  preNotifyDays: number;
+  preNotifyMin: number;
   nag: boolean;
   nagIntervalMin: number;
   icon: string;
@@ -30,6 +30,16 @@ export interface ReminderFormValues {
 
 const DEFAULT_ICON = "Bell";
 const DEFAULT_COLOR = "#d08f3c";
+
+type PreUnit = "min" | "hour" | "day";
+
+const PRE_UNIT_MINUTES: Record<PreUnit, number> = { min: 1, hour: 60, day: 1440 };
+
+function splitPreNotify(totalMin: number): { value: number; unit: PreUnit } {
+  if (totalMin > 0 && totalMin % 1440 === 0) return { value: totalMin / 1440, unit: "day" };
+  if (totalMin > 0 && totalMin % 60 === 0) return { value: totalMin / 60, unit: "hour" };
+  return { value: totalMin, unit: "min" };
+}
 
 export function ReminderForm({
   initial,
@@ -51,7 +61,9 @@ export function ReminderForm({
   const [repeat, setRepeat] = useState<RepeatKind>(initial?.repeat ?? "none");
   const [repeatEvery, setRepeatEvery] = useState(String(initial?.repeatEvery ?? 3));
   const [repeatUnit, setRepeatUnit] = useState<RepeatUnit>(initial?.repeatUnit ?? "day");
-  const [preNotifyDays, setPreNotifyDays] = useState(String(initial?.preNotifyDays ?? 0));
+  const initialPre = splitPreNotify(initial?.preNotifyMin ?? 0);
+  const [preValue, setPreValue] = useState(String(initialPre.value));
+  const [preUnit, setPreUnit] = useState<PreUnit>(initialPre.unit);
   const [nag, setNag] = useState(initial?.nag ?? false);
   const [nagIntervalMin, setNagIntervalMin] = useState(String(initial?.nagIntervalMin ?? 30));
   const [icon, setIcon] = useState(initial?.icon ?? DEFAULT_ICON);
@@ -88,7 +100,7 @@ export function ReminderForm({
       repeat,
       repeatEvery: repeat === "custom" ? Math.max(1, Number(repeatEvery) || 1) : null,
       repeatUnit: repeat === "custom" ? repeatUnit : null,
-      preNotifyDays: Math.max(0, Number(preNotifyDays) || 0),
+      preNotifyMin: Math.max(0, Number(preValue) || 0) * PRE_UNIT_MINUTES[preUnit],
       nag: nag ? 1 : 0,
       nagIntervalMin: nag ? Math.max(1, Number(nagIntervalMin) || 30) : null,
       icon,
@@ -158,35 +170,44 @@ export function ReminderForm({
         </div>
       )}
 
-      <Input
-        label="Напомнить заранее, дней (0 — выкл)"
-        value={preNotifyDays}
-        onChange={setPreNotifyDays}
-        type="number"
-        min={0}
-      />
+      <div className="grid grid-cols-2 gap-2">
+        <Input
+          label="Напомнить за (0 — выкл)"
+          value={preValue}
+          onChange={setPreValue}
+          type="number"
+          min={0}
+        />
+        <Select
+          label="Единица"
+          options={[
+            { value: "min", label: "минут" },
+            { value: "hour", label: "часов" },
+            { value: "day", label: "дней" },
+          ]}
+          value={preUnit}
+          onChange={(v) => setPreUnit(v as PreUnit)}
+        />
+      </div>
 
-      <Switch label="Повторять уведомление, пока не выполню" checked={nag} onChange={setNag} />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm text-app-text">Повторять уведомление, пока не выполню</span>
+        <Switch label="Повторять уведомление, пока не выполню" checked={nag} onChange={setNag} />
+      </div>
 
       {nag && (
-        <div className="flex flex-col gap-1">
-          <Input
-            label="Интервал повтора, минут"
-            value={nagIntervalMin}
-            onChange={setNagIntervalMin}
-            type="number"
-            min={1}
-          />
-          <span className="text-xs text-muted">
-            Проверка идёт раз в 15 минут — меньшие интервалы срабатывают с этим шагом.
-          </span>
-        </div>
+        <Input
+          label="Интервал повтора, минут"
+          value={nagIntervalMin}
+          onChange={setNagIntervalMin}
+          type="number"
+          min={1}
+        />
       )}
 
-      <div className="grid grid-cols-2 gap-2">
-        <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
-        <ColorPicker label="Цвет" value={color} onChange={setColor} />
-      </div>
+      <ColorPicker label="Цвет" value={color} onChange={setColor} />
+
+      <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
 
       <div className="mt-1 flex items-center justify-between gap-2">
         {onDelete ? (

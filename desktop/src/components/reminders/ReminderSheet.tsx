@@ -15,7 +15,7 @@ function toFormValues(r: Reminder): Partial<ReminderFormValues> {
     repeat: r.repeat,
     repeatEvery: r.repeat_every ?? 3,
     repeatUnit: r.repeat_unit ?? "day",
-    preNotifyDays: r.pre_notify_days,
+    preNotifyMin: r.pre_notify_min,
     nag: r.nag === 1,
     nagIntervalMin: r.nag_interval_min ?? 30,
     icon: r.icon ?? undefined,

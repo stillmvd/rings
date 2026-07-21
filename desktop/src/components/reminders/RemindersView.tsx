@@ -44,6 +44,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Rows({
   items,
   dateLabelFor,
+  completed = false,
   onToggle,
   onOpen,
   onMenu,
@@ -51,6 +52,7 @@ function Rows({
 }: {
   items: Reminder[];
   dateLabelFor?: (r: Reminder) => string | undefined;
+  completed?: boolean;
   onToggle: (id: number) => void;
   onOpen?: (r: Reminder) => void;
   onMenu?: (r: Reminder, x: number, y: number) => void;
@@ -64,6 +66,7 @@ function Rows({
             key={r.id}
             reminder={r}
             dateLabel={dateLabelFor?.(r)}
+            completed={completed}
             onToggle={onToggle}
             onOpen={onOpen}
             onMenu={onMenu}
@@ -284,6 +287,7 @@ export function RemindersView({
                     <Rows
                       items={groups.completed}
                       dateLabelFor={(r) => formatDayMonthRu(r.date)}
+                      completed
                       onToggle={() => {}}
                       onOpen={onReminderOpen}
                     />

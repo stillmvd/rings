@@ -10,7 +10,7 @@ export type Reminder = {
   repeat: RepeatKind;
   repeat_every: number | null;
   repeat_unit: RepeatUnit | null;
-  pre_notify_days: number;
+  pre_notify_min: number;
   nag: number;
   nag_interval_min: number | null;
   icon: string | null;
@@ -28,7 +28,7 @@ export type ReminderInput = {
   repeat: RepeatKind;
   repeatEvery: number | null;
   repeatUnit: RepeatUnit | null;
-  preNotifyDays: number;
+  preNotifyMin: number;
   nag: number;
   nagIntervalMin: number | null;
   icon: string | null;
@@ -37,7 +37,7 @@ export type ReminderInput = {
 };
 
 const SELECT = `SELECT id, title, note, date, time, repeat, repeat_every, repeat_unit,
-  pre_notify_days, nag, nag_interval_min, icon, color, event_id, snoozed_until, completed_at
+  pre_notify_min, nag, nag_interval_min, icon, color, event_id, snoozed_until, completed_at
   FROM reminders`;
 
 export async function listReminders(): Promise<Reminder[]> {
@@ -55,7 +55,7 @@ export async function createReminder(input: ReminderInput): Promise<number> {
   const db = await getDb();
   const res = await db.execute(
     `INSERT INTO reminders(title, note, date, time, repeat, repeat_every, repeat_unit,
-       pre_notify_days, nag, nag_interval_min, icon, color, event_id)
+       pre_notify_min, nag, nag_interval_min, icon, color, event_id)
      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.title,
@@ -65,7 +65,7 @@ export async function createReminder(input: ReminderInput): Promise<number> {
       input.repeat,
       input.repeatEvery,
       input.repeatUnit,
-      input.preNotifyDays,
+      input.preNotifyMin,
       input.nag,
       input.nagIntervalMin,
       input.icon,
@@ -80,7 +80,7 @@ export async function updateReminder(id: number, input: ReminderInput): Promise<
   const db = await getDb();
   await db.execute(
     `UPDATE reminders SET title = ?, note = ?, date = ?, time = ?, repeat = ?, repeat_every = ?,
-       repeat_unit = ?, pre_notify_days = ?, nag = ?, nag_interval_min = ?, icon = ?, color = ?,
+       repeat_unit = ?, pre_notify_min = ?, nag = ?, nag_interval_min = ?, icon = ?, color = ?,
        event_id = ?, snoozed_until = NULL WHERE id = ?`,
     [
       input.title,
@@ -90,7 +90,7 @@ export async function updateReminder(id: number, input: ReminderInput): Promise<
       input.repeat,
       input.repeatEvery,
       input.repeatUnit,
-      input.preNotifyDays,
+      input.preNotifyMin,
       input.nag,
       input.nagIntervalMin,
       input.icon,

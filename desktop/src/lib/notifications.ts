@@ -4,9 +4,8 @@ import {
   requestPermission,
   sendNotification,
 } from "@tauri-apps/plugin-notification";
-import { addDays, parseISO } from "date-fns";
 import { createLocalStore } from "./localStore";
-import { todayISO, toISO, formatFullRu } from "./dates";
+import { todayISO, formatFullRu } from "./dates";
 import { isBirthdayToday, formatTurningAge } from "./birthday";
 import { nowLocalMinuteISO } from "./reminders";
 import { listPeople } from "@/db/queries/people";
@@ -14,11 +13,14 @@ import { listReminders, type Reminder } from "@/db/queries/reminders";
 import { getSetting, setSetting } from "@/db/queries/settings";
 
 const LAST_NOTICE_KEY = "last_birthday_notice_date";
-const REMINDER_STATE_KEY = "reminder_notice_state";
+// v2: после пересоздания таблицы id напоминаний начинаются заново — старый ключ
+// хранил отметки «уже уведомлено» с теми же id@date и глушил новые уведомления.
+const REMINDER_STATE_KEY = "reminder_notice_state_v2";
 
 // Приложение живёт в трее сутками: интервальная проверка переживает сон ПК, в отличие
-// от одного таймера до полуночи. От дублей защищает дата в settings, а не частота.
-const CHECK_INTERVAL_MS = 15 * 60 * 1000;
+// от одного таймера до полуночи. От дублей защищает отметка в settings, а не частота.
+// Минутный шаг нужен напоминаниям («за 30 минут», назойливые каждые 10) — запрос в локальный SQLite дёшев.
+const CHECK_INTERVAL_MS = 60 * 1000;
 
 export const notifyBirthdaysStore = createLocalStore<"1" | "0">("rings.notifyBirthdays", "1");
 export const notifyRemindersStore = createLocalStore<"1" | "0">("rings.notifyReminders", "1");
@@ -81,6 +83,13 @@ function dueMoment(r: Reminder): string {
 const minutesBetween = (fromISO: string, untilISO: string): number =>
   (Date.parse(untilISO) - Date.parse(fromISO)) / 60000;
 
+// «Через 10 мин / 2 ч / 3 дн» для предварительного оповещения.
+function formatIn(minutes: number): string {
+  if (minutes < 60) return `${minutes} мин`;
+  if (minutes < 1440) return `${Math.round(minutes / 60)} ч`;
+  return `${Math.round(minutes / 1440)} дн`;
+}
+
 export async function checkReminders(): Promise<void> {
   if (notifyRemindersStore.get() !== "1") return;
 
@@ -92,36 +101,41 @@ export async function checkReminders(): Promise<void> {
   const toasts: { title: string; body?: string }[] = [];
   const missedTitles: string[] = [];
 
+  // Окно уведомлений: от «за pre_notify_min до срока» и до отметки «выполнено».
+  // Назойливый режим повторяет в обеих стадиях (до срока и после) со своим интервалом.
   for (const r of active) {
     const due = dueMoment(r);
     const dueKey = `${r.id}@${r.date}`;
-    if (due <= now) {
+    const preKey = `pre:${r.id}@${r.date}`;
+    const nagInterval = r.nag === 1 ? (r.nag_interval_min ?? 30) : null;
+    const minutesToDue = minutesBetween(now, due);
+
+    if (minutesToDue <= 0) {
       const prev = state[dueKey];
       if (!prev) {
         if (due.slice(0, 10) < today) missedTitles.push(r.title);
         else toasts.push({ title: r.title, body: r.note ?? undefined });
         next[dueKey] = now;
-      } else if (r.nag === 1 && minutesBetween(prev, now) >= (r.nag_interval_min ?? 30)) {
+      } else if (nagInterval !== null && minutesBetween(prev, now) >= nagInterval) {
         toasts.push({ title: r.title, body: r.note ?? undefined });
         next[dueKey] = now;
       } else {
         next[dueKey] = prev;
       }
-    }
-
-    if (r.pre_notify_days > 0 && today < r.date) {
-      const preStart = toISO(addDays(parseISO(r.date), -r.pre_notify_days));
-      if (today >= preStart) {
-        const preKey = `pre:${r.id}@${r.date}`;
-        if (!state[preKey]) {
-          toasts.push({
-            title: `Скоро: ${r.title}`,
-            body: formatFullRu(r.date) + (r.time ? `, ${r.time}` : ""),
-          });
-          next[preKey] = now;
-        } else {
-          next[preKey] = state[preKey];
-        }
+    } else if (r.pre_notify_min > 0 && minutesToDue <= r.pre_notify_min) {
+      const prev = state[preKey];
+      const toast = {
+        title: `Через ${formatIn(Math.round(minutesToDue))}: ${r.title}`,
+        body: r.time ? `${formatFullRu(r.date)}, ${r.time}` : formatFullRu(r.date),
+      };
+      if (!prev) {
+        toasts.push(toast);
+        next[preKey] = now;
+      } else if (nagInterval !== null && minutesBetween(prev, now) >= nagInterval) {
+        toasts.push(toast);
+        next[preKey] = now;
+      } else {
+        next[preKey] = prev;
       }
     }
   }

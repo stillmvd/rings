@@ -23,6 +23,30 @@ async function migrate(db: Database): Promise<void> {
   if (!(await hasColumn(db, "events", "track"))) {
     await db.execute("ALTER TABLE events ADD COLUMN track INTEGER NOT NULL DEFAULT 0");
   }
+  if (await hasColumn(db, "reminders", "pre_notify_days")) {
+    await db.execute("DROP TABLE reminders");
+    await db.execute(`CREATE TABLE IF NOT EXISTS reminders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      note TEXT,
+      date TEXT NOT NULL,
+      time TEXT,
+      repeat TEXT NOT NULL DEFAULT 'none',
+      repeat_every INTEGER,
+      repeat_unit TEXT,
+      pre_notify_min INTEGER NOT NULL DEFAULT 0,
+      nag INTEGER NOT NULL DEFAULT 0,
+      nag_interval_min INTEGER,
+      icon TEXT,
+      color TEXT,
+      event_id INTEGER REFERENCES events(id) ON DELETE SET NULL,
+      snoozed_until TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )`);
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_reminders_date ON reminders(date)");
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_reminders_event ON reminders(event_id)");
+  }
   if (await hasColumn(db, "marks", "category_id")) {
     await db.execute("DROP TABLE marks");
     await db.execute(`CREATE TABLE IF NOT EXISTS marks (

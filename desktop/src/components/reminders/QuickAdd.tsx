@@ -20,7 +20,7 @@ export function QuickAdd() {
       repeat: "none",
       repeatEvery: null,
       repeatUnit: null,
-      preNotifyDays: 0,
+      preNotifyMin: 0,
       nag: 0,
       nagIntervalMin: null,
       icon: null,
