@@ -17,7 +17,7 @@ export function eventAccent(event: {
     return {
       fill: c,
       onFill: onColorFor(c),
-      container: `color-mix(in srgb, ${c} 20%, var(--rg-surface))`,
+      container: `color-mix(in srgb, ${c} 40%, var(--rg-surface))`,
       onContainer: c,
     };
   }
