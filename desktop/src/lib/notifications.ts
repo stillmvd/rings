@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   isPermissionGranted,
   requestPermission,
@@ -30,6 +31,29 @@ async function ensurePermission(): Promise<boolean> {
   return (await requestPermission()) === "granted";
 }
 
+type ToastButton = { label: string; action: string };
+
+const REMINDER_BUTTONS: ToastButton[] = [
+  { label: "Выполнено", action: "done" },
+  { label: "Отложить на час", action: "snooze" },
+];
+
+// Родной WinRT-тост несёт кнопки и клик, плагин — нет. Если WinRT недоступен,
+// падаем на плагин: лучше тост без действий, чем тишина.
+async function winToast(
+  kind: "reminder" | "birthday",
+  id: number,
+  title: string,
+  body?: string,
+  buttons: ToastButton[] = [],
+): Promise<void> {
+  try {
+    await invoke("notify", { kind, id, title, body: body ?? null, buttons });
+  } catch {
+    if (await ensurePermission()) sendNotification({ title, body });
+  }
+}
+
 // Отметка вида "2026-07-17:3,5" — дата и уже поздравленные. Дедуп по людям, а не по дате:
 // иначе человек, добавленный после первой проверки, остался бы без уведомления до завтра.
 function parseNotified(stored: string | null, today: string): Set<string> {
@@ -49,14 +73,14 @@ export async function checkBirthdays(): Promise<void> {
   const fresh = born.filter((p) => !notified.has(String(p.id)));
   if (fresh.length === 0) return;
 
-  if (!(await ensurePermission())) return;
-
   for (const person of fresh) {
     const turning = formatTurningAge(person.birth_date, person.has_year);
-    sendNotification({
-      title: `Сегодня день рождения у ${person.name}`,
-      body: turning ? `Исполняется ${turning}` : "С праздником!",
-    });
+    await winToast(
+      "birthday",
+      person.id,
+      `Сегодня день рождения у ${person.name}`,
+      turning ? `Исполняется ${turning}` : "С праздником!",
+    );
   }
 
   const done = [...notified, ...fresh.map((p) => String(p.id))];
@@ -98,8 +122,8 @@ export async function checkReminders(): Promise<void> {
   const today = now.slice(0, 10);
   const state = await loadReminderState();
   const next: ReminderNoticeState = {};
-  const toasts: { title: string; body?: string }[] = [];
-  const missedTitles: string[] = [];
+  const toasts: { id: number; title: string; body?: string }[] = [];
+  const missed: { id: number; title: string }[] = [];
 
   // Окно уведомлений: от «за pre_notify_min до срока» и до отметки «выполнено».
   // Назойливый режим повторяет в обеих стадиях (до срока и после) со своим интервалом.
@@ -113,26 +137,27 @@ export async function checkReminders(): Promise<void> {
     if (minutesToDue <= 0) {
       const prev = state[dueKey];
       if (!prev) {
-        if (due.slice(0, 10) < today) missedTitles.push(r.title);
-        else toasts.push({ title: r.title, body: r.note ?? undefined });
+        if (due.slice(0, 10) < today) missed.push({ id: r.id, title: r.title });
+        else toasts.push({ id: r.id, title: r.title, body: r.note ?? undefined });
         next[dueKey] = now;
       } else if (nagInterval !== null && minutesBetween(prev, now) >= nagInterval) {
-        toasts.push({ title: r.title, body: r.note ?? undefined });
+        toasts.push({ id: r.id, title: r.title, body: r.note ?? undefined });
         next[dueKey] = now;
       } else {
         next[dueKey] = prev;
       }
     } else if (r.pre_notify_min > 0 && minutesToDue <= r.pre_notify_min) {
       const prev = state[preKey];
-      const toast = {
+      const pre = {
+        id: r.id,
         title: `Через ${formatIn(Math.round(minutesToDue))}: ${r.title}`,
         body: r.time ? `${formatFullRu(r.date)}, ${r.time}` : formatFullRu(r.date),
       };
       if (!prev) {
-        toasts.push(toast);
+        toasts.push(pre);
         next[preKey] = now;
       } else if (nagInterval !== null && minutesBetween(prev, now) >= nagInterval) {
-        toasts.push(toast);
+        toasts.push(pre);
         next[preKey] = now;
       } else {
         next[preKey] = prev;
@@ -141,16 +166,16 @@ export async function checkReminders(): Promise<void> {
   }
 
   const changed = JSON.stringify(next) !== JSON.stringify(state);
-  const hasNotices = toasts.length > 0 || missedTitles.length > 0;
 
-  if (hasNotices) {
-    if (!(await ensurePermission())) return;
-    if (missedTitles.length > 3) {
-      sendNotification({ title: `Пропущено напоминаний: ${missedTitles.length}` });
-    } else {
-      missedTitles.forEach((t) => sendNotification({ title: `Пропущено: ${t}` }));
+  if (missed.length > 3) {
+    await winToast("reminder", 0, `Пропущено напоминаний: ${missed.length}`);
+  } else {
+    for (const m of missed) {
+      await winToast("reminder", m.id, `Пропущено: ${m.title}`, undefined, REMINDER_BUTTONS);
     }
-    toasts.forEach((t) => sendNotification({ title: t.title, body: t.body }));
+  }
+  for (const t of toasts) {
+    await winToast("reminder", t.id, t.title, t.body, REMINDER_BUTTONS);
   }
   if (changed) await setSetting(REMINDER_STATE_KEY, JSON.stringify(next));
 }

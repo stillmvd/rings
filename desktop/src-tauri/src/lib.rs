@@ -164,6 +164,79 @@ fn restore_backup(app: tauri::AppHandle, zip_path: String) -> Result<(), String>
     Ok(())
 }
 
+#[cfg(windows)]
+#[derive(serde::Deserialize)]
+struct NotifyButton {
+    label: String,
+    action: String,
+}
+
+#[cfg(windows)]
+#[derive(Clone, serde::Serialize)]
+struct NotifyActivation {
+    kind: String,
+    id: i64,
+    action: String,
+}
+
+// AppUserModelID берётся из установленной копии: у запуска из target/* его нет в реестре,
+// и тост с таким id молча не показывается — для отладки подменяем на powershell.
+#[cfg(windows)]
+fn toast_app_id(app: &tauri::AppHandle) -> String {
+    let unpacked = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.to_path_buf()))
+        .map(|dir| dir.ends_with("debug") || dir.ends_with("release"))
+        .unwrap_or(true);
+    if unpacked {
+        tauri_winrt_notification::Toast::POWERSHELL_APP_ID.to_string()
+    } else {
+        app.config().identifier.clone()
+    }
+}
+
+// Плагин уведомлений умеет только показать тост: у него нет кнопок и реакции на клик.
+// Свой toast через WinRT даёт и то и другое, пока приложение живёт в трее.
+#[cfg(windows)]
+#[tauri::command]
+fn notify(
+    app: tauri::AppHandle,
+    kind: String,
+    id: i64,
+    title: String,
+    body: Option<String>,
+    buttons: Vec<NotifyButton>,
+) -> Result<(), String> {
+    use tauri::Emitter;
+    use tauri_winrt_notification::{Duration, Toast};
+
+    let app_id = toast_app_id(&app);
+    let mut toast = Toast::new(&app_id).title(&title).duration(Duration::Long);
+    if let Some(text) = body.as_deref() {
+        toast = toast.text1(text);
+    }
+    for button in &buttons {
+        toast = toast.add_button(&button.label, &button.action);
+    }
+
+    let handle = app.clone();
+    toast
+        .on_activated(move |action| {
+            show_main(&handle);
+            let _ = handle.emit(
+                "notification-action",
+                NotifyActivation {
+                    kind: kind.clone(),
+                    id,
+                    action: action.unwrap_or_else(|| "open".to_string()),
+                },
+            );
+            Ok(())
+        })
+        .show()
+        .map_err(|e| e.to_string())
+}
+
 const TRAY_WHITE: &[u8] = include_bytes!("../icons/tray-white.png");
 const TRAY_BLACK: &[u8] = include_bytes!("../icons/tray-black.png");
 
@@ -247,7 +320,8 @@ pub fn run() {
                 .with_state_flags(
                     tauri_plugin_window_state::StateFlags::SIZE
                         | tauri_plugin_window_state::StateFlags::POSITION
-                        | tauri_plugin_window_state::StateFlags::MAXIMIZED,
+                        | tauri_plugin_window_state::StateFlags::MAXIMIZED
+                        | tauri_plugin_window_state::StateFlags::FULLSCREEN,
                 )
                 .build(),
         )
@@ -265,7 +339,9 @@ pub fn run() {
             delete_media,
             set_tray_icon,
             create_backup,
-            restore_backup
+            restore_backup,
+            #[cfg(windows)]
+            notify
         ])
         .setup(|app| {
             setup_tray(app)?;

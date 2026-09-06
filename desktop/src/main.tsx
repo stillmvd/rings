@@ -11,3 +11,16 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <App />
   </React.StrictMode>,
 );
+
+const SPLASH_MIN_MS = 1000;
+const SPLASH_FADE_MS = 340;
+const splash = document.getElementById("splash");
+if (splash) {
+  window.setTimeout(
+    () => {
+      splash.classList.add("splash-out");
+      window.setTimeout(() => splash.remove(), SPLASH_FADE_MS);
+    },
+    Math.max(0, SPLASH_MIN_MS - performance.now()),
+  );
+}

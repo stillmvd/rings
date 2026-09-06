@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { bumpDataVersion } from "@/lib/dataVersion";
 import { modeStore } from "@/lib/mode";
+import { snoozePlusHour } from "@/lib/reminders";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import {
   ReminderSheet,
@@ -17,9 +18,12 @@ import {
   completeReminder,
   snoozeReminder,
   clearCompleted,
+  getReminder,
   type Reminder,
   type ReminderInput,
 } from "@/db/queries/reminders";
+
+type NotificationAction = { kind: "reminder" | "birthday"; id: number; action: string };
 
 type RemindersCtx = {
   addReminder: (input: ReminderInput) => Promise<boolean>;
@@ -71,6 +75,34 @@ export function RemindersProvider({ children }: { children: ReactNode }) {
       unlisten.then((f) => f());
     };
   }, []);
+
+  useEffect(() => {
+    const unlisten = listen<NotificationAction>("notification-action", async ({ payload }) => {
+      if (payload.kind === "birthday") {
+        modeStore.set("birthdays");
+        return;
+      }
+      modeStore.set("reminders");
+      if (payload.id <= 0) return;
+      if (payload.action === "done") {
+        await completeReminder(payload.id);
+        bumpDataVersion();
+        show("Напоминание выполнено", "success");
+        return;
+      }
+      if (payload.action === "snooze") {
+        await snoozeReminder(payload.id, snoozePlusHour());
+        bumpDataVersion();
+        show("Отложено на час", "success");
+        return;
+      }
+      const reminder = await getReminder(payload.id);
+      if (reminder) setSheet({ mode: "edit", reminder });
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, [show]);
 
   const addReminder = useCallback(
     async (input: ReminderInput) => {

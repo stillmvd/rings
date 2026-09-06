@@ -4,10 +4,143 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rings</title>
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem("rings.theme") || "system";
+          var light =
+            pref === "light" ||
+            (pref === "system" && window.matchMedia("(prefers-color-scheme: light)").matches);
+          document.documentElement.dataset.theme = light ? "light" : "dark";
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: oklch(0.151 0.004 285.878);
+      }
+      html[data-theme="light"],
+      html[data-theme="light"] body {
+        background: oklch(0.959 0.01 81.795);
+      }
+
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        background: inherit;
+        transition:
+          opacity 320ms cubic-bezier(0.2, 0, 0, 1),
+          transform 320ms cubic-bezier(0.2, 0, 0, 1);
+      }
+      #splash.splash-out {
+        opacity: 0;
+        transform: scale(1.03);
+        pointer-events: none;
+      }
+
+      .splash-mark {
+        animation: splash-in 520ms cubic-bezier(0.2, 0, 0, 1) both;
+      }
+      .splash-name {
+        font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.34em;
+        text-indent: 0.34em;
+        text-transform: uppercase;
+        color: oklch(0.63 0.017 90.301);
+        animation: splash-in 520ms cubic-bezier(0.2, 0, 0, 1) 90ms both;
+      }
+      .splash-bar {
+        position: relative;
+        width: 132px;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: oklch(0.258 0.007 285.867);
+        animation: splash-in 520ms cubic-bezier(0.2, 0, 0, 1) 150ms both;
+      }
+      html[data-theme="light"] .splash-bar {
+        background: oklch(0.896 0.019 86.151);
+      }
+      .splash-bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 2px;
+        background: linear-gradient(
+          100deg in oklch,
+          oklch(0.817 0.164 75.837),
+          oklch(0.644 0.192 41.687)
+        );
+        animation: splash-sweep 1100ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+
+      @keyframes splash-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px) scale(0.94);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes splash-sweep {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .splash-mark,
+        .splash-name,
+        .splash-bar {
+          animation-duration: 1ms;
+          animation-delay: 0ms;
+        }
+        .splash-bar::after {
+          animation: none;
+          transform: none;
+        }
+      }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
+    <div id="splash">
+      <svg class="splash-mark" width="88" height="88" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <linearGradient id="splash-grad" x1="12" y1="8" x2="52" y2="58" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#FFB224" />
+            <stop offset="1" stop-color="#E8590C" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M10.8029,26.40275c0,-8.17381 6.62619,-14.8 14.8,-14.8c8.17381,0 14.8,6.62619 14.8,14.8c0,6.53902 -4.24072,12.08757 -10.12198,14.04546c-0.31339,-0.89219 -0.48382,-1.85167 -0.48382,-2.85096c0,-0.68984 0.08122,-1.36071 0.23462,-2.00356c3.4151,-1.64865 5.77118,-5.14465 5.77118,-9.19094c0,-5.6333 -4.5667,-10.2 -10.2,-10.2c-5.6333,0 -10.2,4.5667 -10.2,10.2c0,4.39364 2.77795,8.13846 6.67327,9.57386c-0.0523,0.53314 -0.07907,1.07376 -0.07907,1.62064c0,1.10896 0.11007,2.19222 0.31988,3.23943c-6.59239,-1.49446 -11.51408,-7.38943 -11.51408,-14.43393z"
+          fill="url(#splash-grad)"
+        />
+        <path
+          d="M23.5971,37.59725c0,-6.53902 4.24072,-12.08757 10.12198,-14.04546c0.31339,0.89219 0.48382,1.85167 0.48382,2.85096c0,0.68984 -0.08122,1.36071 -0.23462,2.00356c-3.4151,1.64865 -5.77118,5.14465 -5.77118,9.19094c0,5.6333 4.5667,10.2 10.2,10.2c5.6333,0 10.2,-4.5667 10.2,-10.2c0,-4.39364 -2.77795,-8.13846 -6.67327,-9.57386c0.0523,-0.53314 0.07907,-1.07376 0.07907,-1.62064c0,-1.10896 -0.11007,-2.19222 -0.31988,-3.23943c6.59239,1.49446 11.51408,7.38943 11.51408,14.43393c0,8.17381 -6.62619,14.8 -14.8,14.8c-8.17381,0 -14.8,-6.62619 -14.8,-14.8z"
+          fill="#C2410C"
+        />
+      </svg>
+      <div class="splash-name">Rings</div>
+      <div class="splash-bar"></div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
