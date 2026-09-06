@@ -75,7 +75,9 @@
       .splash-bar::after {
         content: "";
         position: absolute;
-        inset: 0;
+        inset: 0 auto;
+        width: 42%;
+        height: 100%;
         border-radius: 2px;
         background: linear-gradient(
           100deg in oklch,
@@ -97,10 +99,10 @@
       }
       @keyframes splash-sweep {
         0% {
-          transform: translateX(-100%);
+          transform: translateX(-110%);
         }
         100% {
-          transform: translateX(100%);
+          transform: translateX(348%);
         }
       }
 
