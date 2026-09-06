@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { CategoryManager } from "@/components/settings/CategoryManager";
 import { MarkTypeManager } from "@/components/settings/MarkTypeManager";
 import { BackupPanel } from "@/components/settings/BackupPanel";
+import { UpdatePanel } from "@/components/settings/UpdatePanel";
 import { useLiveSeconds, setLiveSeconds } from "@/components/birthdays/useLiveSeconds";
 import { themeStore, type ThemePref } from "@/lib/theme";
 import { closeToTrayStore, trayIconStore, type TrayIconPref } from "@/lib/behavior";
@@ -212,6 +213,10 @@ export function SettingsPage() {
               label="Живой отсчёт секунд"
             />
           </Row>
+        </Section>
+
+        <Section title="Обновления" description="Новые версии приходят с GitHub.">
+          <UpdatePanel />
         </Section>
 
         <Section title="Бэкап" description="Архив с базой и фотографиями в выбранной папке.">

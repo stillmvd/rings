@@ -6,6 +6,7 @@ import { EventsProvider } from "./components/events/EventsProvider";
 import { PeopleProvider } from "./components/events/PeopleProvider";
 import { RemindersProvider } from "./components/events/RemindersProvider";
 import { SearchHost } from "./components/search/SearchHost";
+import { UpdateWatcher } from "./components/settings/UpdatePanel";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
 import { useCloseToTray, useApplyTrayIcon } from "./lib/behavior";
@@ -53,6 +54,7 @@ export default function App() {
               </div>
             </div>
             <SearchHost />
+            <UpdateWatcher />
           </PeopleProvider>
         </EventsProvider>
       </RemindersProvider>

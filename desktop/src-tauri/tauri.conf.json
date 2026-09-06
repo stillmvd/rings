@@ -31,9 +31,19 @@
       }
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVDMjY3QjkwRjQ2REFEN0EKUldSNnJXMzBrSHNtWEZ0SnhWeHdTOEJRQXRyNEdpcEFLUEVMT3UydU96aTBBS2FhL1VCZE5hZTMK",
+      "endpoints": ["https://github.com/stillmvd/rings/releases/latest/download/latest.json"],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
     "publisher": "stillmvd",
     "copyright": "© stillmvd",
     "shortDescription": "Личный таймлайн жизни",
