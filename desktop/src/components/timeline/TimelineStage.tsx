@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { GridCanvas } from "./GridCanvas";
 import { StickyContext } from "./StickyContext";
 import { EventLayer } from "./EventLayer";
+import { PeriodLayer } from "./PeriodLayer";
+import { LayerToggle } from "./LayerToggle";
 import { TimelineControls } from "./TimelineControls";
 import { useViewport } from "./useViewport";
 import { xToMs } from "@/lib/projection";
 import { msToISO, isoToMs } from "@/lib/dates";
+import { timelineLayerStore, isPeriod } from "@/lib/timelineLayer";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE } from "@/lib/constants";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
@@ -35,6 +39,7 @@ export function TimelineStage({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const layer = timelineLayerStore.use();
   const { viewport, lod, zoomAt, zoomStep, panByPixels, centerToday, centerToMs } = useViewport(
     size.width,
   );
@@ -89,9 +94,11 @@ export function TimelineStage({
     return () => window.removeEventListener("keydown", onKey);
   }, [zoomStep, centerToday]);
 
-  // Центрирование к событию из результатов поиска.
+  // Центрирование к событию из результатов поиска — со слоем, где оно видно.
   useEffect(() => {
-    if (focus && size.width > 0) centerToMs(isoToMs(focus.event.date));
+    if (!focus || size.width <= 0) return;
+    timelineLayerStore.set(isPeriod(focus.event) ? "periods" : "events");
+    centerToMs(isoToMs(focus.event.date));
   }, [focus, centerToMs, size.width]);
 
   const pointerActive = useRef(false);
@@ -160,20 +167,37 @@ export function TimelineStage({
       onPointerCancel={onPointerCancel}
     >
       <GridCanvas viewport={viewport} width={size.width} height={size.height} lod={lod} />
-      <EventLayer
-        events={events}
-        marks={marks}
-        viewport={viewport}
-        width={size.width}
-        height={size.height}
-        lod={lod}
-        filter={filter}
-        highlightId={focus?.event.id ?? null}
-        onEventClick={handleEventClick}
-        onMarkOpen={onMarkOpen}
-        onMarkMenu={onMarkMenu}
-      />
+      <AnimatePresence initial={false}>
+        {layer === "events" ? (
+          <EventLayer
+            key="layer-events"
+            events={events}
+            marks={marks}
+            viewport={viewport}
+            width={size.width}
+            height={size.height}
+            lod={lod}
+            filter={filter}
+            highlightId={focus?.event.id ?? null}
+            onEventClick={handleEventClick}
+            onMarkOpen={onMarkOpen}
+            onMarkMenu={onMarkMenu}
+          />
+        ) : (
+          <PeriodLayer
+            key="layer-periods"
+            events={events}
+            viewport={viewport}
+            width={size.width}
+            height={size.height}
+            filter={filter}
+            highlightId={focus?.event.id ?? null}
+            onEventClick={handleEventClick}
+          />
+        )}
+      </AnimatePresence>
       <StickyContext viewport={viewport} width={size.width} height={size.height} lod={lod} />
+      <LayerToggle />
       <TimelineControls
         viewport={viewport}
         lod={lod}

@@ -1,13 +1,12 @@
 import { createElement, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { type Viewport, msToX, xToMs } from "@/lib/projection";
-import { isoToMs, formatFullRu, formatDayMonthRu } from "@/lib/dates";
+import { isoToMs, formatFullRu } from "@/lib/dates";
 import { isVisibleAtLod, getSignificanceMeta } from "@/lib/significance";
 import { isFuture } from "@/lib/duration";
-import { eventAccent } from "@/lib/accent";
 import { onColorFor } from "@/lib/colors";
 import { resolveIconOrNull } from "@/lib/icons";
-import { mediaSrc } from "@/lib/paths";
+import { isPeriod } from "@/lib/timelineLayer";
 import {
   EMPTY_FILTER,
   isFilterActive,
@@ -17,20 +16,19 @@ import {
 } from "@/lib/filter";
 import { type Lod, lodRank } from "./lod";
 import { EventDot } from "./EventDot";
+import { EventTooltip } from "./EventTooltip";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Mark } from "@/db/queries/marks";
 
 const CLUSTER_GAP_PX = 18;
-const MIN_BAR_PX = 14;
 const MARK_BASE_DY = 54;
 const MARK_STEP_PX = 20;
 const MARK_STACK_MAX = 3;
-const TOOLTIP_HALF_PX = 196;
 const RING_GAP = "0 0 0 2px var(--rg-bg)";
 const PLUS_BG = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const LAYER_SPRING = { type: "spring" as const, bounce: 0, duration: 0.45 };
 
 type Cluster = { x: number; events: TimelineEvent[] };
-type Bar = { ev: TimelineEvent; x1: number; x2: number; tip: Cluster };
 
 type Props = {
   events: TimelineEvent[];
@@ -66,25 +64,15 @@ export function EventLayer({
   // Точки/метки по центру ячейки дня (как число на оси). На отдалении полдня ≈ 0 px.
   const cellShift = viewport.pxPerDay / 2;
 
-  const { bars, clusters } = useMemo<{ bars: Bar[]; clusters: Cluster[] }>(() => {
-    const bars: Bar[] = [];
+  const clusters = useMemo<Cluster[]>(() => {
     const points: Array<{ ev: TimelineEvent; x: number }> = [];
 
     for (const ev of events) {
+      if (isPeriod(ev)) continue;
       if (filterOn && !matchesFilter(ev, filter)) continue;
       if (!isVisibleAtLod(ev.significance, rank)) continue;
-      const x1 = msToX(isoToMs(ev.date), viewport) + cellShift;
-      if (ev.end_date) {
-        const x2 = msToX(isoToMs(ev.end_date), viewport) + cellShift;
-        if (x2 - x1 >= MIN_BAR_PX) {
-          if (x2 >= -24 && x1 <= width + 24) {
-            const cx = Math.min(Math.max((x1 + x2) / 2, 8), Math.max(8, width - 8));
-            bars.push({ ev, x1, x2, tip: { x: cx, events: [ev] } });
-          }
-          continue;
-        }
-      }
-      if (x1 >= -24 && x1 <= width + 24) points.push({ ev, x: x1 });
+      const x = msToX(isoToMs(ev.date), viewport) + cellShift;
+      if (x >= -24 && x <= width + 24) points.push({ ev, x });
     }
 
     points.sort((a, b) => a.x - b.x);
@@ -99,7 +87,7 @@ export function EventLayer({
         out.push({ x, sumX: x, events: [ev] });
       }
     }
-    return { bars, clusters: out.map(({ x, events: e }) => ({ x, events: e })) };
+    return out.map(({ x, events: e }) => ({ x, events: e }));
   }, [events, viewport, width, rank, filter, filterOn, cellShift]);
 
   // Отметки видны только на днях. Группируем по дню — столбиком под числом.
@@ -124,11 +112,12 @@ export function EventLayer({
     if (width <= 0) return null;
     const fromMs = xToMs(0, viewport);
     const toMs = xToMs(width, viewport);
-    const considered = filterOn ? events.filter((ev) => matchesFilter(ev, filter)) : events;
+    const considered = events.filter(
+      (ev) => !isPeriod(ev) && (!filterOn || matchesFilter(ev, filter)),
+    );
     const hasInRange = considered.some((ev) => {
       const ms = isoToMs(ev.date);
-      const endMs = ev.end_date ? isoToMs(ev.end_date) : ms;
-      return endMs >= fromMs && ms <= toMs;
+      return ms >= fromMs && ms <= toMs;
     });
     if (hasInRange) return null;
     if (filterOn) return "Ничего не найдено по фильтру в этом диапазоне.";
@@ -140,49 +129,18 @@ export function EventLayer({
   // Позиция подсвеченного события (результат поиска) — для пульс-кольца.
   const highlightX = useMemo<number | null>(() => {
     if (highlightId == null) return null;
-    const bar = bars.find((b) => b.ev.id === highlightId);
-    if (bar) return (bar.x1 + bar.x2) / 2;
     const cluster = clusters.find((c) => c.events.some((e) => e.id === highlightId));
     return cluster ? cluster.x : null;
-  }, [highlightId, bars, clusters]);
+  }, [highlightId, clusters]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <AnimatePresence initial={false}>
-        {bars.map((bar) => {
-          const color = eventAccent(bar.ev).fill;
-          const future = isFuture(bar.ev.date);
-          return (
-            <motion.div
-              key={`bar-${bar.ev.id}`}
-              className="pointer-events-auto absolute cursor-pointer rounded-full"
-              style={{
-                left: bar.x1,
-                top: axisY,
-                y: "-50%",
-                width: bar.x2 - bar.x1,
-                height: 3,
-                background: future
-                  ? `repeating-linear-gradient(90deg, ${color} 0 6px, transparent 6px 11px)`
-                  : color,
-              }}
-              initial={{ opacity: 0, scaleY: 0.4 }}
-              animate={{ opacity: future ? 0.75 : 1, scaleY: 1 }}
-              exit={{ opacity: 0, scaleY: 0.4 }}
-              transition={{ duration: 0.18, ease: "easeOut" as const }}
-              onMouseEnter={() => setHovered(bar.tip)}
-              onMouseLeave={() => setHovered((h) => (h === bar.tip ? null : h))}
-              onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-              onPointerUp={(e: React.PointerEvent) => e.stopPropagation()}
-              onClick={(e) => {
-                const r = e.currentTarget.getBoundingClientRect();
-                onEventClick?.(bar.ev, { x: e.clientX, y: r.top + r.height / 2 });
-              }}
-            />
-          );
-        })}
-      </AnimatePresence>
-
+    <motion.div
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      initial={{ opacity: 0, scaleY: 0.6 }}
+      animate={{ opacity: 1, scaleY: 1 }}
+      exit={{ opacity: 0, scaleY: 0.6 }}
+      transition={LAYER_SPRING}
+    >
       <AnimatePresence initial={false}>
         {clusters.map((cluster) => {
           const key = cluster.events[0].id;
@@ -343,59 +301,10 @@ export function EventLayer({
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            key="tooltip"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute z-20 w-max min-w-[13rem] max-w-sm -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3.5 py-2.5 shadow-lg"
-            style={{
-              left: Math.min(
-                Math.max(hovered.x, TOOLTIP_HALF_PX),
-                Math.max(TOOLTIP_HALF_PX, width - TOOLTIP_HALF_PX),
-              ),
-              top: axisY - 16,
-            }}
-          >
-            {hovered.events.length === 1 ? (
-              <>
-                {hovered.events[0].cover && (
-                  <img
-                    src={mediaSrc(hovered.events[0].cover)}
-                    alt=""
-                    className="img-outline mb-1.5 h-24 w-full rounded-md object-cover"
-                  />
-                )}
-                <div className="text-sm font-semibold text-app-text">
-                  {hovered.events[0].title}
-                </div>
-                <div className="text-xs text-muted">
-                  {hovered.events[0].end_date
-                    ? `${formatDayMonthRu(hovered.events[0].date)} — ${formatFullRu(hovered.events[0].end_date)}`
-                    : formatFullRu(hovered.events[0].date)}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mb-1 text-xs font-semibold text-muted">
-                  {hovered.events.length} событий
-                </div>
-                {hovered.events.slice(0, 6).map((e) => (
-                  <div key={e.id} className="truncate text-sm text-app-text">
-                    <span className="text-muted">{formatDayMonthRu(e.date)}</span> {e.title}
-                  </div>
-                ))}
-                {hovered.events.length > 6 && (
-                  <div className="text-xs text-muted">…ещё {hovered.events.length - 6}</div>
-                )}
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <EventTooltip
+        anchor={hovered ? { x: hovered.x, y: axisY - 16, events: hovered.events } : null}
+        width={width}
+      />
+    </motion.div>
   );
 }
