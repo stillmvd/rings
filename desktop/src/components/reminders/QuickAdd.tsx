@@ -43,7 +43,7 @@ export function QuickAdd() {
         aria-label="Новое напоминание"
         className="h-9 min-w-0 flex-1 bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
       />
-      <div className="w-36 shrink-0">
+      <div className="w-44 shrink-0">
         <DatePicker value={date} onChange={setDate} />
       </div>
       <input

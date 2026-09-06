@@ -96,7 +96,7 @@ export function DatePicker({
           }`}
         >
           <CalendarDays size={15} className="shrink-0 text-muted" />
-          <span className={`flex-1 text-left ${value ? "" : "text-muted"}`}>
+          <span className={`flex-1 truncate text-left ${value ? "" : "text-muted"}`}>
             {value ? formatFullRu(value) : "Выберите дату"}
           </span>
         </button>
