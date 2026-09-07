@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, RefreshCw } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
-import { relaunch } from "@tauri-apps/plugin-process";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { useQuery } from "@/lib/useQuery";
@@ -58,7 +57,6 @@ export function UpdatePanel() {
         if (event.event === "Progress") setDownloaded((n) => n + event.data.chunkLength);
         if (event.event === "Finished") setPhase("installing");
       });
-      await relaunch();
     } catch (e) {
       setError(describeUpdateError(e));
       setPhase("idle");
