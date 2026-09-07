@@ -227,7 +227,7 @@ h2 {
   color: var(--rg-amber);
 }
 
-/* Кнопка «Сегодня» — tonal amber, появляется вне текущего месяца. */
+/* Кнопка «Сегодня» — вторичное действие на нейтральной ступени, появляется вне текущего месяца. */
 .tl-cal-today {
   position: absolute;
   left: 0;
@@ -239,7 +239,7 @@ h2 {
   padding: 0.4rem 0.85rem;
   border-radius: 9999px;
   border: none;
-  background: color-mix(in srgb, var(--rg-amber) 16%, var(--rg-surface));
+  background: var(--ds-surface-2);
   color: var(--rg-text);
   font-size: 0.8rem;
   font-weight: 500;
@@ -315,13 +315,11 @@ h2 {
   transition: background-color 0.15s;
 }
 
-/* Выходные — приглушённый фон; праздники — акцент rust. */
-.tl-cal-cell.is-weekend:not(.is-today) {
-  background: color-mix(in srgb, var(--rg-muted) 11%, transparent);
-}
-
+/* Нерабочий день — ниша surface-2; праздник среди них выделен красным числом.
+   Заливка rust ушла: этот цвет по системе значит ошибку и удаление. */
+.tl-cal-cell.is-weekend:not(.is-today),
 .tl-cal-cell.is-holiday:not(.is-today) {
-  background: color-mix(in srgb, var(--rg-rust) 12%, transparent);
+  background: var(--ds-surface-2);
 }
 
 .tl-cal-cell.is-holiday:not(.is-today) .tl-cal-num {
