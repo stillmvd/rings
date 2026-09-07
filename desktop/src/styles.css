@@ -114,7 +114,7 @@ h2 {
   letter-spacing: -0.015em;
 }
 
-/* === Календарь (react-day-picker + кастомные ячейки), палитра Rings ======= */
+/* === Календарь (react-day-picker + кастомные ячейки), палитра Trail ======= */
 
 .tl-calendar .rdp-root {
   --rdp-accent-color: var(--rg-amber);

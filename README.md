@@ -1,4 +1,4 @@
-# Rings
+# Trail
 
 Личный таймлайн жизни — десктопное приложение для Windows. Визуализация событий в пяти режимах: Canvas-ось времени с зумом и панорамой, галерея карточек, календарь, «Отслеживание» и «Дни рождения». Живёт в трее, шлёт нативные уведомления о днях рождения, умеет резервное копирование.
 
@@ -20,7 +20,7 @@
 
 Tauri 2 (Rust) · React 19 · Vite · Tailwind CSS 4 · tauri-plugin-sql (SQLite) · TypeScript · pnpm
 
-Бренд — **Rings** (`brand/brandbook.html`). Данные (SQLite + медиа) — в `%APPDATA%\com.stillmvd.rings`.
+Бренд — **Trail** (`brand/brandbook.html`). Данные (SQLite + медиа) — в `%APPDATA%\com.stillmvd.trail`.
 
 ## Разработка
 
@@ -40,11 +40,11 @@ pnpm tauri build   # NSIS-инсталлятор → src-tauri/target/release/bu
 bash cleanup.sh    # очистка тяжёлых артефактов target/ после сборки
 ```
 
-Установщик `Rings_<version>_x64-setup.exe` ставит приложение в `Program Files\Rings` (perMachine, ярлык в Пуске, деинсталлятор).
+Установщик `Trail_<version>_x64-setup.exe` ставит приложение в `Program Files\Trail` (perMachine, ярлык в Пуске, деинсталлятор).
 
 ## Обновление версии
 
-Перед релизом поднять `version` в `desktop/src-tauri/tauri.conf.json` и `desktop/src-tauri/Cargo.toml`. **Не менять** `productName` (`Rings`) и `identifier` (`com.stillmvd.rings`) — от них зависят обнаружение прошлой установки и путь к данным. Подробнее — в [CLAUDE.md](./CLAUDE.md).
+Перед релизом поднять `version` в `desktop/src-tauri/tauri.conf.json` и `desktop/src-tauri/Cargo.toml`. **Не менять** `productName` (`Trail`) и `identifier` (`com.stillmvd.trail`) — от них зависят обнаружение прошлой установки и путь к данным. Подробнее — в [CLAUDE.md](./CLAUDE.md).
 
 ## Структура
 
@@ -54,7 +54,7 @@ desktop/
                 tracking, birthdays, search, settings, ui) · db/ · lib/
   src-tauri/    Rust: команды (медиа, бэкап, трей), плагины, tauri.conf.json
   cleanup.sh    очистка артефактов сборки
-brand/          брендбук и логотипы Rings
+brand/          брендбук и логотипы Trail
 ```
 
 Подробности архитектуры и конвенций — в [CLAUDE.md](./CLAUDE.md).

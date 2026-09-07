@@ -1,7 +1,7 @@
 [package]
 name = "desktop"
 version = "0.1.9"
-description = "Rings — личный таймлайн жизни"
+description = "Trail — личный таймлайн жизни"
 authors = ["stillmvd"]
 edition = "2021"
 

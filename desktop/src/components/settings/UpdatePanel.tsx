@@ -99,7 +99,7 @@ export function UpdatePanel() {
                   ? `Скачивается: ${formatProgress(downloaded, total)}`
                   : phase === "installing"
                     ? "Ставится, приложение сейчас перезапустится"
-                    : (update.body ?? "Новая сборка Rings")}
+                    : (update.body ?? "Новая сборка Trail")}
               </span>
             </div>
             <Button onClick={runInstall} disabled={busy}>

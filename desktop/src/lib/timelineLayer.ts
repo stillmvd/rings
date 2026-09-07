@@ -3,7 +3,7 @@ import { createLocalStore } from "./localStore";
 export type TimelineLayer = "events" | "periods";
 
 export const timelineLayerStore = createLocalStore<TimelineLayer>(
-  "rings.timelineLayer",
+  "trail.timelineLayer",
   "events",
 );
 

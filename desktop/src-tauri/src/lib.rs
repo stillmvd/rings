@@ -138,7 +138,7 @@ fn restore_backup(app: tauri::AppHandle, zip_path: String) -> Result<(), String>
     let mut archive = zip::ZipArchive::new(file).map_err(|e| format!("не архив: {e}"))?;
 
     if archive.by_name("timeline.db").is_err() {
-        return Err("в архиве нет timeline.db — это не бэкап Rings".into());
+        return Err("в архиве нет timeline.db — это не бэкап Trail".into());
     }
 
     for i in 0..archive.len() {
@@ -237,19 +237,10 @@ fn notify(
         .map_err(|e| e.to_string())
 }
 
-const TRAY_WHITE: &[u8] = include_bytes!("../icons/tray-white.png");
-const TRAY_BLACK: &[u8] = include_bytes!("../icons/tray-black.png");
+const TRAY: &[u8] = include_bytes!("../icons/tray.png");
 
-fn tray_image(dark: bool) -> tauri::Result<tauri::image::Image<'static>> {
-    tauri::image::Image::from_bytes(if dark { TRAY_BLACK } else { TRAY_WHITE })
-}
-
-// Windows не умеет template-иконки: цвет марки под панель задач выбирается в настройках.
-#[tauri::command]
-fn set_tray_icon(app: tauri::AppHandle, dark: bool) -> Result<(), String> {
-    let tray = app.tray_by_id("main").ok_or("трей не найден")?;
-    let icon = tray_image(dark).map_err(|e| e.to_string())?;
-    tray.set_icon(Some(icon)).map_err(|e| e.to_string())
+fn tray_image() -> tauri::Result<tauri::image::Image<'static>> {
+    tauri::image::Image::from_bytes(TRAY)
 }
 
 fn show_main(app: &tauri::AppHandle) {
@@ -272,8 +263,8 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     let menu = Menu::with_items(app, &[&open, &add_reminder, &quit])?;
 
     TrayIconBuilder::with_id("main")
-        .icon(tray_image(false)?)
-        .tooltip("Rings")
+        .icon(tray_image()?)
+        .tooltip("Trail")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -302,6 +293,33 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+// Данные до переименования Rings → Trail лежат под старым identifier. Переносим один
+// раз при старте: без этого тихое обновление поднимает приложение с пустой базой, а
+// прожитая история остаётся висеть в папке старого имени.
+fn migrate_legacy_app_data(app: &tauri::App) {
+    let Ok(new_dir) = app.path().app_data_dir() else {
+        return;
+    };
+    if new_dir.join("timeline.db").exists() {
+        return;
+    }
+    let Some(old_dir) = new_dir.parent().map(|p| p.join("com.stillmvd.rings")) else {
+        return;
+    };
+    if !old_dir.join("timeline.db").exists() {
+        return;
+    }
+    if fs::create_dir_all(&new_dir).is_err() {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(&old_dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let _ = fs::rename(entry.path(), new_dir.join(entry.file_name()));
+    }
+}
+
 pub fn run() {
     let mut builder = tauri::Builder::default();
 
@@ -338,13 +356,13 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_media,
             delete_media,
-            set_tray_icon,
             create_backup,
             restore_backup,
             #[cfg(windows)]
             notify
         ])
         .setup(|app| {
+            migrate_legacy_app_data(app);
             setup_tray(app)?;
 
             // Автостарт поднимает приложение с --minimized: живёт в трее, окно не показываем.

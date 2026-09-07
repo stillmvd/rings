@@ -34,7 +34,7 @@ jobs:
         with:
           projectPath: desktop
           tagName: v__VERSION__
-          releaseName: Rings __VERSION__
+          releaseName: Trail __VERSION__
           releaseBody: Установщик для Windows. Обновление ставится из приложения — Настройки → Обновления.
           releaseDraft: false
           prerelease: false

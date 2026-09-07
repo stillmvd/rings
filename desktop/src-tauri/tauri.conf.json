@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rings",
-  "mainBinaryName": "Rings",
+  "productName": "Trail",
+  "mainBinaryName": "Trail",
   "version": "0.1.9",
-  "identifier": "com.stillmvd.rings",
+  "identifier": "com.stillmvd.trail",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
   "app": {
     "windows": [
       {
-        "title": "Rings",
+        "title": "Trail",
         "width": 1280,
         "height": 800,
         "minWidth": 1000,
@@ -34,7 +34,7 @@
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVDMjY3QjkwRjQ2REFEN0EKUldSNnJXMzBrSHNtWEZ0SnhWeHdTOEJRQXRyNEdpcEFLUEVMT3UydU96aTBBS2FhL1VCZE5hZTMK",
-      "endpoints": ["https://github.com/stillmvd/rings/releases/latest/download/latest.json"],
+      "endpoints": ["https://github.com/stillmvd/trail/releases/latest/download/latest.json"],
       "windows": {
         "installMode": "passive"
       }
@@ -47,7 +47,7 @@
     "publisher": "stillmvd",
     "copyright": "© stillmvd",
     "shortDescription": "Личный таймлайн жизни",
-    "longDescription": "Rings — личный таймлайн жизни: события, календарь, отслеживание и дни рождения.",
+    "longDescription": "Trail — личный таймлайн жизни: события, календарь, отслеживание и дни рождения.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

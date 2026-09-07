@@ -7,11 +7,13 @@ import { getDb } from "@/db/database";
 
 export type BackupInterval = "day" | "week";
 
-export const backupEnabledStore = createLocalStore<"1" | "0">("rings.backup.enabled", "0");
-export const backupDirStore = createLocalStore<string>("rings.backup.dir", "");
-export const backupIntervalStore = createLocalStore<BackupInterval>("rings.backup.interval", "week");
-export const backupKeepStore = createLocalStore<string>("rings.backup.keep", "5");
-export const backupLastStore = createLocalStore<string>("rings.backup.last", "");
+export const backupEnabledStore = createLocalStore<"1" | "0">("trail.backup.enabled", "0");
+// Путь абсолютный: перенос старого значения увёл бы бэкапы в папку с прежним именем,
+// которую Rust молча пересоздал бы. Сбрасываем на дефолт.
+export const backupDirStore = createLocalStore<string>("trail.backup.dir", "", false);
+export const backupIntervalStore = createLocalStore<BackupInterval>("trail.backup.interval", "week");
+export const backupKeepStore = createLocalStore<string>("trail.backup.keep", "5");
+export const backupLastStore = createLocalStore<string>("trail.backup.last", "");
 
 const INTERVAL_MS: Record<BackupInterval, number> = {
   day: 24 * 60 * 60 * 1000,
@@ -28,7 +30,7 @@ function stamp(d: Date): string {
 // Папка по умолчанию — в Документах, а не в AppData: бэкап рядом с боевой БД теряется
 // вместе с ней. Rust создаёт её при первом архиве.
 export async function defaultBackupDir(): Promise<string> {
-  return join(await documentDir(), "Rings", "backups");
+  return join(await documentDir(), "Trail", "backups");
 }
 
 export async function resolveBackupDir(): Promise<string> {

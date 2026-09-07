@@ -9,4 +9,4 @@ export type ViewMode =
   | "birthdays"
   | "settings";
 
-export const modeStore = createLocalStore<ViewMode>("rings.mode", "timeline");
+export const modeStore = createLocalStore<ViewMode>("trail.mode", "timeline");

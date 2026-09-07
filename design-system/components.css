@@ -1,0 +1,643 @@
+/* Component layer. Depends on tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  font-family: var(--ds-font);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-regular);
+  line-height: var(--ds-leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(a) {
+  color: inherit;
+}
+
+:where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+
+:where(:focus-visible) {
+  outline: 2px solid var(--ds-accent);
+  outline-offset: 2px;
+  border-radius: var(--ds-radius-xs);
+}
+
+/* ============ Type ====================================================== */
+/* The signature move: a light-weight headline with the load-bearing word set
+   in bold. Wrap that word in <b> or .ds-em — never colour it instead. */
+
+.ds-display,
+.ds-h1,
+.ds-h2,
+.ds-h3 {
+  margin: 0;
+  font-weight: var(--ds-weight-light);
+  line-height: var(--ds-leading-tight);
+  letter-spacing: var(--ds-tracking-tight);
+  text-wrap: balance;
+}
+
+.ds-display {
+  font-size: var(--ds-text-display);
+}
+.ds-h1 {
+  font-size: var(--ds-text-h1);
+}
+.ds-h2 {
+  font-size: var(--ds-text-h2);
+}
+.ds-h3 {
+  font-size: var(--ds-text-h3);
+  line-height: var(--ds-leading-snug);
+}
+
+.ds-display b,
+.ds-h1 b,
+.ds-h2 b,
+.ds-h3 b,
+.ds-em {
+  font-weight: var(--ds-weight-bold);
+}
+
+.ds-body-lg {
+  font-size: var(--ds-text-lg);
+  line-height: var(--ds-leading-normal);
+}
+.ds-body {
+  font-size: var(--ds-text-base);
+}
+.ds-sm {
+  font-size: var(--ds-text-sm);
+}
+.ds-xs {
+  font-size: var(--ds-text-xs);
+}
+
+.ds-muted {
+  color: var(--ds-text-muted);
+}
+.ds-secondary {
+  color: var(--ds-text-secondary);
+}
+.ds-accent-text {
+  color: var(--ds-accent-ink);
+}
+
+/* Oversized readouts: temperature, counters, percentages. */
+.ds-numeral {
+  font-size: 64px;
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============ Button ==================================================== */
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-5);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease),
+    border-color var(--ds-duration-fast) var(--ds-ease),
+    transform var(--ds-duration-instant) var(--ds-ease);
+}
+
+.ds-btn:hover {
+  background: var(--ds-surface-3);
+}
+.ds-btn:active {
+  transform: scale(0.97);
+}
+.ds-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ds-btn--primary {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+}
+.ds-btn--primary:hover {
+  background: var(--ds-accent-hover);
+}
+.ds-btn--primary:active {
+  background: var(--ds-accent-press);
+}
+
+.ds-btn--ghost {
+  background: transparent;
+  border-color: var(--ds-line-strong);
+}
+.ds-btn--ghost:hover {
+  background: var(--ds-surface-1);
+  border-color: var(--ds-line-strong);
+}
+
+.ds-btn--sm {
+  height: var(--ds-control-sm);
+  padding: 0 var(--ds-space-4);
+  font-size: var(--ds-text-xs);
+}
+.ds-btn--lg {
+  height: var(--ds-control-lg);
+  padding: 0 var(--ds-space-6);
+  font-size: var(--ds-text-base);
+}
+
+/* Trailing ↗ in its own disc — the source layouts attach it to primary CTAs. */
+.ds-btn__arrow {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-right: calc(var(--ds-space-2) * -1);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-on-accent);
+  color: var(--ds-accent);
+}
+.ds-btn:not(.ds-btn--primary) .ds-btn__arrow {
+  background: var(--ds-text);
+  color: var(--ds-bg);
+}
+
+/* ============ Icon button =============================================== */
+
+.ds-icon-btn {
+  display: grid;
+  place-items: center;
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease),
+    transform var(--ds-duration-instant) var(--ds-ease);
+}
+.ds-icon-btn:hover {
+  background: var(--ds-surface-3);
+}
+.ds-icon-btn:active {
+  transform: scale(0.94);
+}
+
+.ds-icon-btn--solid {
+  background: var(--ds-text);
+  color: var(--ds-bg);
+}
+.ds-icon-btn--solid:hover {
+  background: var(--ds-text-secondary);
+}
+
+.ds-icon-btn--accent {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+}
+.ds-icon-btn--accent:hover {
+  background: var(--ds-accent-hover);
+}
+
+.ds-icon-btn--ghost {
+  background: transparent;
+  border-color: var(--ds-line);
+}
+.ds-icon-btn--ghost:hover {
+  background: var(--ds-surface-1);
+  border-color: var(--ds-line-strong);
+}
+
+.ds-icon-btn--sm {
+  width: var(--ds-control-sm);
+  height: var(--ds-control-sm);
+}
+.ds-icon-btn--lg {
+  width: var(--ds-control-lg);
+  height: var(--ds-control-lg);
+}
+
+/* ============ Pill label =============================================== */
+/* Names a section or a card. Sits at the card's top-left, overlapping its
+   padding — it labels the block rather than heading it. */
+
+.ds-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-sm);
+  padding: 0 var(--ds-space-4);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-regular);
+}
+
+.ds-pill--accent {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+}
+.ds-pill--outline {
+  background: transparent;
+  border: 1px solid var(--ds-line);
+}
+
+/* ============ Chip ===================================================== */
+
+.ds-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-1);
+  min-width: 56px;
+  padding: var(--ds-space-3) var(--ds-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  font-size: var(--ds-text-xs);
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease),
+    color var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-chip:hover {
+  background: var(--ds-surface-3);
+}
+
+.ds-chip--active {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+  border-radius: var(--ds-radius-pill);
+}
+.ds-chip--active:hover {
+  background: var(--ds-accent-hover);
+}
+
+.ds-chip__value {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+}
+
+/* ============ Card ===================================================== */
+
+.ds-card {
+  position: relative;
+  padding: var(--ds-space-6);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-surface-1);
+  box-shadow: var(--ds-shadow-1);
+}
+
+.ds-card--accent {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+}
+.ds-card--inverse {
+  background: var(--ds-surface-inverse);
+  color: var(--ds-text-inverse);
+}
+.ds-card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Media card: artwork bleeds to the edges, controls float on top. */
+.ds-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-surface-2);
+}
+.ds-card__media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ds-card__overlay {
+  position: absolute;
+  inset: var(--ds-space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  pointer-events: none;
+}
+.ds-card__overlay > * {
+  pointer-events: auto;
+}
+
+/* ============ Stat ===================================================== */
+
+.ds-stat__value {
+  font-size: var(--ds-text-display);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.ds-stat__label {
+  margin-top: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-muted);
+}
+/* The ">" lead-in used on the case-study metrics. */
+.ds-stat--marked .ds-stat__value::before {
+  content: ">";
+  margin-right: var(--ds-space-2);
+  font-size: 0.4em;
+  vertical-align: 0.9em;
+  font-weight: var(--ds-weight-light);
+  color: var(--ds-text-muted);
+}
+
+/* ============ Ring gauge =============================================== */
+/* Set --ds-gauge-value between 0 and 1. The arc spans 270°, opening downward,
+   matching the temperature dials in the source. */
+
+.ds-gauge {
+  --ds-gauge-value: 0.5;
+  --ds-gauge-size: 160px;
+  position: relative;
+  width: var(--ds-gauge-size);
+  height: var(--ds-gauge-size);
+}
+.ds-gauge > svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(135deg);
+}
+.ds-gauge__track,
+.ds-gauge__fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  /* r=46 → circumference 289.03; 75% of it is the visible sweep. */
+  stroke-dasharray: 216.77 289.03;
+}
+.ds-gauge__track {
+  stroke: var(--ds-surface-3);
+}
+.ds-gauge__fill {
+  stroke: var(--ds-accent);
+  stroke-dashoffset: calc(216.77 * (1 - var(--ds-gauge-value)));
+  transition: stroke-dashoffset var(--ds-duration-slow) var(--ds-ease);
+}
+.ds-gauge__content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+/* ============ Marker list ============================================== */
+
+.ds-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--ds-space-4);
+}
+.ds-list > li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: var(--ds-space-3);
+  align-items: baseline;
+}
+.ds-list > li::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  /* The small pennant marker that flags values throughout the source. */
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+  background: var(--ds-accent);
+  transform: translateY(-1px);
+}
+
+/* ============ Segment meter ============================================ */
+/* A discrete 0..n scale. Reads at a glance where a continuous bar does not. */
+
+.ds-segments {
+  display: flex;
+  gap: 5px;
+}
+.ds-segments__unit {
+  flex: 1;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--ds-surface-3);
+}
+.ds-segments__unit--on {
+  background: var(--ds-accent);
+}
+
+/* ============ Field ==================================================== */
+
+.ds-field {
+  display: grid;
+  gap: var(--ds-space-2);
+}
+.ds-field__label {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-muted);
+}
+.ds-input {
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  font-size: var(--ds-text-base);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-input::placeholder {
+  color: var(--ds-text-faint);
+}
+.ds-input:hover {
+  border-color: var(--ds-line-strong);
+}
+.ds-input:focus {
+  outline: none;
+  border-color: var(--ds-accent);
+}
+textarea.ds-input {
+  height: auto;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  line-height: var(--ds-leading-normal);
+  resize: vertical;
+}
+
+/* ============ Switch =================================================== */
+
+.ds-switch {
+  appearance: none;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-3);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-text);
+  transition: transform var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-switch:checked {
+  background: var(--ds-accent);
+}
+.ds-switch:checked::after {
+  background: var(--ds-on-accent);
+  transform: translateX(18px);
+}
+
+/* ============ Accordion ================================================ */
+/* Native <details>. No script, keyboard and find-in-page work for free. */
+
+.ds-accordion {
+  border-bottom: 1px solid var(--ds-line);
+}
+.ds-accordion > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-5) 0;
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-regular);
+  cursor: pointer;
+  list-style: none;
+}
+.ds-accordion > summary::-webkit-details-marker {
+  display: none;
+}
+.ds-accordion > summary::after {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-right: 1.75px solid var(--ds-text-muted);
+  border-bottom: 1.75px solid var(--ds-text-muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-accordion[open] > summary::after {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+.ds-accordion__body {
+  padding-bottom: var(--ds-space-5);
+  color: var(--ds-text-muted);
+  max-width: 62ch;
+}
+
+/* ============ Nav ====================================================== */
+
+.ds-nav {
+  display: inline-flex;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-1);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-1);
+}
+.ds-nav__item {
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border: 0;
+  border-radius: var(--ds-radius-pill);
+  background: transparent;
+  color: var(--ds-text-muted);
+  font-size: var(--ds-text-sm);
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease),
+    color var(--ds-duration-fast) var(--ds-ease);
+}
+.ds-nav__item:hover {
+  color: var(--ds-text);
+}
+.ds-nav__item--active {
+  background: var(--ds-surface-3);
+  color: var(--ds-text);
+}
+
+/* ============ Avatar & badge =========================================== */
+
+.ds-avatar {
+  position: relative;
+  display: block;
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  border-radius: var(--ds-radius-pill);
+  object-fit: cover;
+  background: var(--ds-surface-2);
+}
+.ds-avatar-wrap {
+  position: relative;
+  display: inline-block;
+}
+.ds-avatar-wrap::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ds-bg);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-accent);
+}
+
+.ds-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-surface-2);
+  color: var(--ds-accent-ink);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+.ds-badge--accent {
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+}

@@ -5,7 +5,6 @@ import { appDataDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { isEnabled, enable, disable } from "@tauri-apps/plugin-autostart";
 import { Mark } from "@/components/brand/Mark";
-import { MarkMono } from "@/components/brand/MarkMono";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/Switch";
@@ -16,7 +15,7 @@ import { BackupPanel } from "@/components/settings/BackupPanel";
 import { UpdatePanel } from "@/components/settings/UpdatePanel";
 import { useLiveSeconds, setLiveSeconds } from "@/components/birthdays/useLiveSeconds";
 import { themeStore, type ThemePref } from "@/lib/theme";
-import { closeToTrayStore, trayIconStore, type TrayIconPref } from "@/lib/behavior";
+import { closeToTrayStore } from "@/lib/behavior";
 import { notifyBirthdaysStore, notifyRemindersStore } from "@/lib/notifications";
 import { useQuery } from "@/lib/useQuery";
 
@@ -24,17 +23,6 @@ const THEME_SEGMENTS: { value: ThemePref; label: string }[] = [
   { value: "system", label: "Системная" },
   { value: "light", label: "Светлая" },
   { value: "dark", label: "Тёмная" },
-];
-
-// Превью имитирует панель задач: марка показана на том фоне, ради которого её выбирают.
-const TRAY_ICON_OPTIONS: {
-  value: TrayIconPref;
-  label: string;
-  bg: string;
-  fg: string;
-}[] = [
-  { value: "white", label: "Тёмная панель", bg: "#1f1f23", fg: "#ffffff" },
-  { value: "black", label: "Светлая панель", bg: "#f3f3f3", fg: "#000000" },
 ];
 
 function Section({
@@ -81,7 +69,6 @@ export function SettingsPage() {
   const theme = themeStore.use();
   const liveSeconds = useLiveSeconds();
   const closeToTray = closeToTrayStore.use() === "1";
-  const trayIcon = trayIconStore.use();
   const notifyBirthdays = notifyBirthdaysStore.use() === "1";
   const notifyReminders = notifyRemindersStore.use() === "1";
   const { show } = useToast();
@@ -111,7 +98,7 @@ export function SettingsPage() {
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div>
           <p className="m-0 mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-muted">
-            rings · приложение
+            trail · приложение
           </p>
           <h1 className="m-0 text-4xl font-bold leading-none tracking-[-0.045em]">Настройки</h1>
         </div>
@@ -145,38 +132,6 @@ export function SettingsPage() {
               label="Сворачивать в трей при закрытии"
             />
           </Row>
-          <div className="flex flex-col gap-1.5 pt-1">
-            <span className="text-sm text-app-text">Иконка в трее</span>
-            <span className="text-xs text-muted">
-              Выберите марку под цвет своей панели задач
-            </span>
-            <div className="mt-1.5 flex gap-3">
-              {TRAY_ICON_OPTIONS.map((opt) => {
-                const active = trayIcon === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => trayIconStore.set(opt.value)}
-                    className="flex cursor-pointer flex-col items-center gap-1.5"
-                  >
-                    <span
-                      className={`grid h-16 w-24 place-items-center rounded-xl border-2 transition-colors ${
-                        active ? "border-amber" : "border-line hover:border-muted"
-                      }`}
-                      style={{ background: opt.bg, color: opt.fg }}
-                    >
-                      <MarkMono size={28} />
-                    </span>
-                    <span className={`text-xs ${active ? "text-app-text" : "text-muted"}`}>
-                      {opt.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </Section>
 
         <Section title="Уведомления">
@@ -241,7 +196,7 @@ export function SettingsPage() {
           <div className="flex items-center gap-3">
             <Mark size={40} />
             <div>
-              <p className="m-0 text-sm font-semibold text-app-text">Rings</p>
+              <p className="m-0 text-sm font-semibold text-app-text">Trail</p>
               <p className="m-0 text-sm text-muted">Личный таймлайн жизни · версия {version ?? "—"}</p>
             </div>
           </div>

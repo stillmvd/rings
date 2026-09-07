@@ -30,7 +30,7 @@ type GridColors = {
   grayZone: string;
 };
 
-// Чтение CSS-переменных Rings: canvas реагирует на тему.
+// Чтение CSS-переменных Trail: canvas реагирует на тему.
 function readColors(): GridColors {
   const s = getComputedStyle(document.documentElement);
   const v = (name: string, fallback: string) => s.getPropertyValue(name).trim() || fallback;

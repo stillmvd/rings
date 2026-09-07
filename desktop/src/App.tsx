@@ -9,7 +9,7 @@ import { SearchHost } from "./components/search/SearchHost";
 import { UpdateWatcher } from "./components/settings/UpdatePanel";
 import { modeStore, type ViewMode } from "./lib/mode";
 import { useApplyTheme } from "./lib/theme";
-import { useCloseToTray, useApplyTrayIcon } from "./lib/behavior";
+import { useCloseToTray } from "./lib/behavior";
 import { useNotifications } from "./lib/notifications";
 import { useAutoBackup } from "./lib/backup";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -33,7 +33,6 @@ const PAGES: Record<ViewMode, ComponentType> = {
 export default function App() {
   useApplyTheme();
   useCloseToTray();
-  useApplyTrayIcon();
   useNotifications();
   useAutoBackup();
   const mode = modeStore.use();

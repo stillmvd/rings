@@ -13,7 +13,7 @@ export function Titlebar() {
       <div className="pointer-events-none flex items-center gap-2 pl-3">
         <Mark size={16} />
         <span className="text-[13px] font-semibold tracking-tight text-app-text">
-          Rings
+          Trail
         </span>
       </div>
       <div className="flex h-full">

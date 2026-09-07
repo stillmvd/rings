@@ -3,7 +3,7 @@ import { createLocalStore } from "./localStore";
 
 export type ThemePref = "system" | "light" | "dark";
 
-export const themeStore = createLocalStore<ThemePref>("rings.theme", "system");
+export const themeStore = createLocalStore<ThemePref>("trail.theme", "system");
 
 export function useApplyTheme() {
   const pref = themeStore.use();

@@ -23,8 +23,8 @@ const REMINDER_STATE_KEY = "reminder_notice_state_v2";
 // Минутный шаг нужен напоминаниям («за 30 минут», назойливые каждые 10) — запрос в локальный SQLite дёшев.
 const CHECK_INTERVAL_MS = 60 * 1000;
 
-export const notifyBirthdaysStore = createLocalStore<"1" | "0">("rings.notifyBirthdays", "1");
-export const notifyRemindersStore = createLocalStore<"1" | "0">("rings.notifyReminders", "1");
+export const notifyBirthdaysStore = createLocalStore<"1" | "0">("trail.notifyBirthdays", "1");
+export const notifyRemindersStore = createLocalStore<"1" | "0">("trail.notifyReminders", "1");
 
 async function ensurePermission(): Promise<boolean> {
   if (await isPermissionGranted()) return true;

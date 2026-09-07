@@ -1,6 +1,15 @@
 import { useSyncExternalStore } from "react";
 
-export function createLocalStore<T extends string>(key: string, fallback: T) {
+export function createLocalStore<T extends string>(key: string, fallback: T, migrateLegacy = true) {
+  // Одноразовый перенос ключей rings.* → trail.* после переименования приложения.
+  const legacyKey = migrateLegacy && key.startsWith("trail.") ? `rings.${key.slice(6)}` : null;
+  if (legacyKey && localStorage.getItem(key) === null) {
+    const legacy = localStorage.getItem(legacyKey);
+    if (legacy !== null) {
+      localStorage.setItem(key, legacy);
+      localStorage.removeItem(legacyKey);
+    }
+  }
   let listeners: Array<() => void> = [];
   const get = () => (localStorage.getItem(key) as T | null) ?? fallback;
   const set = (value: T) => {
