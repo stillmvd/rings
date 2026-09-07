@@ -42,6 +42,7 @@
   --color-surface-0: var(--rg-bg);
   --color-surface-1: var(--rg-surface);
   --color-surface-2: var(--ds-surface-2);
+  --color-surface-3: var(--ds-surface-3);
   --color-app-text: var(--rg-text);
   --color-line: var(--rg-line);
   --color-muted: var(--rg-muted);
@@ -70,6 +71,10 @@
 
 @utility bg-tonal-hover {
   background: var(--ds-surface-3);
+}
+
+@utility text-accent-ink {
+  color: var(--ds-accent-ink);
 }
 
 

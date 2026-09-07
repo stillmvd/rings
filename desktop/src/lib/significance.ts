@@ -37,7 +37,7 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
   },
   3: {
     level: 3,
-    label: "Самое важное",
+    label: "Главное",
     color: "var(--rg-sig-3)",
     onColor: "var(--rg-sig-3-on)",
     container: "color-mix(in srgb, var(--rg-sig-3) 20%, var(--rg-surface))",

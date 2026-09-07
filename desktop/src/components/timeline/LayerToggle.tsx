@@ -29,13 +29,13 @@ export function LayerToggle() {
             aria-pressed={active}
             onClick={() => timelineLayerStore.set(value)}
             className={`relative flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
-              active ? "text-ink" : "text-muted hover:text-app-text"
+              active ? "text-accent-ink" : "text-muted hover:text-app-text"
             }`}
           >
             {active && (
               <motion.span
                 layoutId="tl-layer-pill"
-                className="absolute inset-0 rounded-full bg-amber"
+                className="absolute inset-0 rounded-full bg-surface-3"
                 transition={PILL_SPRING}
               />
             )}
