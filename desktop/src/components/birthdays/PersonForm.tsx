@@ -145,7 +145,7 @@ export function PersonForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-3.5">
       <div className="relative px-2 pt-1">
         <motion.button
           type="button"
@@ -245,7 +245,7 @@ export function PersonForm({
         max={hasYear ? todayISO() : TIMELINE_MAX_DATE}
       />
 
-      <div className="mt-1 flex items-center justify-between gap-2">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (
           <Button type="button" variant="danger" onClick={onDelete} disabled={submitting}>
             Удалить

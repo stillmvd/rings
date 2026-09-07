@@ -111,7 +111,7 @@ export function ReminderForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-3.5">
       <Input
         label="Название"
         value={title}
@@ -210,7 +210,7 @@ export function ReminderForm({
 
       <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
 
-      <div className="mt-1 flex items-center justify-between gap-2">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (
           <Button type="button" variant="danger" onClick={onDelete}>
             Удалить

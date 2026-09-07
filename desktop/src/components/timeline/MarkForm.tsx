@@ -74,7 +74,7 @@ export function MarkForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-3.5">
       <p className="text-sm text-muted">Быстрая отметка дня — выберите тип, без названия.</p>
 
       <div className="flex flex-col gap-1.5">
@@ -96,7 +96,7 @@ export function MarkForm({
         max={TIMELINE_MAX_DATE}
       />
 
-      <div className="mt-1 flex justify-end gap-2">
+      <div className="mt-auto flex justify-end gap-2 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>
           Отмена
         </Button>

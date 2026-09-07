@@ -58,9 +58,9 @@ export function PersonSheet({ state, onStartEdit, onCreate, onUpdate, onDelete, 
       )}
 
       {state?.mode === "view" && (
-        <>
+        <div className="flex min-h-full flex-col">
           <PersonView person={state.person} />
-          <div className="mt-4 flex items-center justify-between gap-2">
+          <div className="mt-auto flex items-center justify-between gap-2 pt-4">
             <Button variant="danger" onClick={() => onDelete(state.person.id)}>
               <Trash2 size={16} strokeWidth={1.75} />
               Удалить
@@ -70,7 +70,7 @@ export function PersonSheet({ state, onStartEdit, onCreate, onUpdate, onDelete, 
               Редактировать
             </Button>
           </div>
-        </>
+        </div>
       )}
     </SideSheet>
   );

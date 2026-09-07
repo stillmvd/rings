@@ -84,7 +84,7 @@ export function EventSheet({
     <>
       <SideSheet open={state !== null} onClose={close} title={title} width={390}>
         {state?.mode === "create" && (
-          <div className="flex flex-col gap-3.5">
+          <div className="flex min-h-full flex-col gap-3.5">
             <SegmentedControl
               segments={[
                 { value: "event", label: "Событие" },
