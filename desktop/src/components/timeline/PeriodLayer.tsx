@@ -125,7 +125,7 @@ export function PeriodLayer({
                 >
                   {showIcon &&
                     Icon &&
-                    createElement(Icon, { size: iconSize, strokeWidth: 2.25, className: "shrink-0" })}
+                    createElement(Icon, { size: iconSize, strokeWidth: 1.75, className: "shrink-0" })}
                   <span className="truncate">{bar.ev.title}</span>
                 </span>
               )}

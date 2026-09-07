@@ -44,7 +44,7 @@ export function LayerToggle() {
               animate={active ? { scale: [1, 1.22, 1], rotate: [0, -10, 0] } : { scale: 1, rotate: 0 }}
               transition={{ duration: 0.42, ease: EASE }}
             >
-              {createElement(icon, { size: 14, strokeWidth: 2.25 })}
+              {createElement(icon, { size: 14, strokeWidth: 1.75 })}
             </motion.span>
             <span className="relative">{label}</span>
           </button>

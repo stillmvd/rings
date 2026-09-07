@@ -28,6 +28,7 @@ type GridColors = {
   muted: string;
   today: string;
   grayZone: string;
+  axis: string;
 };
 
 // Чтение CSS-переменных Trail: canvas реагирует на тему.
@@ -41,6 +42,7 @@ function readColors(): GridColors {
     muted: v("--rg-muted", "#8d897e"),
     today: v("--rg-amber", "#ffb224"),
     grayZone: v("--rg-muted", "#8d897e"),
+    axis: v("--ds-text-faint", "#808080"),
   };
 }
 
@@ -77,7 +79,7 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
   ctx.textBaseline = "middle";
 
   if (lod === "years") {
-    ctx.font = "600 13px system-ui, sans-serif";
+    ctx.font = "700 13px Gilroy, system-ui, sans-serif";
     const pxPerYear = viewport.pxPerDay * 365.25;
     const step = pxPerYear >= 46 ? 1 : pxPerYear >= 22 ? 5 : pxPerYear >= 11 ? 10 : pxPerYear >= 5 ? 25 : 50;
     const minorTicks = pxPerYear >= 11;
@@ -100,11 +102,11 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
       const x = drawTick(d, ms, jan ? 10 : 6, jan);
       ctx.textAlign = "left";
       if (jan) {
-        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.font = "700 13px Gilroy, system-ui, sans-serif";
         ctx.fillStyle = colors.text;
         ctx.fillText(formatYear(msToISO(ms)), x + 5, axisY - 26);
       }
-      ctx.font = "500 11px system-ui, sans-serif";
+      ctx.font = "500 11px Gilroy, system-ui, sans-serif";
       ctx.fillStyle = colors.muted;
       ctx.fillText(formatMonthShortRu(msToISO(ms)), x + 4, axisY + 16);
     }
@@ -115,11 +117,11 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
       const x = drawTick(d, ms, 16, true);
       const iso = msToISO(ms);
       ctx.textAlign = "left";
-      ctx.font = "500 12px system-ui, sans-serif";
+      ctx.font = "500 12px Gilroy, system-ui, sans-serif";
       ctx.fillStyle = colors.text;
       ctx.fillText(formatMonthShortRu(iso), x + 5, axisY - 20);
       if (isJanuary(ms)) {
-        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.font = "700 13px Gilroy, system-ui, sans-serif";
         ctx.fillText(formatYear(iso), x + 5, axisY - 38);
       }
     }
@@ -133,11 +135,11 @@ function drawLodLayer(d: DrawCtx, lod: Lod, layerAlpha: number) {
       const x = drawTick(d, ms, 5, false);
       const iso = msToISO(ms);
       ctx.textAlign = "center";
-      ctx.font = "500 11px system-ui, sans-serif";
+      ctx.font = "500 11px Gilroy, system-ui, sans-serif";
       ctx.fillStyle = colors.text;
       ctx.fillText(formatDayNum(iso), x + ppd / 2, axisY + 24);
       if (showWeekday) {
-        ctx.font = "400 9px system-ui, sans-serif";
+        ctx.font = "400 9px Gilroy, system-ui, sans-serif";
         ctx.fillStyle = colors.muted;
         ctx.fillText(formatWeekdayShortRu(iso), x + ppd / 2, axisY + 38);
       }
@@ -203,7 +205,7 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
     }
     ctx.globalAlpha = 1;
 
-    ctx.strokeStyle = colors.line;
+    ctx.strokeStyle = colors.axis;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, axisY + 0.5);
@@ -238,12 +240,14 @@ export function GridCanvas({ viewport, width, height, lod }: Props) {
       const tx = Math.round(todayX) + 0.5;
       ctx.strokeStyle = colors.today;
       ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.5;
       ctx.beginPath();
       ctx.moveTo(tx, 0);
       ctx.lineTo(tx, axisY - AXIS_GAP_PX);
       ctx.moveTo(tx, axisY + bottomGap);
       ctx.lineTo(tx, height);
       ctx.stroke();
+      ctx.globalAlpha = 1;
       ctx.lineWidth = 1;
     }
   };
