@@ -1,16 +1,26 @@
+import { useSyncExternalStore } from "react";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 
-let cached: Update | null = null;
-let lastCheckAt: number | null = null;
+type UpdateState = { update: Update | null; checkedAt: number | null };
 
-export async function checkUpdate(): Promise<Update | null> {
-  cached = await check();
-  lastCheckAt = Date.now();
-  return cached;
+let state: UpdateState = { update: null, checkedAt: null };
+let listeners: Array<() => void> = [];
+
+function subscribe(listener: () => void) {
+  listeners.push(listener);
+  return () => {
+    listeners = listeners.filter((l) => l !== listener);
+  };
 }
 
-export const cachedUpdate = () => cached;
-export const lastCheck = () => lastCheckAt;
+export async function checkUpdate(): Promise<Update | null> {
+  const update = await check();
+  state = { update, checkedAt: Date.now() };
+  listeners.forEach((l) => l());
+  return update;
+}
+
+export const useUpdateState = () => useSyncExternalStore(subscribe, () => state);
 
 export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} КБ`;

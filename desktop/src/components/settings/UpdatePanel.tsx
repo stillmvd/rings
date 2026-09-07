@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import { Download, RefreshCw } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { relaunch } from "@tauri-apps/plugin-process";
-import type { Update } from "@tauri-apps/plugin-updater";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { useQuery } from "@/lib/useQuery";
 import {
-  cachedUpdate,
   checkUpdate,
   describeUpdateError,
   formatProgress,
-  lastCheck,
+  useUpdateState,
 } from "@/lib/updates";
 
 type Phase = "idle" | "checking" | "downloading" | "installing";
@@ -30,8 +28,7 @@ export function UpdateWatcher() {
 
 export function UpdatePanel() {
   const { data: version } = useQuery(getVersion);
-  const [update, setUpdate] = useState<Update | null>(cachedUpdate);
-  const [checkedAt, setCheckedAt] = useState<number | null>(lastCheck);
+  const { update, checkedAt } = useUpdateState();
   const [phase, setPhase] = useState<Phase>("idle");
   const [downloaded, setDownloaded] = useState(0);
   const [total, setTotal] = useState<number | null>(null);
@@ -41,8 +38,7 @@ export function UpdatePanel() {
     setPhase("checking");
     setError(null);
     try {
-      setUpdate(await checkUpdate());
-      setCheckedAt(lastCheck());
+      await checkUpdate();
     } catch (e) {
       setError(describeUpdateError(e));
     } finally {
