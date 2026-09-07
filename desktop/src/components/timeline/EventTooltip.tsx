@@ -35,7 +35,7 @@ export function EventTooltip({ anchor, width }: { anchor: TooltipAnchor | null; 
                   className="img-outline mb-1.5 h-24 w-full rounded-md object-cover"
                 />
               )}
-              <div className="text-sm font-semibold text-app-text">{anchor.events[0].title}</div>
+              <div className="text-sm font-medium text-app-text">{anchor.events[0].title}</div>
               <div className="text-xs text-muted">
                 {anchor.events[0].end_date
                   ? `${formatDayMonthRu(anchor.events[0].date)} — ${formatFullRu(anchor.events[0].end_date)}`
@@ -44,7 +44,7 @@ export function EventTooltip({ anchor, width }: { anchor: TooltipAnchor | null; 
             </>
           ) : (
             <>
-              <div className="mb-1 text-xs font-semibold text-muted">
+              <div className="mb-1 text-xs font-medium text-muted">
                 {anchor.events.length} событий
               </div>
               {anchor.events.slice(0, 6).map((e) => (

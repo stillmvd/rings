@@ -22,7 +22,7 @@ export function IconPicker({
     <div className="flex flex-col gap-1">
       {label && <span className="text-xs font-medium text-muted">{label}</span>}
 
-      <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-0 px-2.5 transition focus-within:border-amber">
+      <div className="flex h-10 items-center gap-2 rounded-xl border border-line bg-surface-2 px-2.5 transition focus-within:border-amber">
         <Search size={15} className="shrink-0 text-muted" />
         <input
           value={query}
@@ -32,7 +32,7 @@ export function IconPicker({
         />
       </div>
 
-      <div className="mt-1.5 grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto rounded-lg border border-line bg-surface-0 p-2">
+      <div className="mt-1.5 grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto rounded-xl border border-line bg-surface-2 p-2">
         {filtered.map((name) => {
           const active = name === value;
           return (

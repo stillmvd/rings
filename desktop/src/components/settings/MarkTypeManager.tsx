@@ -63,9 +63,9 @@ export function MarkTypeManager() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-app-text">Типы отметок</h3>
+        <h3 className="text-base font-medium text-app-text">Типы отметок</h3>
         <Button variant="secondary" onClick={() => setEdit({ mode: "create" })}>
-          <Plus size={15} /> Добавить
+          <Plus size={15} strokeWidth={1.75} /> Добавить
         </Button>
       </div>
 
@@ -76,7 +76,7 @@ export function MarkTypeManager() {
         {types.map((t) => (
           <div
             key={t.id}
-            className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-0"
+            className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-2"
           >
             <span
               className="grid h-7 w-7 shrink-0 place-items-center rounded-lg"
@@ -87,10 +87,10 @@ export function MarkTypeManager() {
             <span className="flex-1 truncate text-sm text-app-text">{t.name}</span>
             <div className="flex items-center gap-2">
               <IconButton label="Редактировать" onClick={() => setEdit({ mode: "edit", type: t })}>
-                <Pencil size={15} />
+                <Pencil size={15} strokeWidth={1.75} />
               </IconButton>
               <IconButton label="Удалить" onClick={() => setConfirm(t)} danger>
-                <Trash2 size={15} />
+                <Trash2 size={15} strokeWidth={1.75} />
               </IconButton>
             </div>
           </div>

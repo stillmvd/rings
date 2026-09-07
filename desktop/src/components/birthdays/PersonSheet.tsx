@@ -13,7 +13,7 @@ import { SideSheet } from "@/components/ui/SideSheet";
 import { PersonForm, type PersonFormPayload } from "./PersonForm";
 import type { Person } from "@/db/queries/people";
 
-const AMBER_CONTAINER = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const AMBER_CONTAINER = "var(--ds-surface-2)";
 
 export type PersonSheetState =
   | { mode: "create" }
@@ -62,11 +62,11 @@ export function PersonSheet({ state, onStartEdit, onCreate, onUpdate, onDelete, 
           <PersonView person={state.person} />
           <div className="mt-4 flex items-center justify-between gap-2">
             <Button variant="danger" onClick={() => onDelete(state.person.id)}>
-              <Trash2 size={16} />
+              <Trash2 size={16} strokeWidth={1.75} />
               Удалить
             </Button>
             <Button variant="secondary" onClick={onStartEdit}>
-              <Pencil size={16} />
+              <Pencil size={16} strokeWidth={1.75} />
               Редактировать
             </Button>
           </div>
@@ -110,7 +110,7 @@ function PersonView({ person }: { person: Person }) {
       </div>
 
       <div>
-        <h3 className="text-xl font-semibold text-app-text">{person.name}</h3>
+        <h3 className="text-xl font-bold text-app-text">{person.name}</h3>
         <p className="mt-0.5 text-sm text-muted">
           {person.has_year ? formatFullRu(person.birth_date) : formatDayMonthRu(person.birth_date)}
         </p>

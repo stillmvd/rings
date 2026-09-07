@@ -91,8 +91,8 @@ export function SearchPanel({
             transition={{ type: "spring", stiffness: 360, damping: 30 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-0 px-3">
-              <Search size={18} className="shrink-0 text-muted" />
+            <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3">
+              <Search size={18} strokeWidth={1.75} className="shrink-0 text-muted" />
               <input
                 ref={inputRef}
                 type="text"
@@ -107,9 +107,9 @@ export function SearchPanel({
                 type="button"
                 aria-label="Закрыть"
                 onClick={onClose}
-                className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-app-text"
               >
-                <X size={16} />
+                <X size={16} strokeWidth={1.75} />
               </button>
             </div>
 
@@ -126,7 +126,7 @@ export function SearchPanel({
                         <button
                           type="button"
                           onClick={() => onSelectResult(event)}
-                          className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-surface-0"
+                          className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-surface-2"
                         >
                           {createElement(resolveIcon(event.category_icon), {
                             size: 16,
@@ -149,7 +149,7 @@ export function SearchPanel({
                         <button
                           type="button"
                           onClick={() => setAllFor(query)}
-                          className="w-full cursor-pointer px-3 py-2 text-center text-xs text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                          className="w-full cursor-pointer px-3 py-2 text-center text-xs text-muted transition-colors hover:bg-surface-2 hover:text-app-text"
                         >
                           Показать все ({matched.length})
                         </button>
@@ -175,7 +175,7 @@ export function SearchPanel({
                       onClick={() => toggleCategory(cat.id)}
                       style={on ? { borderColor: cat.color, color: cat.color } : undefined}
                       className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                        on ? "bg-surface-0" : "border-line text-muted hover:text-app-text"
+                        on ? "bg-surface-2" : "border-line text-muted hover:text-app-text"
                       }`}
                     >
                       {createElement(resolveIcon(cat.icon), { size: 14, color: cat.color })}
@@ -201,7 +201,7 @@ export function SearchPanel({
                       onClick={() => toggleSignificance(meta.level)}
                       style={on ? { borderColor: meta.color, color: meta.color } : undefined}
                       className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                        on ? "bg-surface-0" : "border-line text-muted hover:text-app-text"
+                        on ? "bg-surface-2" : "border-line text-muted hover:text-app-text"
                       }`}
                     >
                       <span

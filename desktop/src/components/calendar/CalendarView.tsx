@@ -232,7 +232,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                     onPersonOpen(p);
                   }}
                 >
-                  <Cake size={11} />
+                  <Cake size={11} strokeWidth={1.75} />
                 </button>
               ))}
             </div>
@@ -355,7 +355,7 @@ function WheelField({
         className="tl-cal-wheel-chev"
         onClick={() => onShift(-1)}
       >
-        <ChevronUp size={13} />
+        <ChevronUp size={13} strokeWidth={1.75} />
       </button>
       <span className="tl-cal-wheel-val">{label}</span>
       <button
@@ -365,7 +365,7 @@ function WheelField({
         className="tl-cal-wheel-chev"
         onClick={() => onShift(1)}
       >
-        <ChevronDown size={13} />
+        <ChevronDown size={13} strokeWidth={1.75} />
       </button>
     </div>
   );
@@ -392,7 +392,7 @@ function MonthCaption({ calendarMonth, displayIndex, ...rest }: MonthCaptionProp
       </div>
       {!isTodayMonth && (
         <button type="button" className="tl-cal-today" onClick={onToday}>
-          <CalendarDays size={15} />
+          <CalendarDays size={15} strokeWidth={1.75} />
           Сегодня
         </button>
       )}

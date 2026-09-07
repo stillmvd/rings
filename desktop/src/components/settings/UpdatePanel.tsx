@@ -82,7 +82,7 @@ export function UpdatePanel() {
           {error && <span className="text-xs text-rust">{error}</span>}
         </div>
         <Button variant="secondary" onClick={runCheck} disabled={phase !== "idle"}>
-          <RefreshCw size={15} className={phase === "checking" ? "animate-spin" : ""} />
+          <RefreshCw size={15} strokeWidth={1.75} className={phase === "checking" ? "animate-spin" : ""} />
           {phase === "checking" ? "Проверяю…" : "Проверить"}
         </Button>
       </div>
@@ -103,13 +103,13 @@ export function UpdatePanel() {
               </span>
             </div>
             <Button onClick={runInstall} disabled={busy}>
-              <Download size={15} />
+              <Download size={15} strokeWidth={1.75} />
               Обновить
             </Button>
           </div>
           {phase === "downloading" && (
             <div
-              className="h-1 overflow-hidden rounded-full bg-surface-0"
+              className="h-1 overflow-hidden rounded-full bg-surface-2"
               role="progressbar"
               aria-label="Скачивание обновления"
               aria-valuemin={0}

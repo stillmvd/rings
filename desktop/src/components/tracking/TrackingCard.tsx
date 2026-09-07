@@ -24,7 +24,7 @@ import type { Significance } from "@/lib/constants";
 const ELEVATION_1 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)";
 const ELEVATION_2 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)";
 const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
-const AMBER_CONTAINER = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const AMBER_CONTAINER = "var(--ds-surface-2)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -48,7 +48,7 @@ function Metric({
         {icon}
         {label}
       </span>
-      <span className="text-sm font-semibold tabular-nums text-app-text">{value}</span>
+      <span className="text-sm font-medium tabular-nums text-app-text">{value}</span>
     </div>
   );
 }
@@ -100,7 +100,7 @@ export function TrackingCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <CoverPlaceholder fill={accent.fill} container={accent.container} />
+          <CoverPlaceholder fill={accent.fill} />
         )}
         {event.category_name && (
           <span
@@ -133,7 +133,7 @@ export function TrackingCard({
             className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
             style={{ background: "var(--rg-amber)", color: "var(--rg-bg)" }}
           >
-            <BellRing size={13} />
+            <BellRing size={13} strokeWidth={1.75} />
             Напоминание
           </span>
         )}
@@ -141,13 +141,13 @@ export function TrackingCard({
 
       <div className="flex flex-col gap-3 p-4">
         <div>
-          <h3 className="truncate text-xl font-semibold text-app-text">{event.title}</h3>
+          <h3 className="truncate text-xl font-bold text-app-text">{event.title}</h3>
           <p className="mt-0.5 text-sm text-muted">{formatFullRu(event.date)}</p>
         </div>
 
         <div className="rounded-2xl px-4 py-3" style={{ background: heroBg, color: heroColor }}>
           <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
-            {isFuture ? <BellRing size={14} /> : <Hourglass size={14} />}
+            {isFuture ? <BellRing size={14} strokeWidth={1.75} /> : <Hourglass size={14} strokeWidth={1.75} />}
             {isFuture ? "Осталось" : "Уже прошло"}
           </span>
           <span className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums">
@@ -163,17 +163,17 @@ export function TrackingCard({
 
         <div className="grid grid-cols-2 gap-2">
           <Metric
-            icon={<CalendarDays size={13} />}
+            icon={<CalendarDays size={13} strokeWidth={1.75} />}
             label="Всего дней"
             value={formatTotalDays(event.date)}
           />
           <Metric
-            icon={<CalendarClock size={13} />}
+            icon={<CalendarClock size={13} strokeWidth={1.75} />}
             label="День недели"
             value={cap(formatWeekdayFullRu(event.date))}
           />
           {anniversary && (
-            <Metric icon={<Cake size={13} />} label="Годовщина" value={anniversary} wide />
+            <Metric icon={<Cake size={13} strokeWidth={1.75} />} label="Годовщина" value={anniversary} wide />
           )}
         </div>
       </div>

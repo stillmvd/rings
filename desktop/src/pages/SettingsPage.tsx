@@ -37,7 +37,7 @@ function Section({
   return (
     <section className="flex flex-col gap-3 border-t border-line pt-6 first:border-t-0 first:pt-0">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-app-text">{title}</h2>
+        <h2 className="text-xl font-bold tracking-tight text-app-text">{title}</h2>
         {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       </div>
       {children}
@@ -97,7 +97,7 @@ export function SettingsPage() {
     <div className="h-full overflow-y-auto px-10 py-10">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div>
-          <p className="m-0 mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-muted">
+          <p className="m-0 mb-3 text-xs font-medium uppercase tracking-[0.24em] text-muted">
             trail · приложение
           </p>
           <h1 className="m-0 text-4xl font-bold leading-none tracking-[-0.045em]">Настройки</h1>
@@ -181,7 +181,7 @@ export function SettingsPage() {
         <Section title="Данные" description="База и медиа хранятся в папке приложения.">
           <div>
             <Button variant="secondary" onClick={openDataFolder}>
-              <FolderOpen size={15} />
+              <FolderOpen size={15} strokeWidth={1.75} />
               Открыть папку данных
             </Button>
           </div>
@@ -196,7 +196,7 @@ export function SettingsPage() {
           <div className="flex items-center gap-3">
             <Mark size={40} />
             <div>
-              <p className="m-0 text-sm font-semibold text-app-text">Trail</p>
+              <p className="m-0 text-sm font-medium text-app-text">Trail</p>
               <p className="m-0 text-sm text-muted">Личный таймлайн жизни · версия {version ?? "—"}</p>
             </div>
           </div>

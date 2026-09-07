@@ -51,7 +51,7 @@ export function MediaUploader({
               key={item.key}
               value={item}
               onClick={() => setLightbox(i)}
-              className="group relative h-16 w-16 cursor-grab overflow-hidden rounded-lg border border-line bg-surface-0 active:cursor-grabbing"
+              className="group relative h-16 w-16 cursor-grab overflow-hidden rounded-lg border border-line bg-surface-2 active:cursor-grabbing"
             >
               <img
                 src={mediaItemSrc(item)}
@@ -69,7 +69,7 @@ export function MediaUploader({
                 }}
                 className="absolute right-0.5 top-0.5 grid h-5 w-5 cursor-pointer place-items-center rounded-md bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
-                <X size={12} />
+                <X size={12} strokeWidth={1.75} />
               </button>
             </Reorder.Item>
           ))}
@@ -91,7 +91,7 @@ export function MediaUploader({
             : "border-line text-muted hover:border-amber hover:text-app-text"
         }`}
       >
-        <ImagePlus size={15} />
+        <ImagePlus size={15} strokeWidth={1.75} />
         Перетащите, вставьте (Ctrl+V) или нажмите
       </button>
 

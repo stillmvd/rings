@@ -42,14 +42,14 @@ export function EventCard({
             style={{ opacity: future ? 0.6 : undefined }}
           />
         ) : (
-          <CoverPlaceholder fill={accent.fill} container={accent.container} dimmed={future} />
+          <CoverPlaceholder fill={accent.fill} dimmed={future} />
         )}
         {future && (
           <span
             className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full bg-surface-1 text-muted shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
             title="Запланировано"
           >
-            <CalendarClock size={15} />
+            <CalendarClock size={15} strokeWidth={1.75} />
           </span>
         )}
         {Icon && (

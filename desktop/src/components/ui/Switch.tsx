@@ -15,7 +15,7 @@ export function Switch({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] ${
-        checked ? "bg-amber" : "bg-surface-0 ring-1 ring-inset ring-line"
+        checked ? "bg-amber" : "bg-surface-2 ring-1 ring-inset ring-line"
       }`}
     >
       <span

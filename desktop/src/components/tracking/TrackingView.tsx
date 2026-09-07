@@ -28,7 +28,7 @@ function Section({
       {showHeader && (
         <div className="sticky top-0 z-30 mb-4 flex justify-center">
           <h2
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-app-text backdrop-blur"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-app-text backdrop-blur"
             style={{
               background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
               boxShadow: "0 1px 2px 0 rgba(0,0,0,0.25)",
@@ -37,7 +37,7 @@ function Section({
             {title}
             <span
               className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-app-text"
-              style={{ background: "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))" }}
+              style={{ background: "var(--ds-surface-2)" }}
             >
               {events.length}
             </span>

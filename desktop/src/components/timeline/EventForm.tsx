@@ -302,7 +302,7 @@ export function EventForm({
         label="Отслеживание"
         segments={[
           { value: "off", label: "Выкл" },
-          { value: "on", label: "Вкл", icon: <Target size={16} /> },
+          { value: "on", label: "Вкл", icon: <Target size={16} strokeWidth={1.75} /> },
         ]}
         value={track ? "on" : "off"}
         onChange={(v) => setTrack(v === "on")}

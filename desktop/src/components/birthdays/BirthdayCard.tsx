@@ -16,7 +16,7 @@ import type { Person } from "@/db/queries/people";
 const ELEVATION_1 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)";
 const ELEVATION_2 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)";
 const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
-const AMBER_CONTAINER = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const HERO_BG = "var(--ds-surface-2)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -27,7 +27,7 @@ function Metric({ icon, label, value }: { icon: ReactNode; label: string; value:
         {icon}
         {label}
       </span>
-      <span className="text-sm font-semibold tabular-nums text-app-text">{value}</span>
+      <span className="text-sm font-medium tabular-nums text-app-text">{value}</span>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export function BirthdayCard({
         ) : (
           <div
             className="flex h-full w-full items-center justify-center"
-            style={{ background: AMBER_CONTAINER }}
+            style={{ background: HERO_BG }}
           >
             <Cake size={56} strokeWidth={1.5} style={{ color: "var(--rg-amber)" }} />
           </div>
@@ -100,7 +100,7 @@ export function BirthdayCard({
               boxShadow: "0 1px 2px 0 rgba(0,0,0,0.3)",
             }}
           >
-            <PartyPopper size={13} />
+            <PartyPopper size={13} strokeWidth={1.75} />
             Сегодня!
           </span>
         )}
@@ -108,7 +108,7 @@ export function BirthdayCard({
 
       <div className="flex flex-col gap-3 p-4">
         <div>
-          <h3 className="truncate text-xl font-semibold text-app-text">{person.name}</h3>
+          <h3 className="truncate text-xl font-bold text-app-text">{person.name}</h3>
           <p className="mt-0.5 text-sm text-muted">
             {person.has_year ? formatFullRu(person.birth_date) : cap(formatDayMonthRu(person.birth_date))}
           </p>
@@ -116,25 +116,30 @@ export function BirthdayCard({
 
         <div
           className="rounded-2xl px-4 py-3"
-          style={{ background: AMBER_CONTAINER, color: "var(--rg-text)" }}
+          style={{ background: HERO_BG, color: "var(--rg-text)" }}
         >
           <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
-            <Gift size={14} />
+            <Gift size={14} strokeWidth={1.75} />
             {today ? "День рождения" : "До дня рождения"}
           </span>
-          <span className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums">{heroValue}</span>
+          <span
+            className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums"
+            style={{ color: "var(--ds-accent-ink)" }}
+          >
+            {heroValue}
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {age && <Metric icon={<Hourglass size={13} />} label="Сейчас" value={age} />}
-          {turning && <Metric icon={<Cake size={13} />} label="Исполнится" value={turning} />}
+          {age && <Metric icon={<Hourglass size={13} strokeWidth={1.75} />} label="Сейчас" value={age} />}
+          {turning && <Metric icon={<Cake size={13} strokeWidth={1.75} />} label="Исполнится" value={turning} />}
           <Metric
-            icon={<CalendarHeart size={13} />}
+            icon={<CalendarHeart size={13} strokeWidth={1.75} />}
             label="Дата"
             value={cap(formatDayMonthRu(nb))}
           />
           <Metric
-            icon={<CalendarClock size={13} />}
+            icon={<CalendarClock size={13} strokeWidth={1.75} />}
             label="День недели"
             value={cap(formatWeekdayFullRu(nb))}
           />

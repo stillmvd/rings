@@ -29,7 +29,7 @@ export interface PersonFormValues {
   photo: string | null;
 }
 
-const AMBER_CONTAINER = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const AMBER_CONTAINER = "var(--ds-surface-2)";
 const withYear2000 = (iso: string) => `2000-${iso.slice(5)}`;
 
 interface PersonFormProps {
@@ -202,7 +202,7 @@ export function PersonForm({
             onClick={clearAvatar}
             className="absolute right-4 top-3 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
           >
-            <X size={16} />
+            <X size={16} strokeWidth={1.75} />
           </button>
         )}
         <input

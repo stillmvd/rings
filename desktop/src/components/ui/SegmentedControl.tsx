@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div className="flex flex-col gap-1">
       {label && <span className="text-xs font-medium text-muted">{label}</span>}
-      <div className="flex gap-1 rounded-full bg-surface-0 p-1">
+      <div className="flex gap-1 rounded-full bg-surface-2 p-1">
         {segments.map((s) => {
           const active = s.value === value;
           return (

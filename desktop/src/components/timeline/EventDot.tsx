@@ -5,7 +5,8 @@ import { resolveIconOrNull } from "@/lib/icons";
 import { isFuture } from "@/lib/duration";
 import type { TimelineEvent } from "@/db/queries/events";
 
-// Размер и рамка — от значимости, цвет и иконка — от категории (откат на цвет значимости).
+// Размер и плотность заливки — от значимости, цвет и иконка — от категории
+// (откат на цвет значимости).
 export function EventDot({ event }: { event: TimelineEvent }) {
   const sig = getSignificanceMeta(event.significance);
   const { fill: color, onFill: contentColor } = eventAccent(event);
@@ -20,8 +21,9 @@ export function EventDot({ event }: { event: TimelineEvent }) {
       style={{
         width: diameter,
         height: diameter,
-        background: future ? `color-mix(in srgb, ${color} 20%, transparent)` : color,
+        background: future || sig.hollow ? `color-mix(in srgb, ${color} 20%, transparent)` : color,
         border: future ? `1.5px dashed ${color}` : undefined,
+        boxShadow: !future && sig.hollow ? `inset 0 0 0 2px ${color}` : undefined,
         opacity: future ? 0.85 : undefined,
       }}
     >

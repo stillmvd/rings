@@ -1,0 +1,223 @@
+/* Design system tokens
+   Source: Ambient Weather case study screenshots (Behance 204141831)
+   Palette values #000000 / #282828 / #F0F0F0 / #FFFFFF / #FFFF1E are declared
+   in the source layouts; every other step is derived on an even OKLCH lightness ramp. */
+
+@font-face {
+  font-family: "Gilroy";
+  src: url("./fonts/Gilroy-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gilroy";
+  src: url("./fonts/Gilroy-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gilroy";
+  src: url("./fonts/Gilroy-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gilroy";
+  src: url("./fonts/Gilroy-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---- Accent ---------------------------------------------------------- */
+  /* #FFFF1E */
+  --ds-accent: oklch(96.84% 0.2067 109.71);
+  --ds-accent-hover: oklch(92% 0.196 109.71);
+  --ds-accent-press: oklch(87% 0.185 109.71);
+  /* Text/icon colour placed on top of an accent fill. Never white: the accent
+     sits at 97% lightness, so only near-black stays legible. */
+  --ds-on-accent: oklch(0% 0 0);
+  /* Accent used AS text on a surface. Differs per theme — raw accent on a light
+     background is 1.1:1 and unreadable. */
+  --ds-accent-ink: oklch(96.84% 0.2067 109.71);
+  --ds-accent-dim: oklch(96.84% 0.2067 109.71 / 0.45);
+  --ds-accent-ghost: oklch(96.84% 0.2067 109.71 / 0.12);
+
+  /* ---- Surfaces (dark, the default) ------------------------------------ */
+  --ds-bg: oklch(0% 0 0); /* #000000 */
+  --ds-surface-1: oklch(19% 0 0); /* #141414 — cards */
+  --ds-surface-2: oklch(27.7% 0 0); /* #282828 — pills, chips, inputs */
+  --ds-surface-3: oklch(34% 0 0); /* #373737 — hover, raised */
+  --ds-surface-inverse: oklch(95.5% 0 0); /* #F0F0F0 — inverted panels */
+
+  /* ---- Text ------------------------------------------------------------ */
+  --ds-text: oklch(100% 0 0);
+  --ds-text-secondary: oklch(80% 0 0);
+  --ds-text-muted: oklch(65% 0 0);
+  --ds-text-faint: oklch(50% 0 0);
+  --ds-text-inverse: oklch(0% 0 0);
+
+  /* ---- Lines ----------------------------------------------------------- */
+  --ds-line: oklch(100% 0 0 / 0.12);
+  --ds-line-strong: oklch(100% 0 0 / 0.24);
+  --ds-line-accent: var(--ds-accent);
+
+  /* ---- Status ---------------------------------------------------------- */
+  /* Kept monochrome-adjacent so the accent stays the only saturated colour
+     in ordinary UI; these appear only on genuine state. */
+  --ds-danger: oklch(63% 0.21 25);
+  --ds-success: oklch(72% 0.17 150);
+
+  /* ---- Type ------------------------------------------------------------ */
+  --ds-font: "Gilroy", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --ds-font-mono: ui-monospace, "Cascadia Code", "Consolas", monospace;
+
+  --ds-weight-light: 300;
+  --ds-weight-regular: 400;
+  --ds-weight-medium: 500;
+  --ds-weight-bold: 700;
+
+  /* Anchors 42 / 28 / 18 are declared in the source layouts; the rest fills
+     the UI range beneath them at ~1.2. */
+  --ds-text-display: 42px;
+  --ds-text-h1: 32px;
+  --ds-text-h2: 28px;
+  --ds-text-h3: 22px;
+  --ds-text-lg: 18px;
+  --ds-text-base: 15px;
+  --ds-text-sm: 13px;
+  --ds-text-xs: 11px;
+
+  --ds-leading-tight: 1.06;
+  --ds-leading-snug: 1.25;
+  --ds-leading-normal: 1.5;
+  --ds-leading-loose: 1.7;
+
+  --ds-tracking-tight: -0.02em;
+  --ds-tracking-normal: 0;
+  --ds-tracking-wide: 0.02em;
+
+  /* ---- Space (4px grid) ------------------------------------------------ */
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 20px;
+  --ds-space-6: 24px;
+  --ds-space-8: 32px;
+  --ds-space-10: 40px;
+  --ds-space-12: 48px;
+  --ds-space-16: 64px;
+  --ds-space-20: 80px;
+  --ds-space-30: 120px;
+
+  /* ---- Radius ---------------------------------------------------------- */
+  --ds-radius-xs: 8px;
+  --ds-radius-sm: 12px;
+  --ds-radius-md: 16px;
+  --ds-radius-lg: 20px;
+  --ds-radius-xl: 28px;
+  --ds-radius-pill: 999px;
+
+  /* ---- Elevation ------------------------------------------------------- */
+  /* Dark theme carries depth through surface steps, not shadow. The only
+     luminous effect is the accent's own glow. */
+  --ds-shadow-1: none;
+  --ds-shadow-2: none;
+  --ds-glow-accent: 0 0 40px oklch(96.84% 0.2067 109.71 / 0.28);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ds-ease: cubic-bezier(0.2, 0, 0, 1);
+  --ds-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ds-duration-instant: 120ms;
+  --ds-duration-fast: 200ms;
+  --ds-duration-normal: 320ms;
+  --ds-duration-slow: 500ms;
+
+  /* ---- Icons ----------------------------------------------------------- */
+  --ds-icon-stroke: 1.75;
+  --ds-icon-sm: 16px;
+  --ds-icon-md: 20px;
+  --ds-icon-lg: 24px;
+
+  /* ---- Controls -------------------------------------------------------- */
+  --ds-control-sm: 32px;
+  --ds-control-md: 40px;
+  --ds-control-lg: 48px;
+
+  color-scheme: dark;
+}
+
+/* ---- Light theme ------------------------------------------------------- */
+/* The source layouts invert into #F0F0F0 sections with white cards; the accent
+   fill is unchanged, only accent-as-text darkens to stay readable. */
+:root[data-theme="light"] {
+  --ds-bg: oklch(95.5% 0 0); /* #F0F0F0 */
+  --ds-surface-1: oklch(100% 0 0); /* #FFFFFF — cards */
+  --ds-surface-2: oklch(93% 0 0);
+  --ds-surface-3: oklch(88% 0 0);
+  --ds-surface-inverse: oklch(19% 0 0);
+
+  --ds-text: oklch(0% 0 0);
+  --ds-text-secondary: oklch(32% 0 0);
+  --ds-text-muted: oklch(45% 0 0);
+  --ds-text-faint: oklch(60% 0 0);
+  --ds-text-inverse: oklch(100% 0 0);
+
+  --ds-line: oklch(0% 0 0 / 0.12);
+  --ds-line-strong: oklch(0% 0 0 / 0.24);
+
+  --ds-accent-ink: oklch(52% 0.14 109.71);
+  --ds-accent-hover: oklch(93% 0.2 109.71);
+  --ds-accent-press: oklch(88% 0.19 109.71);
+  --ds-accent-ghost: oklch(96.84% 0.2067 109.71 / 0.3);
+
+  --ds-shadow-1: 0 1px 2px oklch(0% 0 0 / 0.06), 0 4px 12px oklch(0% 0 0 / 0.05);
+  --ds-shadow-2: 0 2px 4px oklch(0% 0 0 / 0.06), 0 12px 32px oklch(0% 0 0 / 0.08);
+  --ds-glow-accent: 0 0 32px oklch(96.84% 0.2067 109.71 / 0.5);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ds-bg: oklch(95.5% 0 0);
+    --ds-surface-1: oklch(100% 0 0);
+    --ds-surface-2: oklch(93% 0 0);
+    --ds-surface-3: oklch(88% 0 0);
+    --ds-surface-inverse: oklch(19% 0 0);
+
+    --ds-text: oklch(0% 0 0);
+    --ds-text-secondary: oklch(32% 0 0);
+    --ds-text-muted: oklch(45% 0 0);
+    --ds-text-faint: oklch(60% 0 0);
+    --ds-text-inverse: oklch(100% 0 0);
+
+    --ds-line: oklch(0% 0 0 / 0.12);
+    --ds-line-strong: oklch(0% 0 0 / 0.24);
+
+    --ds-accent-ink: oklch(52% 0.14 109.71);
+    --ds-accent-hover: oklch(93% 0.2 109.71);
+    --ds-accent-press: oklch(88% 0.19 109.71);
+    --ds-accent-ghost: oklch(96.84% 0.2067 109.71 / 0.3);
+
+    --ds-shadow-1: 0 1px 2px oklch(0% 0 0 / 0.06), 0 4px 12px oklch(0% 0 0 / 0.05);
+    --ds-shadow-2: 0 2px 4px oklch(0% 0 0 / 0.06), 0 12px 32px oklch(0% 0 0 / 0.08);
+    --ds-glow-accent: 0 0 32px oklch(96.84% 0.2067 109.71 / 0.5);
+
+    color-scheme: light;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-duration-instant: 1ms;
+    --ds-duration-fast: 1ms;
+    --ds-duration-normal: 1ms;
+    --ds-duration-slow: 1ms;
+  }
+}

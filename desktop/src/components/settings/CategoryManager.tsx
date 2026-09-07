@@ -71,9 +71,9 @@ export function CategoryManager() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-app-text">Категории</h3>
+        <h3 className="text-base font-medium text-app-text">Категории</h3>
         <Button variant="secondary" onClick={() => setEdit({ mode: "create", parentId: null })}>
-          <Plus size={15} /> Добавить
+          <Plus size={15} strokeWidth={1.75} /> Добавить
         </Button>
       </div>
 
@@ -174,7 +174,7 @@ function CategoryRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-0 ${
+      className={`flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-2 ${
         indented ? "pl-10" : ""
       }`}
     >
@@ -186,22 +186,22 @@ function CategoryRow({
       </span>
       <span className="flex-1 truncate text-sm text-app-text">{category.name}</span>
       {category.is_default === 1 && (
-        <span className="rounded-full bg-surface-0 px-2 py-0.5 text-[10px] font-medium text-muted">
+        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-muted">
           по умолчанию
         </span>
       )}
       <div className="flex items-center gap-2">
         {onAddChild && (
           <IconButton label="Добавить подкатегорию" onClick={onAddChild}>
-            <Plus size={15} />
+            <Plus size={15} strokeWidth={1.75} />
           </IconButton>
         )}
         <IconButton label="Редактировать" onClick={onEdit}>
-          <Pencil size={15} />
+          <Pencil size={15} strokeWidth={1.75} />
         </IconButton>
         {category.is_default !== 1 && (
           <IconButton label="Удалить" onClick={onDelete} danger>
-            <Trash2 size={15} />
+            <Trash2 size={15} strokeWidth={1.75} />
           </IconButton>
         )}
       </div>

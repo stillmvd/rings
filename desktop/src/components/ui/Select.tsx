@@ -55,16 +55,16 @@ export function Select({
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-line bg-surface-0 px-3 py-2 text-sm text-app-text outline-none transition focus:border-amber"
+          className="flex w-full cursor-pointer items-center gap-2 h-10 rounded-xl border border-line bg-surface-2 px-3 text-sm text-app-text outline-none transition focus:border-amber"
         >
           {selected && <OptionIcon opt={selected} />}
           <span className={`flex-1 truncate text-left ${selected ? "" : "text-muted"}`}>
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronDown size={16} className="shrink-0 text-muted" />
+          <ChevronDown size={16} strokeWidth={1.75} className="shrink-0 text-muted" />
         </button>
         {open && (
-          <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-line bg-surface-1 py-1 shadow-lg">
+          <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-line bg-surface-1 py-1 shadow-lg">
             {options.map((opt) => (
               <button
                 key={opt.value}
@@ -73,11 +73,11 @@ export function Select({
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-app-text transition-colors hover:bg-surface-0"
+                className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-app-text transition-colors hover:bg-surface-2"
               >
                 <OptionIcon opt={opt} />
                 <span className="flex-1 truncate">{opt.label}</span>
-                {opt.value === value && <Check size={15} className="shrink-0 text-amber" />}
+                {opt.value === value && <Check size={15} strokeWidth={1.75} className="shrink-0 text-amber" />}
               </button>
             ))}
           </div>

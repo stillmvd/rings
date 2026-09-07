@@ -25,7 +25,7 @@ export function StickyContext({ viewport, width, height, lod }: Props) {
 
   return (
     <div className="pointer-events-none absolute bottom-14 left-4 z-30 flex items-center gap-1.5 rounded-xl border border-line bg-surface-1/80 px-3 py-1.5 backdrop-blur">
-      <span className="text-sm font-semibold leading-none text-app-text">{year}</span>
+      <span className="text-sm font-medium leading-none text-app-text">{year}</span>
       {lod !== "years" && (
         <span className="text-xs font-medium leading-none text-muted">{monthLabel}</span>
       )}

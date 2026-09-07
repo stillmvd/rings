@@ -21,7 +21,7 @@ export function Textarea({
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className={`resize-y rounded-lg border bg-surface-0 px-3 py-2 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-amber ${
+        className={`resize-y rounded-xl border bg-surface-2 px-3 py-2 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-amber ${
           error ? "border-rust" : "border-line"
         } ${className}`}
         {...rest}

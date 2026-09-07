@@ -11,6 +11,7 @@ import { IconPicker } from "@/components/ui/IconPicker";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Button } from "@/components/ui/Button";
 import type { ReminderInput } from "@/db/queries/reminders";
+import { DEFAULT_CATEGORY_COLOR } from "@/lib/colors";
 
 export interface ReminderFormValues {
   title: string;
@@ -29,7 +30,7 @@ export interface ReminderFormValues {
 }
 
 const DEFAULT_ICON = "Bell";
-const DEFAULT_COLOR = "#d08f3c";
+const DEFAULT_COLOR = DEFAULT_CATEGORY_COLOR;
 
 type PreUnit = "min" | "hour" | "day";
 
@@ -137,7 +138,7 @@ export function ReminderForm({
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="rounded-lg border border-line bg-surface-0 px-3 py-2 text-sm text-app-text outline-none transition focus:border-amber"
+            className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-app-text outline-none transition focus:border-amber"
           />
         </label>
       </div>

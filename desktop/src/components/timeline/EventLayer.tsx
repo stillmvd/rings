@@ -25,7 +25,7 @@ const MARK_BASE_DY = 54;
 const MARK_STEP_PX = 20;
 const MARK_STACK_MAX = 3;
 const RING_GAP = "0 0 0 2px var(--rg-bg)";
-const PLUS_BG = "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))";
+const PLUS_BG = "var(--ds-surface-2)";
 const LAYER_SPRING = { type: "spring" as const, bounce: 0, duration: 0.45 };
 
 type Cluster = { x: number; events: TimelineEvent[] };
@@ -181,7 +181,7 @@ export function EventLayer({
             <motion.div
               key={key}
               {...common}
-              className={`${common.className} flex items-center justify-center rounded-full text-[10px] font-semibold`}
+              className={`${common.className} flex items-center justify-center rounded-full text-[10px] font-medium`}
               style={{
                 ...common.style,
                 width: size,
@@ -247,7 +247,7 @@ export function EventLayer({
             })}
             {overflow > 0 && (
               <div
-                className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full text-[10px] font-semibold text-app-text"
+                className="pointer-events-auto absolute flex cursor-pointer items-center justify-center rounded-full text-[10px] font-medium text-app-text"
                 style={{
                   top: (MARK_STACK_MAX - 1) * MARK_STEP_PX,
                   width: 20,

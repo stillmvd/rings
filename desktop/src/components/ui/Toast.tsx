@@ -25,7 +25,7 @@ export function useToast() {
 }
 
 const META: Record<ToastType, { icon: typeof Info; color: string }> = {
-  success: { icon: CheckCircle2, color: "oklch(0.773 0.153 163.223)" },
+  success: { icon: CheckCircle2, color: "var(--ds-success)" },
   error: { icon: AlertCircle, color: "var(--rg-rust)" },
   info: { icon: Info, color: "var(--rg-amber)" },
 };

@@ -92,7 +92,7 @@ export function CategoryForm({
 
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-muted">Предпросмотр</span>
-            <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-0 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2">
               <span
                 className="grid h-6 w-6 shrink-0 place-items-center rounded-md"
                 style={{ background: `${color}22` }}

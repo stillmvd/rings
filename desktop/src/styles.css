@@ -1,60 +1,54 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
+/* Палитра живёт в tokens.css (общий брендбук Trail). Здесь --rg-* остаются
+   алиасами на --ds-*: компоненты и Tailwind-токены читают только их, поэтому
+   смена палитры не расходится по файлам. */
 :root {
-  --rg-bg: oklch(0.151 0.004 285.878);
-  --rg-surface: oklch(0.188 0.006 285.806);
-  --rg-line: oklch(0.258 0.007 285.867);
-  --rg-text: oklch(0.959 0.01 81.795);
-  --rg-muted: oklch(0.63 0.017 90.301);
-  --rg-amber: oklch(0.817 0.164 75.837);
-  --rg-rust: oklch(0.644 0.192 41.687);
-  --rg-grad: linear-gradient(100deg in oklch, var(--rg-amber), var(--rg-rust));
+  --rg-bg: var(--ds-bg);
+  --rg-surface: var(--ds-surface-1);
+  --rg-line: var(--ds-line);
+  --rg-text: var(--ds-text);
+  --rg-muted: var(--ds-text-muted);
+  --rg-amber: var(--ds-accent);
+  --rg-rust: var(--ds-danger);
+  --rg-grad: linear-gradient(100deg in oklch, var(--ds-accent), var(--ds-danger));
 
   /* Обводка изображений — чистый белый/чёрный, без подмеса тона поверхности:
      тонированная кайма читается как грязь по краю фото. */
   --rg-outline: oklch(1 0 0 / 0.1);
 
-  --rg-sig-1: oklch(0.63 0.017 90.301);
-  --rg-sig-1-on: oklch(0.151 0.004 285.878);
-  --rg-sig-1-on-container: oklch(0.821 0.017 88.015);
-  --rg-sig-2: oklch(0.644 0.192 41.687);
-  --rg-sig-2-on: oklch(1 0 0);
-  --rg-sig-2-on-container: oklch(0.752 0.159 45.59);
-  --rg-sig-3: oklch(0.817 0.164 75.837);
-  --rg-sig-3-on: oklch(0.151 0.004 285.878);
-  --rg-sig-3-on-container: oklch(0.862 0.139 81.853);
+  /* Значимость несёт плотность заливки, а не оттенок: обычное — контур,
+     важное — сплошная, самое важное — сплошной акцент. Цвет при этом остаётся
+     за категорией, поэтому обе шкалы читаются одновременно. */
+  --rg-sig-1: var(--ds-text-faint);
+  --rg-sig-1-on: var(--ds-bg);
+  --rg-sig-1-on-container: var(--ds-text-muted);
+  --rg-sig-2: var(--ds-text);
+  --rg-sig-2-on: var(--ds-bg);
+  --rg-sig-2-on-container: var(--ds-text);
+  --rg-sig-3: var(--ds-accent);
+  --rg-sig-3-on: var(--ds-on-accent);
+  --rg-sig-3-on-container: var(--ds-accent-ink);
 
-  /* Единый язык движения: spring без отскока для интерактива, стандартная кривая
-     для входов/выходов. Держим в одном месте, чтобы CSS и motion не разъезжались. */
-  --rg-ease: cubic-bezier(0.2, 0, 0, 1);
+  --rg-ease: var(--ds-ease);
 }
 
 [data-theme="light"] {
-  --rg-bg: oklch(0.959 0.01 81.795);
-  --rg-surface: oklch(0.989 0.006 84.566);
-  --rg-line: oklch(0.896 0.019 86.151);
-  --rg-text: oklch(0.151 0.004 285.878);
-  /* На светлом фоне тёмный muted обязателен: прежний L=0.63 давал 3.1:1 — ниже AA.
-     L=0.514 — тот же тон, что sig-1-on-container, 5.0:1. */
-  --rg-muted: oklch(0.514 0.016 88.76);
-
   --rg-outline: oklch(0 0 0 / 0.1);
-
-  --rg-sig-1-on-container: oklch(0.514 0.016 88.76);
-  --rg-sig-2-on-container: oklch(0.564 0.167 41.859);
-  --rg-sig-3-on-container: oklch(0.571 0.122 72.423);
 }
 
 @theme inline {
   --color-surface-0: var(--rg-bg);
   --color-surface-1: var(--rg-surface);
+  --color-surface-2: var(--ds-surface-2);
   --color-app-text: var(--rg-text);
   --color-line: var(--rg-line);
   --color-muted: var(--rg-muted);
   --color-amber: var(--rg-amber);
   --color-rust: var(--rg-rust);
-  --color-ink: oklch(0.151 0.004 285.878);
-  --font-sans: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --color-ink: var(--ds-on-accent);
+  --font-sans: var(--ds-font);
 }
 
 @utility bg-resin {
@@ -67,14 +61,15 @@
   box-shadow: inset 0 0 0 1px var(--rg-outline);
 }
 
-/* Тональная заливка вторичных действий: кнопка обязана отличаться от поля ввода
-   формой и фоном, а не обводкой — иначе Button и Input выглядят одинаково. */
+/* Заливка вторичных действий: кнопка обязана отличаться от поля ввода формой и
+   фоном, а не обводкой. Нейтральная ступень, а не тонированная акцентом, —
+   жёлтый остаётся признаком состояния, а не просто «второй кнопки». */
 @utility bg-tonal {
-  background: color-mix(in srgb, var(--rg-amber) 14%, var(--rg-surface));
+  background: var(--ds-surface-2);
 }
 
 @utility bg-tonal-hover {
-  background: color-mix(in srgb, var(--rg-amber) 24%, var(--rg-surface));
+  background: var(--ds-surface-3);
 }
 
 
@@ -90,7 +85,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Segoe UI Variable покрывает все веса — фальшивый bold/italic только испортит форму. */
+  /* Gilroy поставляется четырьмя весами — фальшивый bold/italic только испортит форму. */
   font-synthesis: none;
   user-select: none;
   cursor: default;

@@ -12,7 +12,7 @@ export function Titlebar() {
     >
       <div className="pointer-events-none flex items-center gap-2 pl-3">
         <Mark size={16} />
-        <span className="text-[13px] font-semibold tracking-tight text-app-text">
+        <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-app-text">
           Trail
         </span>
       </div>
@@ -23,7 +23,7 @@ export function Titlebar() {
           title="Свернуть"
           className="flex h-full w-12 items-center justify-center text-muted transition-colors hover:bg-surface-1 hover:text-app-text"
         >
-          <Minus size={15} />
+          <Minus size={15} strokeWidth={1.75} />
         </button>
         <button
           type="button"
@@ -31,7 +31,7 @@ export function Titlebar() {
           title="Развернуть"
           className="flex h-full w-12 items-center justify-center text-muted transition-colors hover:bg-surface-1 hover:text-app-text"
         >
-          <Square size={12} />
+          <Square size={12} strokeWidth={1.75} />
         </button>
         <button
           type="button"
@@ -39,7 +39,7 @@ export function Titlebar() {
           title="Закрыть"
           className="flex h-full w-12 items-center justify-center text-muted transition-colors hover:bg-rust hover:text-white"
         >
-          <X size={16} />
+          <X size={16} strokeWidth={1.75} />
         </button>
       </div>
     </div>

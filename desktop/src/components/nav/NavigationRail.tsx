@@ -9,7 +9,6 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
-import { Mark } from "../brand/Mark";
 import { modeStore, type ViewMode } from "../../lib/mode";
 import { searchOpenStore } from "../../lib/search";
 
@@ -46,7 +45,7 @@ function RailButton({
           : "text-muted hover:bg-surface-1 hover:text-app-text"
       }`}
     >
-      <Icon size={20} />
+      <Icon size={20} strokeWidth={1.75} />
     </button>
   );
 }
@@ -59,10 +58,6 @@ export function NavigationRail() {
       aria-label="Основная навигация"
       className="flex h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-line bg-surface-0 py-4"
     >
-      <div className="mb-3">
-        <Mark size={34} />
-      </div>
-
       {DESTINATIONS.map(({ value, label, icon }) => (
         <RailButton
           key={value}

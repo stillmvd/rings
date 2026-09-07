@@ -124,17 +124,17 @@ export function BackupPanel() {
         <div className="flex items-center gap-2">
           <span
             title={shownDir}
-            className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface-0 px-3 py-2 text-sm text-app-text"
+            className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-app-text"
           >
             {shownDir || "—"}
           </span>
           <Button variant="secondary" onClick={pickDir}>
-            <FolderOpen size={15} />
+            <FolderOpen size={15} strokeWidth={1.75} />
             Выбрать
           </Button>
           {(dir || last) && (
             <Button variant="ghost" onClick={openBackupDir}>
-              <ExternalLink size={15} />
+              <ExternalLink size={15} strokeWidth={1.75} />
               Открыть
             </Button>
           )}
@@ -159,11 +159,11 @@ export function BackupPanel() {
 
       <div className="mt-1 flex gap-2">
         <Button variant="secondary" onClick={backupNow} disabled={busy}>
-          <Archive size={15} />
+          <Archive size={15} strokeWidth={1.75} />
           Сделать бэкап сейчас
         </Button>
         <Button variant="ghost" onClick={pickRestore} disabled={busy}>
-          <RotateCcw size={15} />
+          <RotateCcw size={15} strokeWidth={1.75} />
           Восстановить из файла
         </Button>
       </div>

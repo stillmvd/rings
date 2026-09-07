@@ -22,7 +22,7 @@ function Section({
       {showHeader && (
         <div className="sticky top-0 z-30 mb-4 flex justify-center">
           <h2
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-app-text backdrop-blur"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-app-text backdrop-blur"
             style={{
               background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
               boxShadow: "0 1px 2px 0 rgba(0,0,0,0.25)",
@@ -31,7 +31,7 @@ function Section({
             {title}
             <span
               className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-app-text"
-              style={{ background: "color-mix(in srgb, var(--rg-amber) 18%, var(--rg-surface))" }}
+              style={{ background: "var(--ds-surface-2)" }}
             >
               {people.length}
             </span>
@@ -78,7 +78,7 @@ export function BirthdaysView({
           возрастом.
         </p>
         <Button onClick={onAdd}>
-          <Plus size={16} />
+          <Plus size={16} strokeWidth={1.75} />
           Добавить человека
         </Button>
       </div>
@@ -93,7 +93,7 @@ export function BirthdaysView({
         aria-label="Добавить человека"
         className="absolute bottom-6 right-6 z-30 flex h-14 w-14 cursor-pointer items-center justify-center rounded-2xl bg-amber text-ink shadow-lg transition-transform hover:scale-105"
       >
-        <Plus size={24} />
+        <Plus size={24} strokeWidth={1.75} />
       </button>
       <div className="h-full w-full overflow-y-auto px-6 py-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="mx-auto flex max-w-6xl flex-col gap-12">

@@ -52,7 +52,7 @@ export function ReminderRow({
           e.preventDefault();
           onMenu(reminder, e.clientX, e.clientY);
         }}
-        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-0"
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
       >
         {Icon &&
           createElement(Icon, {
@@ -79,9 +79,9 @@ export function ReminderRow({
           aria-label="Открыть связанное событие"
           title="Открыть связанное событие"
           onClick={() => onEventJump(reminder.event_id!)}
-          className="relative grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-muted opacity-0 transition-[opacity,color,background-color] duration-150 after:absolute after:-inset-x-1.5 after:-inset-y-1 hover:bg-surface-0 hover:text-app-text group-hover:opacity-100"
+          className="relative grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-md text-muted opacity-0 transition-[opacity,color,background-color] duration-150 after:absolute after:-inset-x-1.5 after:-inset-y-1 hover:bg-surface-2 hover:text-app-text group-hover:opacity-100"
         >
-          <ArrowUpRight size={14} />
+          <ArrowUpRight size={14} strokeWidth={1.75} />
         </button>
       )}
     </motion.li>

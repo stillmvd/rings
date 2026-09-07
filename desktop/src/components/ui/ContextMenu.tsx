@@ -51,7 +51,7 @@ export function ContextMenu({
             item.onSelect();
             onClose();
           }}
-          className={`flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-sm transition-colors hover:bg-surface-0 ${
+          className={`flex w-full cursor-pointer items-center gap-2.5 px-3.5 py-2 text-left text-sm transition-colors hover:bg-surface-2 ${
             item.danger ? "text-rust" : "text-app-text"
           }`}
         >

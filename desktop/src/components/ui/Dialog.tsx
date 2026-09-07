@@ -38,7 +38,7 @@ export function Dialog({
           <motion.div
             role="dialog"
             aria-modal="true"
-            className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-2xl bg-surface-1 text-app-text shadow-2xl"
+            className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-surface-1 text-app-text shadow-2xl"
             style={{ maxWidth: width }}
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -48,14 +48,14 @@ export function Dialog({
           >
             {title && (
               <header className="flex shrink-0 items-center justify-between gap-3 px-5 pb-2 pt-4">
-                <h2 className="text-lg font-semibold text-app-text">{title}</h2>
+                <h2 className="text-lg font-bold text-app-text">{title}</h2>
                 <button
                   type="button"
                   aria-label="Закрыть"
                   onClick={onClose}
-                  className="relative grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-surface-0 hover:text-app-text active:scale-[0.96]"
+                  className="relative grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-surface-2 hover:text-app-text active:scale-[0.96]"
                 >
-                  <X size={18} />
+                  <X size={18} strokeWidth={1.75} />
                 </button>
               </header>
             )}

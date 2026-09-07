@@ -35,7 +35,7 @@ const appear = (i: number) => ({
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}>
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">{title}</h2>
+      <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">{title}</h2>
       {children}
     </section>
   );
@@ -148,7 +148,7 @@ export function RemindersView({
                 className={`rounded-2xl p-5 ${CARD_SHADOW}`}
                 style={{ background: "color-mix(in srgb, var(--rg-rust) 10%, var(--rg-surface))" }}
               >
-                <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-rust">
+                <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-rust">
                   Просроченные · {groups.overdue.length}
                 </h2>
                 <Rows
@@ -163,7 +163,7 @@ export function RemindersView({
 
             <motion.div {...appear(2)} className="grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
               <section className={`rounded-2xl bg-surface-1 p-6 ${CARD_SHADOW}`}>
-                <h2 className="text-2xl font-semibold text-app-text">
+                <h2 className="text-2xl font-bold text-app-text">
                   Сегодня, {formatRu(today, "d MMMM")}
                 </h2>
                 <p className="mt-0.5 mb-4 text-sm text-muted">{formatWeekdayFullRu(today)}</p>
@@ -177,10 +177,10 @@ export function RemindersView({
                           <button
                             type="button"
                             onClick={() => onPersonClick(p)}
-                            className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-0"
+                            className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
                           >
                             <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-amber text-ink">
-                              <Cake size={12} />
+                              <Cake size={12} strokeWidth={1.75} />
                             </span>
                             <span className="min-w-0 flex-1 truncate text-sm text-app-text">
                               День рождения — {p.name}
@@ -263,10 +263,11 @@ export function RemindersView({
                   <button
                     type="button"
                     onClick={() => setShowCompleted((v) => !v)}
-                    className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted transition-colors hover:text-app-text"
+                    className="flex cursor-pointer items-center gap-1.5 text-sm font-medium uppercase tracking-wide text-muted transition-colors hover:text-app-text"
                   >
                     <ChevronRight
                       size={15}
+                      strokeWidth={1.75}
                       className={`transition-transform duration-150 ease-[var(--rg-ease)] ${
                         showCompleted ? "rotate-90" : ""
                       }`}
@@ -278,7 +279,7 @@ export function RemindersView({
                     onClick={() => purgeCompleted()}
                     className="flex cursor-pointer items-center gap-1.5 text-xs text-muted transition-colors hover:text-rust"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={13} strokeWidth={1.75} />
                     Очистить
                   </button>
                 </div>
@@ -309,22 +310,22 @@ export function RemindersView({
             ? [
                 {
                   label: "Отложить на час",
-                  icon: <AlarmClock size={15} />,
+                  icon: <AlarmClock size={15} strokeWidth={1.75} />,
                   onSelect: () => postponeReminder(menu.reminder.id, snoozePlusHour()),
                 },
                 {
                   label: "Отложить до вечера",
-                  icon: <Sunset size={15} />,
+                  icon: <Sunset size={15} strokeWidth={1.75} />,
                   onSelect: () => postponeReminder(menu.reminder.id, snoozeEvening()),
                 },
                 {
                   label: "Отложить до завтра",
-                  icon: <Moon size={15} />,
+                  icon: <Moon size={15} strokeWidth={1.75} />,
                   onSelect: () => postponeReminder(menu.reminder.id, snoozeTomorrow()),
                 },
                 {
                   label: "Удалить",
-                  icon: <Trash2 size={15} />,
+                  icon: <Trash2 size={15} strokeWidth={1.75} />,
                   danger: true,
                   onSelect: () => removeReminder(menu.reminder.id),
                 },

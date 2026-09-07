@@ -85,7 +85,7 @@ export function DayEventsDialog({
           >
             <header className="flex shrink-0 items-start justify-between gap-3 px-6 pb-3 pt-5">
               <div>
-                <h2 className="text-lg font-semibold text-app-text">
+                <h2 className="text-lg font-bold text-app-text">
                   {dateISO ? formatFullRu(dateISO) : "События"}
                 </h2>
                 <p className="mt-0.5 text-sm text-muted">
@@ -96,9 +96,9 @@ export function DayEventsDialog({
                 type="button"
                 aria-label="Закрыть"
                 onClick={onClose}
-                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-0 hover:text-app-text"
+                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-app-text"
               >
-                <X size={20} />
+                <X size={20} strokeWidth={1.75} />
               </button>
             </header>
 
@@ -129,7 +129,7 @@ export function DayEventsDialog({
 
             <div className="flex shrink-0 justify-end px-6 pb-5 pt-3">
               <Button variant="secondary" onClick={() => dateISO && onCreate(dateISO)}>
-                <Plus size={16} />
+                <Plus size={16} strokeWidth={1.75} />
                 Добавить событие
               </Button>
             </div>
@@ -145,12 +145,12 @@ export function DayEventsDialog({
                 ? [
                     {
                       label: "Редактировать",
-                      icon: <Pencil size={16} />,
+                      icon: <Pencil size={16} strokeWidth={1.75} />,
                       onSelect: () => onEdit(menu.event),
                     },
                     {
                       label: "Удалить",
-                      icon: <Trash2 size={16} />,
+                      icon: <Trash2 size={16} strokeWidth={1.75} />,
                       danger: true,
                       onSelect: () => onDelete(menu.event),
                     },
@@ -186,7 +186,7 @@ function EventRow({
         e.preventDefault();
         onContextMenu(e.clientX, e.clientY);
       }}
-      className="flex cursor-pointer items-center gap-3 rounded-2xl p-2 text-left transition-colors hover:bg-surface-0"
+      className="flex cursor-pointer items-center gap-3 rounded-2xl p-2 text-left transition-colors hover:bg-surface-2"
     >
       {event.cover ? (
         <img
@@ -198,7 +198,7 @@ function EventRow({
         />
       ) : (
         <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-          <CoverPlaceholder fill={accent.fill} container={accent.container} />
+          <CoverPlaceholder fill={accent.fill} />
         </span>
       )}
 
@@ -216,7 +216,7 @@ function EventRow({
         </span>
       </span>
 
-      <span className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-full bg-surface-0 px-2.5 py-1 text-sm text-muted">
+      <span className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-full bg-surface-2 px-2.5 py-1 text-sm text-muted">
         <SignificanceIcon level={event.significance as Significance} size={16} />
         {sig.label}
       </span>
@@ -246,7 +246,7 @@ function MarkRow({ mark, onDelete }: { mark: Mark; onDelete: () => void }) {
         onClick={onDelete}
         className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:text-rust"
       >
-        <Trash2 size={16} />
+        <Trash2 size={16} strokeWidth={1.75} />
       </button>
     </div>
   );

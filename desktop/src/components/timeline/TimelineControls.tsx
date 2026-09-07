@@ -63,13 +63,13 @@ export function TimelineControls({
         onPointerUp={(e) => e.stopPropagation()}
       >
         <button type="button" aria-label="Отдалить" className={BTN} onClick={onZoomOut}>
-          <Minus size={18} />
+          <Minus size={18} strokeWidth={1.75} />
         </button>
         <button type="button" aria-label="Приблизить" className={BTN} onClick={onZoomIn}>
-          <Plus size={18} />
+          <Plus size={18} strokeWidth={1.75} />
         </button>
         <button type="button" aria-label="К сегодня" className={BTN} onClick={onToday}>
-          <CalendarClock size={18} />
+          <CalendarClock size={18} strokeWidth={1.75} />
         </button>
       </div>
     </>

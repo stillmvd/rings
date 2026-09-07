@@ -141,7 +141,7 @@ export function EventSheet({
             <EventView event={state.event} media={state.media} onLightbox={setLbIndex} />
             <div className="mt-auto flex items-center justify-between gap-2 pt-4">
               <Button variant="danger" onClick={() => onDelete(state.event.id)}>
-                <Trash2 size={16} />
+                <Trash2 size={16} strokeWidth={1.75} />
                 Удалить
               </Button>
               <div className="flex items-center gap-2">
@@ -156,10 +156,10 @@ export function EventSheet({
                     });
                   }}
                 >
-                  <Bell size={17} />
+                  <Bell size={17} strokeWidth={1.75} />
                 </IconButton>
                 <Button variant="secondary" onClick={onStartEdit}>
-                  <Pencil size={16} />
+                  <Pencil size={16} strokeWidth={1.75} />
                   Редактировать
                 </Button>
               </div>
@@ -211,7 +211,7 @@ function EventView({
         </button>
       ) : (
         <div className="-mx-6 -mt-2 aspect-video w-[calc(100%+3rem)] overflow-hidden">
-          <CoverPlaceholder fill={accent.fill} container={accent.container} />
+          <CoverPlaceholder fill={accent.fill} />
         </div>
       )}
 
@@ -237,7 +237,7 @@ function EventView({
       )}
 
       <div>
-        <h3 className="text-xl font-semibold text-app-text">{event.title}</h3>
+        <h3 className="text-xl font-bold text-app-text">{event.title}</h3>
         <p className="mt-0.5 text-sm text-muted">{dateLabel}</p>
       </div>
 
