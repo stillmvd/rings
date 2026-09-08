@@ -19,7 +19,7 @@ export function Input({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-10 rounded-xl border bg-surface-2 px-3 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-amber ${
+        className={`h-11 rounded-full border bg-surface-2 px-4 text-sm text-app-text outline-none transition placeholder:text-muted focus:border-amber ${
           error ? "border-rust" : "border-line"
         } ${className}`}
         {...rest}

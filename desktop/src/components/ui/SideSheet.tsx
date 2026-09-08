@@ -39,7 +39,7 @@ export function SideSheet({
           <motion.aside
             role="dialog"
             aria-modal="true"
-            className="fixed right-0 top-0 z-[81] flex h-screen flex-col rounded-l-3xl bg-surface-1 text-app-text shadow-2xl"
+            className="fixed right-0 top-0 z-[81] flex h-screen flex-col rounded-l-4xl bg-surface-1 text-app-text shadow-2xl"
             style={{ width }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -47,18 +47,18 @@ export function SideSheet({
             transition={{ type: "spring", duration: 0.3, bounce: 0 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <header className="flex shrink-0 items-center justify-between gap-3 px-6 pb-2 pt-5">
-              <h2 className="text-lg font-bold text-app-text">{title}</h2>
+            <header className="flex shrink-0 items-center justify-between gap-3 px-7 pb-3 pt-6">
+              <h2 className="text-xl font-bold tracking-tight text-app-text">{title}</h2>
               <button
                 type="button"
                 aria-label="Закрыть"
                 onClick={onClose}
-                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-2 hover:text-app-text active:scale-[0.96]"
+                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full bg-surface-2 text-app-text transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-3 active:scale-[0.96]"
               >
                 <X size={20} strokeWidth={1.75} />
               </button>
             </header>
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-7 pb-7">{children}</div>
           </motion.aside>
         </>
       )}

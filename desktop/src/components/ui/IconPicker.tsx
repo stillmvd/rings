@@ -22,7 +22,7 @@ export function IconPicker({
     <div className="flex flex-col gap-1">
       {label && <span className="text-xs font-medium text-muted">{label}</span>}
 
-      <div className="flex h-10 items-center gap-2 rounded-xl border border-line bg-surface-2 px-2.5 transition focus-within:border-amber">
+      <div className="flex h-11 items-center gap-2 rounded-full border border-line bg-surface-2 px-4 transition focus-within:border-amber">
         <Search size={15} className="shrink-0 text-muted" />
         <input
           value={query}
@@ -32,7 +32,7 @@ export function IconPicker({
         />
       </div>
 
-      <div className="mt-1.5 grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto rounded-xl border border-line bg-surface-2 p-2">
+      <div className="mt-2 grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto rounded-3xl border border-line bg-surface-2 p-3">
         {filtered.map((name) => {
           const active = name === value;
           return (
@@ -41,7 +41,7 @@ export function IconPicker({
               type="button"
               title={name}
               onClick={() => onChange(name)}
-              className={`grid aspect-square cursor-pointer place-items-center rounded-lg transition-colors ${
+              className={`grid aspect-square cursor-pointer place-items-center rounded-full transition-colors ${
                 active ? "bg-amber text-ink" : "text-app-text hover:bg-surface-1"
               }`}
             >
