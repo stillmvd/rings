@@ -34,7 +34,7 @@ export function QuickAdd() {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-surface-1 p-2 pl-4 shadow-[0_1px_2px_0_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]">
+    <div className="flex items-center gap-2 rounded-2xl bg-surface-1 p-2 pl-4 shadow-sm">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}

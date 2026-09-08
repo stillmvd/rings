@@ -31,7 +31,7 @@ function Section({
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-app-text backdrop-blur"
             style={{
               background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
-              boxShadow: "0 1px 2px 0 rgba(0,0,0,0.25)",
+              boxShadow: "var(--ds-shadow-1)",
             }}
           >
             {title}

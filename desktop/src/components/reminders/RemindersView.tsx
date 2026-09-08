@@ -24,7 +24,7 @@ import { ReminderRow } from "./ReminderRow";
 import type { Reminder } from "@/db/queries/reminders";
 import type { Person } from "@/db/queries/people";
 
-const CARD_SHADOW = "shadow-[0_1px_2px_0_rgba(0,0,0,0.3),0_1px_3px_1px_rgba(0,0,0,0.15)]";
+const CARD_SHADOW = "shadow-sm";
 
 const appear = (i: number) => ({
   initial: { opacity: 0, y: 8 },

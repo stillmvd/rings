@@ -84,7 +84,7 @@ export function SearchPanel({
           onMouseDown={onClose}
         >
           <motion.div
-            className="h-fit w-full max-w-xl rounded-[28px] border border-line bg-surface-1 p-4 shadow-2xl"
+            className="h-fit w-full max-w-xl rounded-4xl border border-line bg-surface-1 p-4 shadow-2xl"
             initial={{ opacity: 0, y: -12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.98 }}

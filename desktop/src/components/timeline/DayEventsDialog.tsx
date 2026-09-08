@@ -76,7 +76,7 @@ export function DayEventsDialog({
           <motion.div
             role="dialog"
             aria-modal="true"
-            className="flex max-h-[80vh] w-full max-w-[568px] flex-col rounded-[28px] bg-surface-1 text-app-text shadow-2xl"
+            className="flex max-h-[80vh] w-full max-w-[568px] flex-col rounded-4xl bg-surface-1 text-app-text shadow-2xl"
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}

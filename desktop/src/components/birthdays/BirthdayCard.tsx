@@ -13,8 +13,8 @@ import { useNowMs } from "@/components/tracking/clock";
 import { useLiveSeconds } from "./useLiveSeconds";
 import type { Person } from "@/db/queries/people";
 
-const ELEVATION_1 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)";
-const ELEVATION_2 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)";
+const ELEVATION_1 = "var(--ds-shadow-1)";
+const ELEVATION_2 = "var(--ds-shadow-2)";
 const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
 const HERO_BG = "var(--ds-surface-2)";
 
@@ -63,7 +63,7 @@ export function BirthdayCard({
     <button
       type="button"
       onClick={() => onClick(person)}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[16px] bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
       style={{ boxShadow: ELEVATION_1 }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
@@ -97,7 +97,7 @@ export function BirthdayCard({
             style={{
               background: "var(--rg-amber)",
               color: "var(--rg-bg)",
-              boxShadow: "0 1px 2px 0 rgba(0,0,0,0.3)",
+              boxShadow: "var(--ds-shadow-1)",
             }}
           >
             <PartyPopper size={13} strokeWidth={1.75} />

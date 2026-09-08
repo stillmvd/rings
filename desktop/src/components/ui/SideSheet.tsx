@@ -39,7 +39,7 @@ export function SideSheet({
           <motion.aside
             role="dialog"
             aria-modal="true"
-            className="fixed right-0 top-0 z-[81] flex h-screen flex-col rounded-l-[20px] bg-surface-1 text-app-text shadow-2xl"
+            className="fixed right-0 top-0 z-[81] flex h-screen flex-col rounded-l-3xl bg-surface-1 text-app-text shadow-2xl"
             style={{ width }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}

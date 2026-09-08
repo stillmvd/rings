@@ -41,8 +41,7 @@ const MAX_CHIPS = 3;
 // Горизонт будущего: «напоминания» можно листать на 15 лет вперёд от сегодня.
 const FUTURE_HORIZON_YEARS = 15;
 
-const ELEVATION_1 =
-  "0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)";
+const ELEVATION_1 = "var(--ds-shadow-1)";
 
 // Допустимый диапазон месяцев (0–11) для года в пределах [START_MONTH … limit].
 function monthBounds(limit: Date, year: number): { lo: number; hi: number } {

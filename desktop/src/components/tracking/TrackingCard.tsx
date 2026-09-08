@@ -21,8 +21,8 @@ import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Significance } from "@/lib/constants";
 
-const ELEVATION_1 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)";
-const ELEVATION_2 = "0 1px 2px 0 rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)";
+const ELEVATION_1 = "var(--ds-shadow-1)";
+const ELEVATION_2 = "var(--ds-shadow-2)";
 const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
 const AMBER_CONTAINER = "var(--ds-surface-2)";
 
@@ -80,7 +80,7 @@ export function TrackingCard({
     <button
       type="button"
       onClick={() => onClick(event)}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[16px] bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
       style={{ boxShadow: ELEVATION_1 }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
@@ -108,7 +108,7 @@ export function TrackingCard({
             style={{
               background: accent.fill,
               color: accent.onFill,
-              boxShadow: "0 1px 2px 0 rgba(0,0,0,0.3)",
+              boxShadow: "var(--ds-shadow-1)",
             }}
             title={event.category_name}
           >
@@ -121,7 +121,7 @@ export function TrackingCard({
           className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-app-text backdrop-blur"
           style={{
             background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
-            boxShadow: "0 1px 2px 0 rgba(0,0,0,0.3)",
+            boxShadow: "var(--ds-shadow-1)",
           }}
         >
           <SignificanceIcon level={event.significance as Significance} size={14} />

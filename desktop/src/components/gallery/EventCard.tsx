@@ -26,7 +26,7 @@ export function EventCard({
     <button
       type="button"
       onClick={() => onClick(event)}
-      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-xl bg-surface-1 text-left shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.4)] active:scale-[0.96] ${
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-xl bg-surface-1 text-left shadow-sm transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] hover:shadow-lg active:scale-[0.96] ${
         future ? "border-[1.5px] border-dashed border-muted" : "border border-line"
       }`}
     >
@@ -46,7 +46,7 @@ export function EventCard({
         )}
         {future && (
           <span
-            className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full bg-surface-1 text-muted shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+            className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full bg-surface-1 text-muted shadow-sm"
             title="Запланировано"
           >
             <CalendarClock size={15} strokeWidth={1.75} />
@@ -54,7 +54,7 @@ export function EventCard({
         )}
         {Icon && (
           <span
-            className="absolute left-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+            className="absolute left-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full shadow-sm"
             style={{ background: accent.fill, color: accent.onFill }}
             title={event.category_name ?? undefined}
           >

@@ -38,7 +38,7 @@ export function Dialog({
           <motion.div
             role="dialog"
             aria-modal="true"
-            className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-surface-1 text-app-text shadow-2xl"
+            className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-surface-1 text-app-text shadow-2xl"
             style={{ maxWidth: width }}
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

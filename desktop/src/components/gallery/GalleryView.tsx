@@ -75,7 +75,7 @@ export function GalleryView({
           {groups.map((group) => (
             <section key={group.key} data-scrubber-key={group.key} className="mb-10">
               <div className="sticky top-0 z-30 mb-4 flex justify-center">
-                <h2 className="m-0 inline-flex items-center rounded-full border border-line bg-surface-1/85 px-4 py-1.5 text-sm font-medium text-app-text shadow-[0_1px_2px_rgba(0,0,0,0.25)] backdrop-blur">
+                <h2 className="m-0 inline-flex items-center rounded-full border border-line bg-surface-1/85 px-4 py-1.5 text-sm font-medium text-app-text shadow-sm backdrop-blur">
                   {group.label}
                 </h2>
               </div>
