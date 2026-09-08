@@ -16,7 +16,7 @@ export function LayerToggle() {
 
   return (
     <div
-      className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 gap-1 rounded-full border border-line bg-surface-1/80 p-1 backdrop-blur"
+      className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 gap-1 rounded-full bg-surface-2 p-1.5"
       onPointerDown={(e) => e.stopPropagation()}
       onPointerUp={(e) => e.stopPropagation()}
     >
@@ -28,7 +28,7 @@ export function LayerToggle() {
             type="button"
             aria-pressed={active}
             onClick={() => timelineLayerStore.set(value)}
-            className={`relative flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
+            className={`relative flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-medium transition-colors duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
               active ? "text-accent-ink" : "text-muted hover:text-app-text"
             }`}
           >

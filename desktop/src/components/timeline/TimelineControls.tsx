@@ -20,7 +20,7 @@ type Props = {
 };
 
 const BTN =
-  "flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-line bg-surface-1/80 text-muted backdrop-blur transition-colors hover:text-app-text";
+  "grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-surface-2 text-app-text transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-3 active:scale-[0.96]";
 
 export function TimelineControls({
   viewport,
@@ -53,8 +53,8 @@ export function TimelineControls({
 
   return (
     <>
-      <div className="pointer-events-none absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-xl border border-line bg-surface-1/80 px-3 py-1.5 text-xs backdrop-blur">
-        <span className="font-medium text-app-text">{LOD_LABEL[lod]}</span>
+      <div className="pointer-events-none absolute bottom-4 left-4 z-30 flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-xs">
+        <span className="font-semibold text-app-text">{LOD_LABEL[lod]}</span>
         {dateLabel && <span className="text-muted">{dateLabel}</span>}
       </div>
       <div

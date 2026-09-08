@@ -17,7 +17,7 @@ export function EventTooltip({ anchor, width }: { anchor: TooltipAnchor | null; 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.12 }}
-          className="pointer-events-none absolute z-20 w-max min-w-[13rem] max-w-sm -translate-x-1/2 -translate-y-full rounded-lg border border-line bg-surface-1 px-3.5 py-2.5 shadow-lg"
+          className="pointer-events-none absolute z-20 w-max min-w-[13rem] max-w-sm -translate-x-1/2 -translate-y-full rounded-2xl bg-surface-3 px-3.5 py-2.5 shadow-lg"
           style={{
             left: Math.min(
               Math.max(anchor.x, TOOLTIP_HALF_PX),
@@ -32,10 +32,10 @@ export function EventTooltip({ anchor, width }: { anchor: TooltipAnchor | null; 
                 <img
                   src={mediaSrc(anchor.events[0].cover)}
                   alt=""
-                  className="img-outline mb-1.5 h-24 w-full rounded-md object-cover"
+                  className="img-outline mb-2 h-24 w-full rounded-2xl object-cover"
                 />
               )}
-              <div className="text-sm font-medium text-app-text">{anchor.events[0].title}</div>
+              <div className="text-[13px] font-semibold text-app-text">{anchor.events[0].title}</div>
               <div className="text-xs text-muted">
                 {anchor.events[0].end_date
                   ? `${formatDayMonthRu(anchor.events[0].date)} — ${formatFullRu(anchor.events[0].end_date)}`
@@ -48,7 +48,7 @@ export function EventTooltip({ anchor, width }: { anchor: TooltipAnchor | null; 
                 {anchor.events.length} событий
               </div>
               {anchor.events.slice(0, 6).map((e) => (
-                <div key={e.id} className="truncate text-sm text-app-text">
+                <div key={e.id} className="truncate text-[13px] text-app-text">
                   <span className="text-muted">{formatDayMonthRu(e.date)}</span> {e.title}
                 </div>
               ))}
