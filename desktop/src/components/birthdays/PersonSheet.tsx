@@ -1,5 +1,5 @@
-import { Cake, Pencil, Trash2 } from "lucide-react";
-import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
+import { Cake, CalendarClock, CalendarHeart, Gift, Hourglass, Pencil, Trash2 } from "lucide-react";
+import { formatFullRu, formatDayMonthRu, formatWeekdayFullRu } from "@/lib/dates";
 import { remainingUntil } from "@/lib/duration";
 import {
   nextBirthdayISO,
@@ -10,10 +10,11 @@ import {
 import { mediaSrc } from "@/lib/paths";
 import { Button } from "@/components/ui/Button";
 import { SideSheet } from "@/components/ui/SideSheet";
+import { MetricChip } from "@/components/ui/MetricChip";
 import { PersonForm, type PersonFormPayload } from "./PersonForm";
 import type { Person } from "@/db/queries/people";
 
-const AMBER_CONTAINER = "var(--ds-surface-2)";
+const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 export type PersonSheetState =
   | { mode: "create" }
@@ -76,26 +77,18 @@ export function PersonSheet({ state, onStartEdit, onCreate, onUpdate, onDelete, 
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <dt className="text-muted">{label}</dt>
-      <dd className="font-medium text-app-text">{value}</dd>
-    </div>
-  );
-}
-
 function PersonView({ person }: { person: Person }) {
   const nb = nextBirthdayISO(person.birth_date);
   const days = daysUntilBirthday(person.birth_date);
+  const today = days === 0;
   const age = formatCurrentAge(person.birth_date, person.has_year);
   const turning = formatTurningAge(person.birth_date, person.has_year);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div
-        className="-mx-6 -mt-2 flex aspect-video w-[calc(100%+3rem)] items-center justify-center overflow-hidden"
-        style={{ background: AMBER_CONTAINER }}
+        className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-3xl"
+        style={{ background: "var(--ds-surface-2)" }}
       >
         {person.photo ? (
           <img
@@ -110,17 +103,48 @@ function PersonView({ person }: { person: Person }) {
       </div>
 
       <div>
-        <h3 className="text-xl font-bold text-app-text">{person.name}</h3>
+        <h3 className="text-2xl font-bold leading-tight tracking-tight text-app-text">
+          {person.name}
+        </h3>
         <p className="mt-0.5 text-sm text-muted">
-          {person.has_year ? formatFullRu(person.birth_date) : formatDayMonthRu(person.birth_date)}
+          {person.has_year
+            ? formatFullRu(person.birth_date)
+            : cap(formatDayMonthRu(person.birth_date))}
         </p>
       </div>
 
-      <dl className="flex flex-col gap-1.5 text-sm">
-        {age && <Row label="Сейчас" value={age} />}
-        <Row label="До дня рождения" value={days === 0 ? "Сегодня! 🎂" : remainingUntil(nb)} />
-        {turning && <Row label="Исполнится" value={turning} />}
-      </dl>
+      <div className="rounded-3xl px-5 py-4" style={{ background: "var(--ds-surface-3)" }}>
+        <span className="flex items-center gap-1.5 text-xs font-medium text-faint">
+          <Gift size={14} strokeWidth={1.75} />
+          {today ? "День рождения" : "До дня рождения"}
+        </span>
+        <span className="mt-1 block text-[28px] font-bold leading-none tabular-nums text-app-text">
+          {today ? "Сегодня! 🎂" : remainingUntil(nb)}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {age && (
+          <MetricChip
+            icon={<Hourglass size={12} strokeWidth={1.75} />}
+            label="Сейчас"
+            value={age}
+          />
+        )}
+        {turning && (
+          <MetricChip icon={<Cake size={12} strokeWidth={1.75} />} label="Исполнится" value={turning} />
+        )}
+        <MetricChip
+          icon={<CalendarHeart size={12} strokeWidth={1.75} />}
+          label="Дата"
+          value={cap(formatDayMonthRu(nb))}
+        />
+        <MetricChip
+          icon={<CalendarClock size={12} strokeWidth={1.75} />}
+          label="День"
+          value={cap(formatWeekdayFullRu(nb))}
+        />
+      </div>
     </div>
   );
 }
