@@ -91,7 +91,7 @@ export function DatePicker({
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className={`flex w-full cursor-pointer items-center gap-2 h-10 rounded-xl border bg-surface-2 px-3 text-sm text-app-text outline-none transition focus:border-amber ${
+          className={`flex w-full cursor-pointer items-center gap-2 h-11 rounded-full border bg-surface-2 px-4 text-sm text-app-text outline-none transition focus:border-amber ${
             error ? "border-rust" : "border-line"
           }`}
         >

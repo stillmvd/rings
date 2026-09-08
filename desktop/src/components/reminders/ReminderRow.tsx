@@ -37,7 +37,7 @@ export function ReminderRow({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 16 }}
       transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-      className="group flex items-center gap-3"
+      className="group flex items-center gap-2.5"
     >
       <button
         type="button"
@@ -58,7 +58,7 @@ export function ReminderRow({
           e.preventDefault();
           onMenu(reminder, e.clientX, e.clientY);
         }}
-        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-full px-4 py-2.5 text-left transition-colors ${
+        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-full px-3 py-2.5 text-left transition-colors ${
           onAccent
             ? "hover:bg-[color-mix(in_srgb,var(--ds-on-accent)_10%,transparent)]"
             : "hover:bg-surface-2"
@@ -83,10 +83,10 @@ export function ReminderRow({
         </span>
         {(dateLabel || reminder.time) && (
           <span
-            className={`shrink-0 rounded-full px-2.5 py-1 text-xs tabular-nums ${
+            className={`shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums ${
               onAccent
                 ? "bg-[color-mix(in_srgb,var(--ds-on-accent)_12%,transparent)] text-ink"
-                : "bg-surface-2 text-muted"
+                : "text-muted"
             }`}
           >
             {[dateLabel, reminder.time].filter(Boolean).join(" · ")}

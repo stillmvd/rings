@@ -51,11 +51,21 @@ const appear = (i: number) => ({
   transition: { type: "spring" as const, duration: 0.4, bounce: 0, delay: i * 0.06 },
 });
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({
+  title,
+  empty,
+  children,
+}: {
+  title: string;
+  empty?: string;
+  children?: React.ReactNode;
+}) {
   return (
-    <section className={`relative ${CARD}`}>
-      <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-muted">{title}</h2>
-      {children}
+    <section className={`relative flex h-full flex-col ${CARD}`}>
+      <h2 className="mb-4 self-start rounded-full bg-surface-2 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted">
+        {title}
+      </h2>
+      {children ?? <p className="text-sm text-muted opacity-60">{empty}</p>}
     </section>
   );
 }
@@ -141,12 +151,10 @@ export function RemindersView({
 
   const empty =
     reminders.length === 0 && birthdays.length === 0;
-  const upcomingEmpty =
-    groups.tomorrow.length === 0 && groups.week.length === 0 && groups.later.length === 0;
 
   return (
     <div className="h-full w-full overflow-y-auto">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
+      <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-center gap-6 px-6 py-10">
         <motion.div {...appear(0)}>
           <QuickAdd />
         </motion.div>
@@ -182,8 +190,8 @@ export function RemindersView({
               </motion.section>
             )}
 
-            <motion.div {...appear(2)} className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-              <section className="relative rounded-4xl bg-amber p-7 text-ink shadow-sm">
+            <motion.div {...appear(2)} className="grid gap-6 lg:grid-cols-3">
+              <section className="relative flex flex-col rounded-4xl bg-amber p-7 text-ink shadow-sm lg:col-span-3">
                 <RoundArrow label="Открыть календарь" onAccent />
                 <h2 className="max-w-[70%] text-[34px] leading-[1.1] tracking-tight">
                   <span className="font-light">Сегодня,</span>{" "}
@@ -235,55 +243,57 @@ export function RemindersView({
                 )}
               </section>
 
-              <Card title="Предстоящее">
-                {upcomingEmpty ? (
-                  <p className="text-sm text-muted">Впереди пусто.</p>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {groups.tomorrow.length > 0 && (
-                      <div>
-                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">Завтра</h3>
-                        <Rows
-                          items={groups.tomorrow}
-                          onToggle={finishReminder}
-                          onOpen={onReminderOpen}
-                          onMenu={openMenu} onEventJump={onEventJump}
-                        />
-                      </div>
-                    )}
-                    {groups.week.length > 0 && (
-                      <div>
-                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">На неделе</h3>
-                        <Rows
-                          items={groups.week}
-                          dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
-                          onToggle={finishReminder}
-                          onOpen={onReminderOpen}
-                          onMenu={openMenu} onEventJump={onEventJump}
-                        />
-                      </div>
-                    )}
-                    {groups.later.length > 0 && (
-                      <div>
-                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">Позже</h3>
-                        <Rows
-                          items={groups.later}
-                          dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
-                          onToggle={finishReminder}
-                          onOpen={onReminderOpen}
-                          onMenu={openMenu} onEventJump={onEventJump}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+              <Card
+                title="Завтра"
+                empty={groups.tomorrow.length === 0 ? "Ничего не запланировано" : undefined}
+              >
+                {groups.tomorrow.length > 0 ? (
+                  <Rows
+                    items={groups.tomorrow}
+                    onToggle={finishReminder}
+                    onOpen={onReminderOpen}
+                    onMenu={openMenu}
+                    onEventJump={onEventJump}
+                  />
+                ) : undefined}
+              </Card>
+
+              <Card
+                title="На неделе"
+                empty={groups.week.length === 0 ? "Неделя свободна" : undefined}
+              >
+                {groups.week.length > 0 ? (
+                  <Rows
+                    items={groups.week}
+                    dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
+                    onToggle={finishReminder}
+                    onOpen={onReminderOpen}
+                    onMenu={openMenu}
+                    onEventJump={onEventJump}
+                  />
+                ) : undefined}
+              </Card>
+
+              <Card title="Позже" empty={groups.later.length === 0 ? "Пусто" : undefined}>
+                {groups.later.length > 0 ? (
+                  <Rows
+                    items={groups.later}
+                    dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
+                    onToggle={finishReminder}
+                    onOpen={onReminderOpen}
+                    onMenu={openMenu}
+                    onEventJump={onEventJump}
+                  />
+                ) : undefined}
               </Card>
             </motion.div>
 
             {groups.completed.length > 0 && (
               <motion.section
                 {...appear(3)}
-                className="rounded-full bg-surface-1 px-6 py-3 shadow-sm"
+                className={`bg-surface-1 shadow-sm transition-[padding,border-radius] duration-300 ease-[var(--rg-ease)] ${
+                  showCompleted ? "rounded-4xl px-8 py-7" : "rounded-full px-6 py-3"
+                }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <button
@@ -303,14 +313,13 @@ export function RemindersView({
                   <button
                     type="button"
                     onClick={() => purgeCompleted()}
-                    className="flex cursor-pointer items-center gap-1.5 text-xs text-muted transition-colors hover:text-rust"
+                    className="cursor-pointer rounded-full bg-surface-2 px-4 py-1.5 text-xs text-muted transition-colors hover:bg-surface-3 hover:text-rust"
                   >
-                    <Trash2 size={13} strokeWidth={1.75} />
                     Очистить
                   </button>
                 </div>
                 {showCompleted && (
-                  <div className="mt-3">
+                  <div className="mt-5">
                     <Rows
                       items={groups.completed}
                       dateLabelFor={(r) => formatDayMonthRu(r.date)}
