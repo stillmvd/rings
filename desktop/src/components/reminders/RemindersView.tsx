@@ -160,8 +160,8 @@ export function RemindersView({
               </motion.section>
             )}
 
-            <motion.div {...appear(2)} className="grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
-              <section className={`rounded-2xl bg-surface-1 p-6 ${CARD_SHADOW}`}>
+            <motion.div {...appear(2)} className="grid gap-5 lg:grid-cols-[3fr_2fr]">
+              <section className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}>
                 <h2 className="text-2xl font-bold text-app-text">
                   Сегодня, {formatRu(today, "d MMMM")}
                 </h2>
