@@ -1,0 +1,428 @@
+<title>Объём знака Trail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #0B0B0A;
+    --surface: #141413;
+    --surface-2: #1C1C1A;
+    --line: #2A2A27;
+    --text: #EDEDE8;
+    --muted: #8C8C84;
+    --accent: #FFFF1E;
+    --accent-ink: #12120A;
+    --swatch-dark: #101010;
+    --swatch-light: #E8E8E2;
+  }
+  :root[data-theme="light"] {
+    --ground: #EFEFE9;
+    --surface: #FFFFFF;
+    --surface-2: #F6F6F0;
+    --line: #DCDCD3;
+    --text: #16160F;
+    --muted: #6E6E64;
+    --accent-ink: #12120A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 28px 80px; }
+
+  header { display: grid; gap: 18px; margin-bottom: 44px; }
+  .eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+  }
+  h1 {
+    margin: 0; font-weight: 800; font-size: clamp(34px, 5vw, 54px);
+    letter-spacing: -.03em; line-height: 1.02; text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  :root[data-theme="light"] h1 em { color: #8A8800; }
+  .lede { max-width: 62ch; color: var(--muted); font-weight: 300; font-size: 17px; }
+
+  .grid {
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+    padding: 22px; display: grid; gap: 16px; align-content: start;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 10px; }
+  .num {
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px;
+    color: var(--accent); font-weight: 600;
+  }
+  :root[data-theme="light"] .num { color: #8A8800; }
+  .name { font-weight: 600; font-size: 19px; letter-spacing: -.01em; }
+  .tech { color: var(--muted); font-size: 13.5px; font-weight: 300; min-height: 2.9em; }
+
+  .stage {
+    border-radius: 16px; padding: 26px; display: grid; place-items: center;
+    background:
+      radial-gradient(120% 90% at 50% 12%, #35352F 0%, #17171500 70%),
+      repeating-conic-gradient(from 45deg, #1a1a18 0% 25%, #202020 0% 50%) 0 0 / 18px 18px;
+  }
+  :root[data-theme="light"] .stage {
+    background:
+      radial-gradient(120% 90% at 50% 12%, #FFFFFF 0%, #F0F0EA00 70%),
+      repeating-conic-gradient(from 45deg, #E4E4DC 0% 25%, #EDEDE6 0% 50%) 0 0 / 18px 18px;
+  }
+  .stage svg { width: 176px; height: 176px; display: block; }
+
+  .scales { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .swatch {
+    min-width: 0; overflow: hidden;
+    display: flex; align-items: flex-end; justify-content: center; gap: 9px;
+    padding: 14px 8px; border-radius: 12px; border: 1px solid var(--line);
+  }
+  .swatch svg { flex: none; }
+  .swatch.dark { background: var(--swatch-dark); }
+  .swatch.light { background: var(--swatch-light); }
+  .swatch svg { display: block; }
+  .s48 { width: 48px; height: 48px; }
+  .s32 { width: 32px; height: 32px; }
+  .s24 { width: 24px; height: 24px; }
+  .s16 { width: 16px; height: 16px; }
+
+  footer {
+    margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--line);
+    color: var(--muted); font-weight: 300; font-size: 14.5px; max-width: 74ch;
+    display: grid; gap: 10px;
+  }
+  footer b { color: var(--text); font-weight: 600; }
+  code {
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 5px;
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+  <!-- 01 GLOSS -->
+  <linearGradient id="v1disc" x1=".18" y1="0" x2=".82" y2="1">
+    <stop offset="0" stop-color="#FFFF9C"/><stop offset=".42" stop-color="#FFFF23"/><stop offset="1" stop-color="#BDBB00"/>
+  </linearGradient>
+  <linearGradient id="v1rim" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#FFFFE0" stop-opacity=".9"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#7C7B00" stop-opacity=".7"/>
+  </linearGradient>
+  <linearGradient id="v1shine" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="v1tile" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#55554C"/><stop offset=".38" stop-color="#12120F"/><stop offset="1" stop-color="#000"/>
+  </linearGradient>
+  <linearGradient id="v1gloss" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".02"/>
+  </linearGradient>
+  <filter id="v1sh" x="-50%" y="-50%" width="200%" height="200%">
+    <feDropShadow dx="0" dy="1.2" stdDeviation="1.1" flood-color="#4E4D00" flood-opacity=".62"/>
+  </filter>
+  <g id="v1tileg">
+    <rect width="12" height="12" rx="3.75" fill="url(#v1tile)"/>
+    <rect x="1.1" y="1" width="9.8" height="4.6" rx="2.3" fill="url(#v1gloss)"/>
+  </g>
+  <g id="mark-gloss">
+    <circle cx="32" cy="32" r="32" fill="url(#v1disc)"/>
+    <ellipse cx="32" cy="12.5" rx="25" ry="11.5" fill="url(#v1shine)"/>
+    <circle cx="32" cy="32" r="31.2" fill="none" stroke="url(#v1rim)" stroke-width="1.6"/>
+    <g filter="url(#v1sh)">
+      <use href="#v1tileg" x="15.5" y="35"/>
+      <use href="#v1tileg" x="26" y="26"/>
+      <use href="#v1tileg" x="36.5" y="17"/>
+    </g>
+  </g>
+
+  <!-- 02 METAL -->
+  <linearGradient id="v2ring" x1=".12" y1="0" x2=".88" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset=".2" stop-color="#C9C9C2"/><stop offset=".38" stop-color="#F4F4EE"/>
+    <stop offset=".58" stop-color="#8E8E86"/><stop offset=".78" stop-color="#DEDED6"/><stop offset="1" stop-color="#9C9C93"/>
+  </linearGradient>
+  <radialGradient id="v2disc" cx=".38" cy=".24" r=".92">
+    <stop offset="0" stop-color="#FFFF7A"/><stop offset=".5" stop-color="#F5F310"/><stop offset="1" stop-color="#B4B200"/>
+  </radialGradient>
+  <linearGradient id="v2brush" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#6E6D00" stop-opacity=".35"/>
+  </linearGradient>
+  <linearGradient id="v2tile" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#3E3E38"/><stop offset=".26" stop-color="#0A0A08"/>
+    <stop offset=".82" stop-color="#000"/><stop offset="1" stop-color="#2B2B24"/>
+  </linearGradient>
+  <linearGradient id="v2spec" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <filter id="v2sh" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="1.6" stdDeviation="1.3" flood-color="#3B3A00" flood-opacity=".7"/>
+  </filter>
+  <g id="v2tileg">
+    <rect width="12" height="12" rx="3.6" fill="url(#v2tile)"/>
+    <rect x="1.2" y=".9" width="9.6" height="3.8" rx="1.9" fill="url(#v2spec)" opacity=".55"/>
+  </g>
+  <g id="mark-metal">
+    <circle cx="32" cy="32" r="32" fill="url(#v2ring)"/>
+    <circle cx="32" cy="32" r="28.6" fill="url(#v2disc)"/>
+    <circle cx="32" cy="32" r="28.6" fill="url(#v2brush)"/>
+    <circle cx="32" cy="32" r="28.6" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="1"/>
+    <g filter="url(#v2sh)">
+      <use href="#v2tileg" x="15.5" y="35"/>
+      <use href="#v2tileg" x="26" y="26"/>
+      <use href="#v2tileg" x="36.5" y="17"/>
+    </g>
+  </g>
+
+  <!-- 03 DEBOSS -->
+  <linearGradient id="v3disc" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#FFFF52"/><stop offset=".5" stop-color="#FFFF1E"/><stop offset="1" stop-color="#E3E100"/>
+  </linearGradient>
+  <linearGradient id="v3in" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".5" stop-color="#000" stop-opacity="0"/>
+    <stop offset="1" stop-color="#FFFFC2" stop-opacity=".55"/>
+  </linearGradient>
+  <linearGradient id="v3tile" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#26261F"/>
+  </linearGradient>
+  <g id="v3tileg">
+    <rect x="-.2" y="-1.6" width="12.4" height="12.4" rx="3.9" fill="#6E6D00" opacity=".9"/>
+    <rect x="-.2" y="1.8" width="12.4" height="12.4" rx="3.9" fill="#FFFFCF"/>
+    <rect width="12" height="12" rx="3.75" fill="url(#v3tile)"/>
+    <rect x=".9" y=".8" width="10.2" height="3" rx="1.5" fill="#000" opacity=".55"/>
+  </g>
+  <g id="mark-deboss">
+    <circle cx="32" cy="32" r="32" fill="url(#v3disc)"/>
+    <circle cx="32" cy="32" r="31.3" fill="none" stroke="url(#v3in)" stroke-width="1.4"/>
+    <use href="#v3tileg" x="15.5" y="35"/>
+    <use href="#v3tileg" x="26" y="26"/>
+    <use href="#v3tileg" x="36.5" y="17"/>
+  </g>
+
+  <!-- 04 EXTRUDE -->
+  <linearGradient id="v4face" x1=".3" y1="0" x2=".7" y2="1">
+    <stop offset="0" stop-color="#FFFF72"/><stop offset=".5" stop-color="#FFFF1E"/><stop offset="1" stop-color="#E8E600"/>
+  </linearGradient>
+  <linearGradient id="v4edge" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#A5A300"/><stop offset="1" stop-color="#5E5D00"/>
+  </linearGradient>
+  <linearGradient id="v4tile" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#2E2E28"/><stop offset=".55" stop-color="#080807"/><stop offset="1" stop-color="#000"/>
+  </linearGradient>
+  <filter id="v4sh" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="1" stdDeviation=".7" flood-color="#3F3E00" flood-opacity=".85"/>
+  </filter>
+  <g id="v4tileg">
+    <rect x="0" y="2.4" width="12" height="12" rx="3.75" fill="#1A1A15"/>
+    <rect x="0" y="1.2" width="12" height="12" rx="3.75" fill="#101010"/>
+    <rect width="12" height="12" rx="3.75" fill="url(#v4tile)"/>
+    <rect x="1.3" y=".9" width="9.4" height="3.4" rx="1.7" fill="#fff" opacity=".14"/>
+  </g>
+  <g id="mark-extrude">
+    <circle cx="32" cy="34.6" r="29.4" fill="url(#v4edge)"/>
+    <circle cx="32" cy="30.6" r="29.4" fill="url(#v4face)"/>
+    <circle cx="32" cy="30.6" r="28.6" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width=".9"/>
+    <g filter="url(#v4sh)" transform="translate(0 -1.4)">
+      <use href="#v4tileg" x="15.5" y="35"/>
+      <use href="#v4tileg" x="26" y="26"/>
+      <use href="#v4tileg" x="36.5" y="17"/>
+    </g>
+  </g>
+
+  <!-- 05 CLAY -->
+  <radialGradient id="v5disc" cx=".34" cy=".22" r="1">
+    <stop offset="0" stop-color="#FFFFA4"/><stop offset=".45" stop-color="#F7F52A"/><stop offset="1" stop-color="#CFCD05"/>
+  </radialGradient>
+  <radialGradient id="v5warm" cx=".72" cy=".84" r=".6">
+    <stop offset="0" stop-color="#8E8C00" stop-opacity=".45"/><stop offset="1" stop-color="#8E8C00" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="v5tile" x1=".28" y1="0" x2=".72" y2="1">
+    <stop offset="0" stop-color="#3A3A34"/><stop offset=".55" stop-color="#151513"/><stop offset="1" stop-color="#050504"/>
+  </linearGradient>
+  <filter id="v5sh" x="-70%" y="-70%" width="240%" height="240%">
+    <feDropShadow dx=".4" dy="1.8" stdDeviation="1.9" flood-color="#5A5900" flood-opacity=".5"/>
+  </filter>
+  <g id="v5tileg">
+    <rect width="12" height="12" rx="4.6" fill="url(#v5tile)"/>
+    <rect x="1.6" y="1.3" width="8.8" height="4.2" rx="2.1" fill="#fff" opacity=".16"/>
+  </g>
+  <g id="mark-clay">
+    <circle cx="32" cy="32" r="32" fill="url(#v5disc)"/>
+    <circle cx="32" cy="32" r="32" fill="url(#v5warm)"/>
+    <g filter="url(#v5sh)">
+      <use href="#v5tileg" x="15.5" y="35"/>
+      <use href="#v5tileg" x="26" y="26"/>
+      <use href="#v5tileg" x="36.5" y="17"/>
+    </g>
+  </g>
+
+  <!-- 06 BEVEL -->
+  <linearGradient id="v6bev" x1=".18" y1="0" x2=".82" y2="1">
+    <stop offset="0" stop-color="#FFFFD1"/><stop offset=".45" stop-color="#FFFF3C"/><stop offset="1" stop-color="#8F8D00"/>
+  </linearGradient>
+  <linearGradient id="v6tilebev" x1=".2" y1="0" x2=".8" y2="1">
+    <stop offset="0" stop-color="#6A6A60"/><stop offset=".5" stop-color="#1A1A16"/><stop offset="1" stop-color="#000"/>
+  </linearGradient>
+  <g id="v6tileg">
+    <rect width="12" height="12" rx="3.75" fill="url(#v6tilebev)"/>
+    <rect x="1.15" y="1.15" width="9.7" height="9.7" rx="2.8" fill="#0A0A09"/>
+  </g>
+  <g id="mark-bevel">
+    <circle cx="32" cy="32" r="32" fill="url(#v6bev)"/>
+    <circle cx="32" cy="32" r="29" fill="#FFFF1E"/>
+    <g>
+      <use href="#v6tileg" x="15.5" y="35"/>
+      <use href="#v6tileg" x="26" y="26"/>
+      <use href="#v6tileg" x="36.5" y="17"/>
+    </g>
+  </g>
+
+</defs></svg>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Trail · знак Steps · подбор объёма</div>
+    <h1>Шесть способов <em>снять плоскость</em> со знака</h1>
+    <p class="lede">
+      Геометрия не тронута: круг 64, три плитки 12×12 с радиусом 3.75 на шаге 10.5 / 9 — те же, что в
+      <code>mark.svg</code>. Меняется только светотень. Фронтально, без наклона и перспективы.
+      Под каждым вариантом — 48 / 32 / 24 / 16 px на тёмной и светлой подложке: там видно, что переживёт панель задач.
+    </p>
+  </header>
+
+  <div class="grid">
+
+    <section class="card">
+      <div class="card-head"><span class="num">01</span><span class="name">Глянец</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-gloss"/></svg></div>
+      <p class="tech">Диагональный градиент диска, широкий блик сверху, светлая кромка вверху и тёмная внизу. Плитки — глянцевые кнопки с отражением и мягкой тенью.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-gloss"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><span class="num">02</span><span class="name">Металл</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-metal"/></svg></div>
+      <p class="tech">Ближе всего к референсу: стальной ободок с переменной светлотой, шайба жёлтого металла внутри, чёрные плитки с резким specular-бликом и глубокой тенью.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-metal"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><span class="num">03</span><span class="name">Вдавленный</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-deboss"/></svg></div>
+      <p class="tech">Плитки утоплены в диск: тёмная стенка по верхнему краю, освещённая — по нижнему. Диск остаётся почти плоским, объём читается только на глифе.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-deboss"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><span class="num">04</span><span class="name">Экструзия</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-extrude"/></svg></div>
+      <p class="tech">Монета с честной толщиной: снизу видно тёмно-жёлтый торец. Плитки подняты над поверхностью, у каждой своя боковина и контактная тень.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-extrude"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><span class="num">05</span><span class="name">Пластик</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-clay"/></svg></div>
+      <p class="tech">Матовый объём без бликов-зеркал: рассеянный свет сверху-слева, тёплое затемнение внизу-справа, крупный радиус плиток и длинная мягкая тень.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-clay"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><span class="num">06</span><span class="name">Фаска</span></div>
+      <div class="stage"><svg viewBox="0 0 64 64"><use href="#mark-bevel"/></svg></div>
+      <p class="tech">Никаких размытий: кольцо-фаска 3 px по краю диска и по краю каждой плитки. Единственный вариант, который растеризуется без потерь на 16–24 px.</p>
+      <div class="scales">
+        <div class="swatch dark">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+        </div>
+        <div class="swatch light">
+          <svg class="s48" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s32" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s24" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+          <svg class="s16" viewBox="0 0 64 64"><use href="#mark-bevel"/></svg>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p><b>Что дальше.</b> Выбранный вариант уходит в <code>brand/logo/mark.svg</code> и <code>app-icon.svg</code>, а <code>brand/make-icons.py</code> переписывается: сейчас он рисует плоские фигуры в Pillow, для объёма ему нужны те же градиенты и тени.</p>
+    <p><b>Про мелкие размеры.</b> Ниже 32 px градиент укладывается в три-четыре пикселя и объём превращается в грязь. Рабочая схема — гибрид: объёмная версия для 48 px и выше, плоская нынешняя для 16–32 px. Windows берёт нужную запись из <code>.ico</code> сам.</p>
+  </footer>
+</div>

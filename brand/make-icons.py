@@ -3,8 +3,11 @@
 Знак рисуется программно, а не растеризуется из SVG: фигуры простые, а
 суперсэмплинг даёт более чистый край на мелких размерах.
 
-Две вещи, ради которых скрипт существует:
-  * safe-зона — круг занимает не всю канву, иначе Windows срезает ему бока;
+Три вещи, ради которых скрипт существует:
+  * фаска — объём знака держится на кольце-скосе по краю диска и по краю
+    каждой плитки: свет сверху-слева, тень снизу-справа;
+  * ниже 32 px фаска плиток не помещается в пиксели, там остаётся только
+    фаска диска, а глиф рисуется плоским по целой сетке;
   * полный набор размеров в .ico, включая 30/36/40 под 125% и 150% DPI,
     иначе панель задач пересчитывает 32 px и мылит.
 
@@ -17,15 +20,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ICONS = ROOT / "desktop/src-tauri/icons"
 
-ACCENT = (255, 255, 30, 255)
-GLYPH = (0, 0, 0, 255)
+ACCENT = (255, 255, 30)
+GLYPH = (10, 10, 9)
+
+# Стопы фаски: та же светотень, что в brand/logo/mark.svg.
+DISC_BEVEL = [(0.0, (255, 255, 209)), (0.45, (255, 255, 60)), (1.0, (143, 141, 0))]
+TILE_BEVEL = [(0.0, (106, 106, 96)), (0.5, (26, 26, 22)), (1.0, (0, 0, 0))]
+
+DISC_BEVEL_W = 3.0
+TILE_BEVEL_W = 1.15
+TILE_INNER_RADIUS = 2.8
 
 # Координаты знака в системе 64×64 (как в brand/logo/mark.svg).
 STEPS = [(15.5, 35.0), (26.0, 26.0), (36.5, 17.0)]
 STEP_SIDE = 12.0
 STEP_RADIUS = 3.75
 
-SS = 16  # кратность суперсэмплинга
+GRAD_RES = 128
 
 # Панель задач Windows 11 берёт "малую" иконку (16 px) и растягивает её до 24 —
 # получается мыло. Без записей мельче 24 системе приходится брать 24 и ниже
@@ -51,30 +62,76 @@ PNG_TARGETS = {
     "StoreLogo.png": 50,
 }
 
-
-def padding(size: int) -> int:
-    """Поля нет: круг занимает весь бокс, как у Chrome.
-
-    Знак и так круглый — Windows не добавляет к нему свою рамку, а поле
-    только уменьшает фигуру относительно соседних иконок. Срез краёв, из-за
-    которого поле вводилось, лечится не полем, а честным антиалиасингом:
-    крайние пиксели должны иметь частичную альфу, а не 255.
-    """
-    return 0
-
-
-# До 32 px стороны квадратов попадают между пикселями и глиф расплывается.
-# Там он рисуется по целой сетке: те же пропорции, но границы на целых
-# пикселях, а соседние квадраты перекрываются на 1 px — контакт углами,
-# как в знаке, без разрыва лесенки.
+# До 32 px сторона плитки — 4-5 px: фаска съела бы половину глифа.
 HINTED_MAX = 32
 
 
+def supersample(size: int) -> int:
+    return max(2, min(16, 2048 // size))
+
+
+def sample(stops, t: float):
+    for i in range(len(stops) - 1):
+        o0, c0 = stops[i]
+        o1, c1 = stops[i + 1]
+        if t <= o1:
+            f = 0.0 if o1 == o0 else (t - o0) / (o1 - o0)
+            return tuple(round(a + (b - a) * f) for a, b in zip(c0, c1))
+    return stops[-1][1]
+
+
+def gradient(size: int, p0, p1, stops) -> Image.Image:
+    """Линейный градиент, заданный вектором в системе 64×64."""
+    x0, y0 = p0
+    dx, dy = p1[0] - x0, p1[1] - y0
+    dd = dx * dx + dy * dy
+    g = Image.new("RGB", (GRAD_RES, GRAD_RES))
+    px = g.load()
+    for j in range(GRAD_RES):
+        v = (j + 0.5) * 64.0 / GRAD_RES
+        for i in range(GRAD_RES):
+            u = (i + 0.5) * 64.0 / GRAD_RES
+            t = ((u - x0) * dx + (v - y0) * dy) / dd
+            px[i, j] = sample(stops, min(1.0, max(0.0, t)))
+    return g.resize((size, size), Image.BILINEAR)
+
+
+def mask(size: int, paint) -> Image.Image:
+    """Маска фигуры: рисуется с суперсэмплингом, сжимается честным BOX."""
+    ss = supersample(size)
+    big = size * ss
+    m = Image.new("L", (big, big), 0)
+    paint(ImageDraw.Draw(m), big / 64.0)
+    return m.resize((size, size), Image.BOX)
+
+
+def solid(size: int, color) -> Image.Image:
+    return Image.new("RGB", (size, size), color)
+
+
+def disc(size: int) -> Image.Image:
+    """Жёлтая шайба с фаской по краю."""
+    bevel = max(1.0, DISC_BEVEL_W * size / 64.0) * 64.0 / size
+
+    im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    im.paste(
+        gradient(size, (11.52, 0.0), (52.48, 64.0), DISC_BEVEL),
+        (0, 0),
+        mask(size, lambda d, k: d.ellipse((0, 0, 64 * k - 1, 64 * k - 1), fill=255)),
+    )
+    im.paste(
+        solid(size, ACCENT),
+        (0, 0),
+        mask(size, lambda d, k: d.ellipse(
+            (bevel * k, bevel * k, (64 - bevel) * k - 1, (64 - bevel) * k - 1), fill=255)),
+    )
+    return im
+
+
 def render_hinted(size: int) -> Image.Image:
+    """Мелкие размеры: фаска только у диска, глиф — по целой пиксельной сетке."""
     k = size / 64.0
-    im = Image.new("RGBA", (size * SS, size * SS), (0, 0, 0, 0))
-    ImageDraw.Draw(im).ellipse((0, 0, size * SS - 1, size * SS - 1), fill=ACCENT)
-    im = im.resize((size, size), Image.BOX)
+    im = disc(size)
 
     # Пропорции знака округляются к сетке: сторона 12, шаг 10.5 и 9.
     # Сторона обязана быть больше шага — иначе округление обнуляет перекрытие
@@ -93,37 +150,35 @@ def render_hinted(size: int) -> Image.Image:
         y = top + span_y - side - step_y * i
         box = (x, y, x + side - 1, y + side - 1)
         if side >= 4:
-            d.rounded_rectangle(box, radius=1, fill=GLYPH)
+            d.rounded_rectangle(box, radius=1, fill=GLYPH + (255,))
         else:
-            d.rectangle(box, fill=GLYPH)
+            d.rectangle(box, fill=GLYPH + (255,))
     return im
 
 
 def render(size: int) -> Image.Image:
     if size <= HINTED_MAX:
         return render_hinted(size)
-    pad = padding(size)
-    big = size * SS
-    pad_big = pad * SS
-    diameter = big - pad_big * 2
-    k = diameter / 64.0
 
-    im = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    d.ellipse((pad_big, pad_big, pad_big + diameter - 1, pad_big + diameter - 1), fill=ACCENT)
-
+    im = disc(size)
+    inset = TILE_BEVEL_W
     for x, y in STEPS:
-        left = pad_big + x * k
-        top = pad_big + y * k
-        d.rounded_rectangle(
-            (left, top, left + STEP_SIDE * k - 1, top + STEP_SIDE * k - 1),
-            radius=STEP_RADIUS * k,
-            fill=GLYPH,
+        im.paste(
+            gradient(size, (x + 2.4, y), (x + 9.6, y + STEP_SIDE), TILE_BEVEL),
+            (0, 0),
+            mask(size, lambda d, k, x=x, y=y: d.rounded_rectangle(
+                (x * k, y * k, (x + STEP_SIDE) * k - 1, (y + STEP_SIDE) * k - 1),
+                radius=STEP_RADIUS * k, fill=255)),
         )
-
-    # BOX — честное усреднение покрытия: для одноцветной фигуры на контрастном
-    # фоне даёт более плавный край, чем LANCZOS с его звоном.
-    return im.resize((size, size), Image.BOX)
+        im.paste(
+            solid(size, GLYPH),
+            (0, 0),
+            mask(size, lambda d, k, x=x, y=y: d.rounded_rectangle(
+                ((x + inset) * k, (y + inset) * k,
+                 (x + STEP_SIDE - inset) * k - 1, (y + STEP_SIDE - inset) * k - 1),
+                radius=TILE_INNER_RADIUS * k, fill=255)),
+        )
+    return im
 
 
 def main() -> None:
