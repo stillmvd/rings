@@ -1,15 +1,27 @@
+import { ImageIcon } from "lucide-react";
+import { resolveIconOrNull } from "@/lib/icons";
+
 export function CoverPlaceholder({
   fill,
+  icon,
   dimmed,
 }: {
   fill: string;
+  icon?: string | null;
   dimmed?: boolean;
 }) {
-  const gradient = `linear-gradient(140deg, color-mix(in srgb, ${fill} 14%, var(--ds-surface-2)) 0%, var(--ds-surface-1) 100%)`;
+  const CategoryIcon = resolveIconOrNull(icon);
+  const Icon = CategoryIcon ?? ImageIcon;
   return (
     <div
-      className="h-full w-full"
-      style={{ background: gradient, opacity: dimmed ? 0.6 : undefined }}
-    />
+      className="flex h-full w-full items-center justify-center"
+      style={{ background: "var(--ds-surface-2)", opacity: dimmed ? 0.6 : undefined }}
+    >
+      <Icon
+        className="h-[34%] w-[34%]"
+        strokeWidth={1.5}
+        style={{ color: CategoryIcon ? fill : "var(--ds-text-faint)" }}
+      />
+    </div>
   );
 }

@@ -101,7 +101,7 @@ export function TrackingCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <CoverPlaceholder fill={accent.fill} />
+          <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
         )}
         {event.category_name && (
           <span

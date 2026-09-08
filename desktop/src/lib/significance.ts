@@ -5,8 +5,6 @@ export type SignificanceMeta = {
   label: string;
   color: string;
   onColor: string;
-  container: string;
-  onContainer: string;
   dotRadius: number;
   hollow: boolean;
   minLodRank: 0 | 1 | 2;
@@ -18,8 +16,6 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Обычное",
     color: "var(--rg-sig-1)",
     onColor: "var(--rg-sig-1-on)",
-    container: "color-mix(in srgb, var(--rg-sig-1) 20%, var(--rg-surface))",
-    onContainer: "var(--rg-sig-1-on-container)",
     dotRadius: 5,
     hollow: true,
     minLodRank: 2,
@@ -29,8 +25,6 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Важное",
     color: "var(--rg-sig-2)",
     onColor: "var(--rg-sig-2-on)",
-    container: "color-mix(in srgb, var(--rg-sig-2) 20%, var(--rg-surface))",
-    onContainer: "var(--rg-sig-2-on-container)",
     dotRadius: 8,
     hollow: false,
     minLodRank: 1,
@@ -40,8 +34,6 @@ export const SIGNIFICANCE: Record<Significance, SignificanceMeta> = {
     label: "Главное",
     color: "var(--rg-sig-3)",
     onColor: "var(--rg-sig-3-on)",
-    container: "color-mix(in srgb, var(--rg-sig-3) 20%, var(--rg-surface))",
-    onContainer: "var(--rg-sig-3-on-container)",
     dotRadius: 12,
     hollow: false,
     minLodRank: 0,

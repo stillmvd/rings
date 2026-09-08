@@ -4,8 +4,6 @@ import { onColorFor } from "./colors";
 export type EventAccent = {
   fill: string;
   onFill: string;
-  container: string;
-  onContainer: string;
 };
 
 export function eventAccent(event: {
@@ -17,15 +15,11 @@ export function eventAccent(event: {
     return {
       fill: c,
       onFill: onColorFor(c),
-      container: `color-mix(in srgb, ${c} 20%, var(--rg-surface))`,
-      onContainer: c,
     };
   }
   const sig = getSignificanceMeta(event.significance);
   return {
     fill: sig.color,
     onFill: sig.onColor,
-    container: sig.container,
-    onContainer: sig.onContainer,
   };
 }

@@ -273,7 +273,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{ background: accent.container }}
+                  style={{ background: "var(--ds-surface-2)" }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();

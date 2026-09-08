@@ -198,7 +198,7 @@ function EventRow({
         />
       ) : (
         <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-          <CoverPlaceholder fill={accent.fill} />
+          <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
         </span>
       )}
 
@@ -208,7 +208,11 @@ function EventRow({
         <span className="mt-0.5 flex">
           <span
             className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
-            style={{ background: accent.fill, color: accent.onFill }}
+            style={
+              event.category_name
+                ? { background: accent.fill, color: accent.onFill }
+                : { background: "var(--ds-surface-2)", color: "var(--rg-muted)" }
+            }
           >
             {Icon && createElement(Icon, { size: 11 })}
             {event.category_name ?? "Без категории"}

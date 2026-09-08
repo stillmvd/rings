@@ -211,7 +211,7 @@ function EventView({
         </button>
       ) : (
         <div className="-mx-6 -mt-2 aspect-video w-[calc(100%+3rem)] overflow-hidden">
-          <CoverPlaceholder fill={accent.fill} />
+          <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
         </div>
       )}
 
@@ -244,7 +244,11 @@ function EventView({
       <div className="flex flex-col items-start gap-2 text-sm">
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
-          style={{ background: accent.fill, color: accent.onFill }}
+          style={
+            event.category_name
+              ? { background: accent.fill, color: accent.onFill }
+              : { background: "var(--ds-surface-2)", color: "var(--rg-muted)" }
+          }
         >
           {Icon && createElement(Icon, { size: 14 })}
           {event.category_name ?? "Без категории"}
