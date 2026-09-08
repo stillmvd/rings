@@ -1,17 +1,7 @@
 import { createElement, useState } from "react";
-import {
-  Bell,
-  CalendarClock,
-  CalendarDays,
-  Hourglass,
-  ImageIcon,
-  Maximize2,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Bell, Pencil, Trash2 } from "lucide-react";
 import { useReminders } from "@/components/events/RemindersProvider";
-import { formatFullRu, formatDayMonthRu, formatWeekdayFullRu } from "@/lib/dates";
-import { elapsedSince, remainingUntil, isPast } from "@/lib/duration";
+import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { getSignificanceMeta } from "@/lib/significance";
 import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
@@ -23,7 +13,6 @@ import { Lightbox } from "@/components/ui/Lightbox";
 import { SideSheet } from "@/components/ui/SideSheet";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
-import { MetricChip } from "@/components/ui/MetricChip";
 import { EventForm, type EventFormPayload, type EventFormValues } from "./EventForm";
 import { MarkForm, type MarkFormPayload } from "./MarkForm";
 import type { CategoryNode } from "@/db/queries/categories";
@@ -93,7 +82,7 @@ export function EventSheet({
 
   return (
     <>
-      <SideSheet open={state !== null} onClose={close} title={title}>
+      <SideSheet open={state !== null} onClose={close} title={title} width={390}>
         {state?.mode === "create" && (
           <div className="flex min-h-full flex-col gap-3.5">
             <SegmentedControl
@@ -193,8 +182,6 @@ export function EventSheet({
   );
 }
 
-const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-
 function EventView({
   event,
   media,
@@ -211,45 +198,31 @@ function EventView({
   const dateLabel = event.end_date
     ? `${formatDayMonthRu(event.date)} ↔ ${formatFullRu(event.end_date)}`
     : formatFullRu(event.date);
-  const spanLabel = isPast(event.date) ? elapsedSince(event.date) : remainingUntil(event.date);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative aspect-video w-full overflow-hidden rounded-3xl">
-        {images.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => onLightbox(0)}
-            aria-label="Открыть фото"
-            className="group block h-full w-full cursor-pointer"
-          >
-            <img
-              src={images[0].src}
-              alt=""
-              decoding="async"
-              className="h-full w-full object-cover transition-transform duration-300 ease-[var(--rg-ease)] group-hover:scale-[1.03]"
-            />
-            <span
-              aria-hidden
-              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full transition-transform duration-150 ease-[var(--rg-ease)] group-hover:scale-105"
-              style={{ background: "var(--rg-bg)", color: "var(--rg-text)" }}
-            >
-              <Maximize2 size={16} strokeWidth={2} />
-            </span>
-          </button>
-        ) : (
+    <div className="flex flex-col gap-3">
+      {images.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => onLightbox(0)}
+          className="-mx-6 -mt-2 block aspect-video w-[calc(100%+3rem)] cursor-pointer overflow-hidden"
+        >
+          <img src={images[0].src} alt="" decoding="async" className="h-full w-full object-cover" />
+        </button>
+      ) : (
+        <div className="-mx-6 -mt-2 aspect-video w-[calc(100%+3rem)] overflow-hidden">
           <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
-        )}
-      </div>
+        </div>
+      )}
 
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto">
           {images.map((img, i) => (
             <button
               key={img.key}
               type="button"
               onClick={() => onLightbox(i)}
-              className="h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-2xl transition-transform duration-150 ease-[var(--rg-ease)] hover:scale-105"
+              className="h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-lg border border-line"
             >
               <img
                 src={img.src}
@@ -263,54 +236,27 @@ function EventView({
         </div>
       )}
 
-      <h3 className="text-2xl font-bold leading-tight tracking-tight text-app-text">
-        {event.title}
-      </h3>
-
-      <div className="rounded-3xl px-5 py-4" style={{ background: "var(--ds-surface-2)" }}>
-        <span className="flex items-center gap-1.5 text-xs font-medium text-faint">
-          <CalendarDays size={14} strokeWidth={1.75} />
-          {event.end_date ? "Период" : "Дата"}
-        </span>
-        <span className="mt-1 block text-xl font-bold leading-tight text-app-text">
-          {dateLabel}
-        </span>
+      <div>
+        <h3 className="text-xl font-bold text-app-text">{event.title}</h3>
+        <p className="mt-0.5 text-sm text-muted">{dateLabel}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col items-start gap-2 text-sm">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
           style={
             event.category_name
               ? { background: accent.fill, color: accent.onFill }
               : { background: "var(--ds-surface-2)", color: "var(--rg-muted)" }
           }
         >
-          {Icon && createElement(Icon, { size: 13 })}
+          {Icon && createElement(Icon, { size: 14 })}
           {event.category_name ?? "Без категории"}
         </span>
-
-        <MetricChip
-          icon={<SignificanceIcon level={event.significance as Significance} size={13} />}
-          value={sig.label}
-        />
-        <MetricChip
-          icon={<CalendarClock size={12} strokeWidth={1.75} />}
-          label="День"
-          value={cap(formatWeekdayFullRu(event.date))}
-        />
-        <MetricChip
-          icon={<Hourglass size={12} strokeWidth={1.75} />}
-          label={isPast(event.date) ? "Прошло" : "Через"}
-          value={spanLabel}
-        />
-        {images.length > 0 && (
-          <MetricChip
-            icon={<ImageIcon size={12} strokeWidth={1.75} />}
-            label="Фото"
-            value={String(images.length)}
-          />
-        )}
+        <span className="inline-flex items-center gap-1.5 text-muted">
+          <SignificanceIcon level={event.significance as Significance} size={15} />
+          {sig.label}
+        </span>
       </div>
 
       {event.description && (
