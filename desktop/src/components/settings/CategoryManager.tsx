@@ -17,15 +17,16 @@ import { useToast } from "@/components/ui/Toast";
 import { CategoryForm, type CategoryFormPayload } from "./CategoryForm";
 
 type EditState =
-  | { mode: "create"; parentId: number | null }
-  | { mode: "edit"; category: Category }
-  | null;
+  { mode: "create"; parentId: number | null } | { mode: "edit"; category: Category } | null;
 
 export function CategoryManager() {
   const { data: categories } = useQuery(listCategories);
   const { show } = useToast();
   const [edit, setEdit] = useState<EditState>(null);
-  const [confirm, setConfirm] = useState<{ category: Category; hasChildren: boolean } | null>(null);
+  const [confirm, setConfirm] = useState<{
+    category: Category;
+    hasChildren: boolean;
+  } | null>(null);
   const [pending, setPending] = useState(false);
 
   const roots = categories ?? [];
@@ -71,13 +72,13 @@ export function CategoryManager() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-app-text">Категории</h3>
+        <h3 className="text-[15px] font-semibold text-app-text">Категории</h3>
         <Button variant="secondary" onClick={() => setEdit({ mode: "create", parentId: null })}>
           <Plus size={15} strokeWidth={1.75} /> Добавить
         </Button>
       </div>
 
-      <div className="flex flex-col divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface-1">
+      <div className="flex flex-col gap-1">
         {roots.length === 0 && (
           <p className="px-4 py-6 text-center text-sm text-muted">Категорий пока нет</p>
         )}
@@ -87,7 +88,12 @@ export function CategoryManager() {
               category={root}
               onAddChild={() => setEdit({ mode: "create", parentId: root.id })}
               onEdit={() => setEdit({ mode: "edit", category: root })}
-              onDelete={() => setConfirm({ category: root, hasChildren: root.children.length > 0 })}
+              onDelete={() =>
+                setConfirm({
+                  category: root,
+                  hasChildren: root.children.length > 0,
+                })
+              }
             />
             {root.children.map((child) => (
               <CategoryRow
@@ -138,7 +144,12 @@ export function CategoryManager() {
         )}
       </Dialog>
 
-      <Dialog open={confirm !== null} onClose={() => setConfirm(null)} title="Удалить категорию?" width={380}>
+      <Dialog
+        open={confirm !== null}
+        onClose={() => setConfirm(null)}
+        title="Удалить категорию?"
+        width={380}
+      >
         <p className="text-sm text-app-text">
           «{confirm?.category.name}» будет удалена безвозвратно.
         </p>
@@ -174,23 +185,26 @@ function CategoryRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface-2 ${
-        indented ? "pl-10" : ""
+      className={`group flex items-center gap-3 rounded-full px-3 py-2 transition-colors hover:bg-surface-2 ${
+        indented ? "ml-8" : ""
       }`}
     >
       <span
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-lg"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
         style={{ background: `${category.color}22` }}
       >
-        {createElement(resolveIcon(category.icon), { size: 15, style: { color: category.color } })}
+        {createElement(resolveIcon(category.icon), {
+          size: 16,
+          style: { color: category.color },
+        })}
       </span>
-      <span className="flex-1 truncate text-sm text-app-text">{category.name}</span>
+      <span className="flex-1 truncate text-[15px] font-medium text-app-text">{category.name}</span>
       {category.is_default === 1 && (
-        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-muted">
+        <span className="rounded-full bg-surface-3 px-2.5 py-1 text-[11px] font-medium text-muted">
           по умолчанию
         </span>
       )}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
         {onAddChild && (
           <IconButton label="Добавить подкатегорию" onClick={onAddChild}>
             <Plus size={15} strokeWidth={1.75} />

@@ -14,15 +14,15 @@ export function Switch({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] ${
-        checked ? "bg-amber" : "bg-surface-2 ring-1 ring-inset ring-line"
+      className={`relative inline-flex h-7 w-[3.25rem] shrink-0 cursor-pointer items-center rounded-full transition-colors duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] ${
+        checked ? "bg-amber" : "bg-surface-3"
       }`}
     >
       <span
-        className={`inline-block h-4 w-4 rounded-full transition-[transform,background-color] duration-150 ease-[var(--rg-ease)] ${
+        className={`inline-block h-5 w-5 rounded-full transition-[transform,background-color] duration-150 ease-[var(--rg-ease)] ${
           checked ? "bg-ink" : "bg-muted"
         }`}
-        style={{ transform: checked ? "translateX(24px)" : "translateX(4px)" }}
+        style={{ transform: checked ? "translateX(28px)" : "translateX(4px)" }}
       />
     </button>
   );

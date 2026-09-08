@@ -35,10 +35,12 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-3 border-t border-line pt-6 first:border-t-0 first:pt-0">
+    <section className="flex flex-col gap-4 rounded-4xl bg-surface-1 p-7">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-app-text">{title}</h2>
-        {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+        <h2 className="inline-flex rounded-full bg-surface-2 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
+          {title}
+        </h2>
+        {description && <p className="mt-2.5 text-sm text-muted">{description}</p>}
       </div>
       {children}
     </section>
@@ -56,9 +58,9 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div className="flex flex-col">
-        <span className="text-sm text-app-text">{title}</span>
-        {description && <span className="text-xs text-muted">{description}</span>}
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[15px] font-medium text-app-text">{title}</span>
+        {description && <span className="text-[13px] leading-snug text-muted">{description}</span>}
       </div>
       {children}
     </div>
@@ -192,15 +194,21 @@ export function SettingsPage() {
           <MarkTypeManager />
         </Section>
 
-        <Section title="О приложении">
-          <div className="flex items-center gap-3">
+        <section className="flex items-center gap-5 rounded-4xl bg-amber p-7 text-ink">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-ink">
             <Mark size={40} />
-            <div>
-              <p className="m-0 text-sm font-medium text-app-text">Trail</p>
-              <p className="m-0 text-sm text-muted">Личный таймлайн жизни · версия {version ?? "—"}</p>
-            </div>
+          </span>
+          <div className="min-w-0">
+            <p className="m-0 text-[28px] font-bold leading-none tracking-tight">Trail</p>
+            <p className="m-0 mt-1.5 text-sm opacity-70">Личный таймлайн жизни</p>
           </div>
-        </Section>
+          <span
+            className="ml-auto shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold tabular-nums"
+            style={{ background: "color-mix(in srgb, var(--ds-on-accent) 12%, transparent)" }}
+          >
+            версия {version ?? "—"}
+          </span>
+        </section>
       </div>
     </div>
   );

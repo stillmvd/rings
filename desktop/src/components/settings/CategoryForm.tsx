@@ -7,6 +7,7 @@ import { IconPicker } from "@/components/ui/IconPicker";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { FormGroup } from "@/components/ui/FormGroup";
 
 export interface CategoryFormPayload {
   name: string;
@@ -38,7 +39,7 @@ export function CategoryForm({
   const [icon, setIcon] = useState(initial?.icon ?? "Circle");
   const [color, setColor] = useState(initial?.color ?? DEFAULT_CATEGORY_COLOR);
   const [parentId, setParentId] = useState<number | null>(
-    lockedParentId !== undefined ? lockedParentId : initial?.parentId ?? null,
+    lockedParentId !== undefined ? lockedParentId : (initial?.parentId ?? null),
   );
   const [nameError, setNameError] = useState<string>();
 
@@ -48,7 +49,12 @@ export function CategoryForm({
     { value: "", label: "Без родителя" },
     ...rootCategories
       .filter((c) => c.id !== selfId)
-      .map((c) => ({ value: String(c.id), label: c.name, icon: c.icon, color: c.color })),
+      .map((c) => ({
+        value: String(c.id),
+        label: c.name,
+        icon: c.icon,
+        color: c.color,
+      })),
   ];
 
   function handleSubmit(e: React.FormEvent) {
@@ -62,48 +68,55 @@ export function CategoryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-      <div className="grid grid-cols-2 gap-5">
-        <div className="flex flex-col gap-3.5">
-          <Input
-            label="Название"
-            value={name}
-            onChange={setName}
-            error={nameError}
-            autoFocus
-            placeholder="Название категории"
-          />
-
-          <ColorPicker label="Цвет" value={color} onChange={setColor} />
-
-          {!parentLocked && (
-            <Select
-              label="Родительская категория"
-              options={parentOptions}
-              value={parentId !== null ? String(parentId) : ""}
-              onChange={(v) => setParentId(v ? Number(v) : null)}
-              placeholder="Без родителя"
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <FormGroup title="Категория" accent>
+        <div className="grid grid-cols-2 gap-5">
+          <div className="flex flex-col gap-3.5">
+            <Input
+              label="Название"
+              value={name}
+              onChange={setName}
+              error={nameError}
+              autoFocus
+              placeholder="Название категории"
             />
-          )}
-        </div>
 
-        <div className="flex flex-col gap-3.5">
-          <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
+            <ColorPicker label="Цвет" value={color} onChange={setColor} />
 
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted">Предпросмотр</span>
-            <div className="flex items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2">
-              <span
-                className="grid h-6 w-6 shrink-0 place-items-center rounded-md"
-                style={{ background: `${color}22` }}
-              >
-                {createElement(resolveIcon(icon), { size: 14, style: { color } })}
-              </span>
-              <span className="truncate text-sm text-app-text">{name.trim() || "—"}</span>
+            {!parentLocked && (
+              <Select
+                label="Родительская категория"
+                options={parentOptions}
+                value={parentId !== null ? String(parentId) : ""}
+                onChange={(v) => setParentId(v ? Number(v) : null)}
+                placeholder="Без родителя"
+              />
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3.5">
+            <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted">Предпросмотр</span>
+              <div className="flex items-center gap-2.5 rounded-full bg-surface-2 px-3 py-2">
+                <span
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
+                  style={{ background: `${color}22` }}
+                >
+                  {createElement(resolveIcon(icon), {
+                    size: 16,
+                    style: { color },
+                  })}
+                </span>
+                <span className="truncate text-sm font-medium text-app-text">
+                  {name.trim() || "—"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </FormGroup>
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>

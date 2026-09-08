@@ -4,12 +4,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { useQuery } from "@/lib/useQuery";
-import {
-  checkUpdate,
-  describeUpdateError,
-  formatProgress,
-  useUpdateState,
-} from "@/lib/updates";
+import { checkUpdate, describeUpdateError, formatProgress, useUpdateState } from "@/lib/updates";
 
 type Phase = "idle" | "checking" | "downloading" | "installing";
 
@@ -77,21 +72,25 @@ export function UpdatePanel() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col">
-          <span className="text-sm text-app-text">Версия {version ?? "—"}</span>
-          {hint && <span className="text-xs text-muted">{hint}</span>}
-          {error && <span className="text-xs text-rust">{error}</span>}
+          <span className="text-[15px] font-medium text-app-text">Версия {version ?? "—"}</span>
+          {hint && <span className="text-[13px] text-muted">{hint}</span>}
+          {error && <span className="text-[13px] text-rust">{error}</span>}
         </div>
         <Button variant="secondary" onClick={runCheck} disabled={phase !== "idle"}>
-          <RefreshCw size={15} strokeWidth={1.75} className={phase === "checking" ? "animate-spin" : ""} />
+          <RefreshCw
+            size={15}
+            strokeWidth={1.75}
+            className={phase === "checking" ? "animate-spin" : ""}
+          />
           {phase === "checking" ? "Проверяю…" : "Проверить"}
         </Button>
       </div>
 
       {update && (
-        <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface-1 p-4">
+        <div className="flex flex-col gap-3.5 rounded-3xl bg-surface-2 p-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-app-text">
+              <span className="text-[15px] font-semibold text-app-text">
                 Доступна версия {update.version}
               </span>
               <span className="text-xs text-muted" aria-live="polite">
@@ -109,7 +108,7 @@ export function UpdatePanel() {
           </div>
           {phase === "downloading" && (
             <div
-              className="h-1 overflow-hidden rounded-full bg-surface-2"
+              className="h-1.5 overflow-hidden rounded-full bg-surface-3"
               role="progressbar"
               aria-label="Скачивание обновления"
               aria-valuemin={0}
@@ -118,7 +117,10 @@ export function UpdatePanel() {
             >
               <div
                 className="h-full rounded-full bg-amber transition-transform duration-200 ease-[var(--rg-ease)]"
-                style={{ transform: `scaleX(${(percent ?? 0) / 100})`, transformOrigin: "left" }}
+                style={{
+                  transform: `scaleX(${(percent ?? 0) / 100})`,
+                  transformOrigin: "left",
+                }}
               />
             </div>
           )}

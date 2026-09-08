@@ -27,9 +27,20 @@ const INTERVAL_SEGMENTS: { value: BackupInterval; label: string }[] = [
   { value: "week", label: "Раз в неделю" },
 ];
 
-const KEEP_OPTIONS = [3, 5, 10, 20].map((n) => ({ value: String(n), label: `${n}` }));
+const KEEP_OPTIONS = [3, 5, 10, 20].map((n) => ({
+  value: String(n),
+  label: `${n}`,
+}));
 
-function Row({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function Row({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col">
@@ -124,7 +135,7 @@ export function BackupPanel() {
         <div className="flex items-center gap-2">
           <span
             title={shownDir}
-            className="min-w-0 flex-1 truncate rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-app-text"
+            className="min-w-0 flex-1 truncate rounded-full bg-surface-2 px-4 py-2.5 text-sm text-app-text"
           >
             {shownDir || "—"}
           </span>
