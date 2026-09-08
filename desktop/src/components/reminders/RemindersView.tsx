@@ -145,8 +145,7 @@ export function RemindersView({
             {groups.overdue.length > 0 && (
               <motion.section
                 {...appear(1)}
-                className={`rounded-2xl p-5 ${CARD_SHADOW}`}
-                style={{ background: "color-mix(in srgb, var(--rg-rust) 10%, var(--rg-surface))" }}
+                className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}
               >
                 <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-rust">
                   Просроченные · {groups.overdue.length}
