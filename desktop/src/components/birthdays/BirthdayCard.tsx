@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
-import { Cake, Gift, PartyPopper, CalendarHeart, CalendarClock, Hourglass } from "lucide-react";
+import {
+  ArrowUpRight,
+  Cake,
+  Gift,
+  PartyPopper,
+  CalendarHeart,
+  CalendarClock,
+  Hourglass,
+} from "lucide-react";
 import { formatFullRu, formatDayMonthRu, formatWeekdayFullRu } from "@/lib/dates";
 import { remainingUntil, countdownParts, formatCountdown, COUNTDOWN_THRESHOLD_DAYS } from "@/lib/duration";
 import {
@@ -15,20 +23,32 @@ import type { Person } from "@/db/queries/people";
 
 const ELEVATION_1 = "var(--ds-shadow-1)";
 const ELEVATION_2 = "var(--ds-shadow-2)";
-const METRIC_BG = "var(--ds-surface-2)";
-const HERO_BG = "var(--ds-surface-3)";
+
+const ON_ACCENT_SOFT = "color-mix(in srgb, var(--ds-on-accent) 10%, transparent)";
+const ON_ACCENT_LINE = "color-mix(in srgb, var(--ds-on-accent) 14%, transparent)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
-function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function Metric({
+  icon,
+  label,
+  value,
+  onAccent,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  onAccent?: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-xl px-3 py-2" style={{ background: METRIC_BG }}>
-      <span className="flex items-center gap-1 text-xs text-muted">
-        {icon}
-        {label}
-      </span>
-      <span className="text-sm font-medium tabular-nums text-app-text">{value}</span>
-    </div>
+    <span
+      className="inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs"
+      style={{ background: onAccent ? ON_ACCENT_LINE : "var(--ds-surface-2)" }}
+    >
+      <span className={onAccent ? "opacity-70" : "text-muted"}>{icon}</span>
+      <span className={onAccent ? "opacity-70" : "text-muted"}>{label}</span>
+      <span className="truncate font-medium tabular-nums">{value}</span>
+    </span>
   );
 }
 
@@ -65,14 +85,16 @@ export function BirthdayCard({
     <button
       type="button"
       onClick={() => onClick(person)}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-4xl text-left transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96] ${
+        highlight ? "bg-amber text-ink" : "bg-surface-1 text-app-text"
+      }`}
       style={{ boxShadow: ELEVATION_1 }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-20 bg-app-text opacity-0 transition-opacity duration-200 group-hover:opacity-[0.08]"
+        className="pointer-events-none absolute inset-0 z-20 bg-app-text opacity-0 transition-opacity duration-200 group-hover:opacity-[0.06]"
       />
 
       <div className="relative aspect-video w-full overflow-hidden">
@@ -87,15 +109,19 @@ export function BirthdayCard({
         ) : (
           <div
             className="flex h-full w-full items-center justify-center"
-            style={{ background: HERO_BG }}
+            style={{ background: highlight ? ON_ACCENT_SOFT : "var(--ds-surface-2)" }}
           >
-            <Cake size={56} strokeWidth={1.5} style={{ color: "var(--ds-accent-ink)" }} />
+            <Cake
+              size={56}
+              strokeWidth={1.5}
+              style={{ color: highlight ? "var(--ds-on-accent)" : "var(--ds-accent-ink)" }}
+            />
           </div>
         )}
 
         {today && (
           <span
-            className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+            className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
             style={{
               background: "var(--rg-amber)",
               color: "var(--rg-bg)",
@@ -106,44 +132,75 @@ export function BirthdayCard({
             Сегодня!
           </span>
         )}
+
+        <span
+          aria-hidden
+          className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] group-hover:scale-105"
+          style={{
+            background: highlight ? "var(--ds-on-accent)" : "var(--rg-bg)",
+            color: highlight ? "var(--rg-amber)" : "var(--rg-text)",
+          }}
+        >
+          <ArrowUpRight size={18} strokeWidth={2} />
+        </span>
       </div>
 
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-3.5 p-5">
         <div>
-          <h3 className="truncate text-xl font-bold text-app-text">{person.name}</h3>
-          <p className="mt-0.5 text-sm text-muted">
+          <h3 className="truncate text-2xl font-bold tracking-tight">{person.name}</h3>
+          <p className={`mt-0.5 text-sm ${highlight ? "opacity-60" : "text-muted"}`}>
             {person.has_year ? formatFullRu(person.birth_date) : cap(formatDayMonthRu(person.birth_date))}
           </p>
         </div>
 
         <div
-          className="rounded-2xl px-4 py-3"
-          style={{ background: HERO_BG, color: "var(--rg-text)" }}
+          className="rounded-3xl px-5 py-4"
+          style={{ background: highlight ? ON_ACCENT_SOFT : "var(--ds-surface-3)" }}
         >
-          <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
+          <span
+            className={`flex items-center gap-1.5 text-xs font-medium ${
+              highlight ? "opacity-70" : "text-muted"
+            }`}
+          >
             <Gift size={14} strokeWidth={1.75} />
             {today ? "День рождения" : "До дня рождения"}
           </span>
           <span
-            className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums"
-            style={{ color: highlight ? "var(--ds-accent-ink)" : "var(--rg-text)" }}
+            className="mt-1 block text-[28px] font-bold leading-none tabular-nums"
+            style={{ color: highlight ? "var(--ds-on-accent)" : "var(--rg-text)" }}
           >
             {heroValue}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {age && <Metric icon={<Hourglass size={13} strokeWidth={1.75} />} label="Сейчас" value={age} />}
-          {turning && <Metric icon={<Cake size={13} strokeWidth={1.75} />} label="Исполнится" value={turning} />}
+        <div className="flex flex-wrap gap-2">
+          {age && (
+            <Metric
+              icon={<Hourglass size={12} strokeWidth={1.75} />}
+              label="Сейчас"
+              value={age}
+              onAccent={highlight}
+            />
+          )}
+          {turning && (
+            <Metric
+              icon={<Cake size={12} strokeWidth={1.75} />}
+              label="Исполнится"
+              value={turning}
+              onAccent={highlight}
+            />
+          )}
           <Metric
-            icon={<CalendarHeart size={13} strokeWidth={1.75} />}
+            icon={<CalendarHeart size={12} strokeWidth={1.75} />}
             label="Дата"
             value={cap(formatDayMonthRu(nb))}
+            onAccent={highlight}
           />
           <Metric
-            icon={<CalendarClock size={13} strokeWidth={1.75} />}
-            label="День недели"
+            icon={<CalendarClock size={12} strokeWidth={1.75} />}
+            label="День"
             value={cap(formatWeekdayFullRu(nb))}
+            onAccent={highlight}
           />
         </div>
       </div>

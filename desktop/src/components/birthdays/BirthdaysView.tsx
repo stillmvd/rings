@@ -10,11 +10,13 @@ function Section({
   title,
   people,
   showHeader,
+  accentFirst,
   onPersonClick,
 }: {
   title: string;
   people: Person[];
   showHeader: boolean;
+  accentFirst?: boolean;
   onPersonClick: (person: Person) => void;
 }) {
   return (
@@ -22,16 +24,13 @@ function Section({
       {showHeader && (
         <div className="sticky top-0 z-30 mb-4 flex justify-center">
           <h2
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-app-text backdrop-blur"
-            style={{
-              background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
-              boxShadow: "var(--ds-shadow-1)",
-            }}
+            className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-xs font-medium uppercase tracking-[0.12em] text-muted backdrop-blur"
+            style={{ boxShadow: "var(--ds-shadow-1)" }}
           >
             {title}
             <span
               className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-app-text"
-              style={{ background: "var(--ds-surface-2)" }}
+              style={{ background: "var(--ds-surface-3)" }}
             >
               {people.length}
             </span>
@@ -43,7 +42,7 @@ function Section({
           <BirthdayCard
             key={person.id}
             person={person}
-            highlight={i === 0}
+            highlight={accentFirst && i === 0}
             onClick={onPersonClick}
           />
         ))}
@@ -96,7 +95,7 @@ export function BirthdaysView({
         type="button"
         onClick={onAdd}
         aria-label="Добавить человека"
-        className="absolute bottom-6 right-6 z-30 flex h-14 w-14 cursor-pointer items-center justify-center rounded-2xl bg-amber text-ink shadow-lg transition-transform hover:scale-105"
+        className="absolute bottom-6 right-6 z-30 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-amber text-ink shadow-lg transition-transform hover:scale-105 active:scale-[0.96]"
       >
         <Plus size={24} strokeWidth={1.75} />
       </button>
@@ -107,6 +106,7 @@ export function BirthdaysView({
               title="Сегодня"
               people={today}
               showHeader={upcoming.length > 0}
+              accentFirst
               onPersonClick={onPersonClick}
             />
           )}
@@ -115,6 +115,7 @@ export function BirthdaysView({
               title="Ближайшие дни рождения"
               people={upcoming}
               showHeader={today.length > 0}
+              accentFirst={today.length === 0}
               onPersonClick={onPersonClick}
             />
           )}
