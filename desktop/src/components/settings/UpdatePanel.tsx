@@ -117,7 +117,7 @@ export function UpdatePanel() {
               aria-valuenow={percent ?? undefined}
             >
               <div
-                className="h-full rounded-full bg-resin transition-transform duration-200 ease-[var(--rg-ease)]"
+                className="h-full rounded-full bg-amber transition-transform duration-200 ease-[var(--rg-ease)]"
                 style={{ transform: `scaleX(${(percent ?? 0) / 100})`, transformOrigin: "left" }}
               />
             </div>

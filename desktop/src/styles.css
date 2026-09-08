@@ -12,7 +12,6 @@
   --rg-muted: var(--ds-text-muted);
   --rg-amber: var(--ds-accent);
   --rg-rust: var(--ds-danger);
-  --rg-grad: linear-gradient(100deg in oklch, var(--ds-accent), var(--ds-danger));
 
   /* Обводка изображений — чистый белый/чёрный, без подмеса тона поверхности:
      тонированная кайма читается как грязь по краю фото. */
@@ -63,10 +62,6 @@
   --shadow-lg: var(--ds-shadow-2);
   --shadow-xl: var(--ds-shadow-2);
   --shadow-2xl: var(--ds-shadow-2);
-}
-
-@utility bg-resin {
-  background: var(--rg-grad);
 }
 
 /* Фото по краю сливается с поверхностью — тонкая обводка возвращает границу.
@@ -131,7 +126,6 @@ h2 {
 
 .tl-calendar .rdp-root {
   --rdp-accent-color: var(--rg-amber);
-  --rdp-accent-background-color: color-mix(in srgb, var(--rg-amber) 22%, var(--rg-surface));
   --rdp-today-color: var(--rg-amber);
   --rdp-day-width: 40px;
   --rdp-day-height: 40px;
