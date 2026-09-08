@@ -8,6 +8,7 @@ import { eventAccent } from "@/lib/accent";
 import { resolveIconOrNull } from "@/lib/icons";
 import { mediaSrc } from "@/lib/paths";
 import { Button } from "@/components/ui/Button";
+import { MetricChip } from "@/components/ui/MetricChip";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { ContextMenu } from "@/components/ui/ContextMenu";
 import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
@@ -27,6 +28,9 @@ interface DayEventsDialogProps {
   onCreate: (dateISO: string) => void;
   onClose: () => void;
 }
+
+// «12 июля 2026» → «12 июля»: год выносим в светлое начертание рядом.
+const dayMonth = (iso: string) => formatFullRu(iso).replace(` ${iso.slice(0, 4)}`, "");
 
 const isPeriod = (e: TimelineEvent) => !!e.end_date && e.end_date > e.date;
 
@@ -83,12 +87,19 @@ export function DayEventsDialog({
             transition={{ type: "spring", duration: 0.28, bounce: 0.18 }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <header className="flex shrink-0 items-start justify-between gap-3 px-6 pb-3 pt-5">
+            <header className="flex shrink-0 items-start justify-between gap-3 px-6 pb-4 pt-6">
               <div>
-                <h2 className="text-lg font-bold text-app-text">
-                  {dateISO ? formatFullRu(dateISO) : "События"}
+                <h2 className="text-[26px] leading-tight tracking-tight text-app-text">
+                  {dateISO ? (
+                    <>
+                      <span className="font-bold">{dayMonth(dateISO)}</span>{" "}
+                      <span className="font-light text-muted">{dateISO.slice(0, 4)}</span>
+                    </>
+                  ) : (
+                    <span className="font-bold">События</span>
+                  )}
                 </h2>
-                <p className="mt-0.5 text-sm text-muted">
+                <p className="mt-1 text-sm text-muted">
                   {total} {plural(total)}
                 </p>
               </div>
@@ -96,13 +107,13 @@ export function DayEventsDialog({
                 type="button"
                 aria-label="Закрыть"
                 onClick={onClose}
-                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-app-text"
+                className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full bg-surface-2 text-app-text transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-3 active:scale-[0.96]"
               >
                 <X size={20} strokeWidth={1.75} />
               </button>
             </header>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-5">
               {showLabels && periods.length > 0 && <GroupLabel label="Периоды" />}
               {periods.map((event) => (
                 <EventRow
@@ -127,8 +138,8 @@ export function DayEventsDialog({
               ))}
             </div>
 
-            <div className="flex shrink-0 justify-end px-6 pb-5 pt-3">
-              <Button variant="secondary" onClick={() => dateISO && onCreate(dateISO)}>
+            <div className="flex shrink-0 justify-end px-6 pb-6 pt-4">
+              <Button onClick={() => dateISO && onCreate(dateISO)}>
                 <Plus size={16} strokeWidth={1.75} />
                 Добавить событие
               </Button>
@@ -186,7 +197,7 @@ function EventRow({
         e.preventDefault();
         onContextMenu(e.clientX, e.clientY);
       }}
-      className="flex cursor-pointer items-center gap-3 rounded-2xl p-2 text-left transition-colors hover:bg-surface-2"
+      className="group flex cursor-pointer items-center gap-3.5 rounded-3xl p-2.5 text-left transition-colors hover:bg-surface-2"
     >
       {event.cover ? (
         <img
@@ -194,24 +205,28 @@ function EventRow({
           alt=""
           loading="lazy"
           decoding="async"
-          className="img-outline h-16 w-16 shrink-0 rounded-xl object-cover"
+          className="img-outline h-16 w-16 shrink-0 rounded-2xl object-cover"
         />
       ) : (
-        <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+        <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
           <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
         </span>
       )}
 
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-sm font-medium text-app-text">{event.title}</span>
-        <span className="truncate text-xs text-muted">{dateLabel(event)}</span>
-        <span className="mt-0.5 flex">
+      <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="truncate text-[15px] font-bold tracking-tight text-app-text">
+          {event.title}
+        </span>
+        {isPeriod(event) && (
+          <span className="truncate text-xs text-muted">{dateLabel(event)}</span>
+        )}
+        <span className="flex">
           <span
-            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+            className="inline-flex max-w-full items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium"
             style={
               event.category_name
                 ? { background: accent.fill, color: accent.onFill }
-                : { background: "var(--ds-surface-2)", color: "var(--rg-muted)" }
+                : { background: "var(--ds-surface-3)", color: "var(--rg-muted)" }
             }
           >
             {Icon && createElement(Icon, { size: 11 })}
@@ -220,9 +235,11 @@ function EventRow({
         </span>
       </span>
 
-      <span className="inline-flex shrink-0 items-center gap-1.5 self-center rounded-full bg-surface-2 px-2.5 py-1 text-sm text-muted">
-        <SignificanceIcon level={event.significance as Significance} size={16} />
-        {sig.label}
+      <span className="shrink-0 self-center">
+        <MetricChip
+          icon={<SignificanceIcon level={event.significance as Significance} size={12} />}
+          value={sig.label}
+        />
       </span>
     </button>
   );
@@ -231,9 +248,9 @@ function EventRow({
 function MarkRow({ mark, onDelete }: { mark: Mark; onDelete: () => void }) {
   const Icon = resolveIconOrNull(mark.type_icon);
   return (
-    <div className="flex items-center gap-3 rounded-2xl p-2">
+    <div className="group flex items-center gap-3.5 rounded-3xl p-2.5">
       <span
-        className="grid h-16 w-16 shrink-0 place-items-center rounded-xl"
+        className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl"
         style={{
           background: `color-mix(in srgb, ${mark.type_color} 20%, var(--rg-surface))`,
           color: mark.type_color,
@@ -241,14 +258,14 @@ function MarkRow({ mark, onDelete }: { mark: Mark; onDelete: () => void }) {
       >
         {Icon && createElement(Icon, { size: 26, strokeWidth: 1.5 })}
       </span>
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-app-text">
+      <span className="min-w-0 flex-1 truncate text-[15px] font-bold tracking-tight text-app-text">
         {mark.type_name}
       </span>
       <button
         type="button"
         aria-label="Удалить отметку"
         onClick={onDelete}
-        className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-colors hover:text-rust"
+        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-surface-2 text-muted opacity-0 transition-[opacity,color,scale] duration-150 ease-[var(--rg-ease)] hover:text-rust focus-visible:opacity-100 active:scale-[0.96] group-hover:opacity-100"
       >
         <Trash2 size={16} strokeWidth={1.75} />
       </button>
@@ -258,7 +275,7 @@ function MarkRow({ mark, onDelete }: { mark: Mark; onDelete: () => void }) {
 
 function GroupLabel({ label }: { label: string }) {
   return (
-    <span className="px-2 pt-1.5 text-xs font-medium uppercase tracking-wide text-muted">
+    <span className="mt-1.5 mb-0.5 inline-flex w-fit rounded-full bg-surface-2 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
       {label}
     </span>
   );
