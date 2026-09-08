@@ -18,8 +18,8 @@ export function MetricChip({
       className="inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs"
       style={{ background: onAccent ? ON_ACCENT_BG : "var(--ds-surface-2)" }}
     >
-      <span className={onAccent ? "opacity-50" : "text-faint"}>{icon}</span>
-      {label && <span className={onAccent ? "opacity-50" : "text-faint"}>{label}</span>}
+      <span className={onAccent ? "opacity-75" : "text-faint"}>{icon}</span>
+      {label && <span className={onAccent ? "opacity-75" : "text-faint"}>{label}</span>}
       <span className="truncate font-semibold tabular-nums">{value}</span>
     </span>
   );
