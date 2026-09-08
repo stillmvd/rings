@@ -273,7 +273,7 @@ function DayCell({ day, modifiers, className, ...rest }: DayProps) {
                   key={e.id}
                   type="button"
                   className="tl-cal-chip"
-                  style={{ background: "var(--ds-surface-2)" }}
+                  style={{ background: "var(--ds-surface-1)" }}
                   title={e.title}
                   onClick={(ev) => {
                     ev.stopPropagation();
@@ -532,12 +532,8 @@ export function CalendarView({
       <div className="flex min-h-full items-center justify-center p-6">
         <div
           ref={cardRef}
-          className="tl-calendar tl-calendar-lg w-full max-w-[1500px] p-5"
-          style={{
-            background: "var(--rg-surface)",
-            borderRadius: "1rem",
-            boxShadow: ELEVATION_1,
-          }}
+          className="tl-calendar tl-calendar-lg w-full max-w-[1500px] rounded-4xl p-6"
+          style={{ background: "var(--ds-surface-1)", boxShadow: ELEVATION_1 }}
         >
         <CalendarContext.Provider value={ctx}>
           <DayPicker

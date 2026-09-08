@@ -6,6 +6,7 @@ import { resolveIcon } from "@/lib/icons";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
+import { FormGroup } from "@/components/ui/FormGroup";
 
 export interface MarkFormPayload {
   date: string;
@@ -62,8 +63,10 @@ export function MarkForm({
 
   if (markTypes.length === 0) {
     return (
-      <div className="flex flex-col gap-3.5">
-        <p className="text-sm text-muted">Нет типов отметок. Создайте их в «Настройки → Отметки».</p>
+      <div className="flex flex-col gap-4">
+        <p className="text-[15px] leading-relaxed text-muted">
+          Нет типов отметок. Создайте их в «Настройки → Отметки».
+        </p>
         <div className="mt-1 flex justify-end">
           <Button type="button" variant="ghost" onClick={onCancel}>
             Закрыть
@@ -74,27 +77,31 @@ export function MarkForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-3.5">
-      <p className="text-sm text-muted">Быстрая отметка дня — выберите тип, без названия.</p>
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-4">
+      <p className="text-[15px] leading-relaxed text-muted">
+        Быстрая отметка дня — выберите тип, без названия.
+      </p>
 
-      <div className="flex flex-col gap-1.5">
-        <SegmentedControl
-          label="Тип"
-          segments={segments}
-          value={markTypeId !== null ? String(markTypeId) : ""}
-          onChange={(v) => setMarkTypeId(Number(v))}
+      <FormGroup title="Отметка" accent>
+        <div className="flex flex-col gap-1.5">
+          <SegmentedControl
+            label="Тип"
+            segments={segments}
+            value={markTypeId !== null ? String(markTypeId) : ""}
+            onChange={(v) => setMarkTypeId(Number(v))}
+          />
+          {typeError && <span className="text-xs text-rust">{typeError}</span>}
+        </div>
+
+        <DatePicker
+          label="Дата"
+          value={date}
+          onChange={setDate}
+          error={dateError}
+          min={TIMELINE_MIN_DATE}
+          max={TIMELINE_MAX_DATE}
         />
-        {typeError && <span className="text-xs text-rust">{typeError}</span>}
-      </div>
-
-      <DatePicker
-        label="Дата"
-        value={date}
-        onChange={setDate}
-        error={dateError}
-        min={TIMELINE_MIN_DATE}
-        max={TIMELINE_MAX_DATE}
-      />
+      </FormGroup>
 
       <div className="mt-auto flex justify-end gap-2 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={submitting}>

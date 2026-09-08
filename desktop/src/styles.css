@@ -282,13 +282,61 @@ h2 {
 }
 
 .tl-calendar-lg .tl-cal-caption {
-  font-size: 1.15rem;
-  font-weight: 600;
-  padding: 0 0.25rem 0.6rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0 0.25rem 1rem;
+}
+
+/* Заголовок месяца: смысловая часть жирная, служебный год — светлый. */
+.tl-calendar-lg .tl-wheel-val {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+.tl-calendar-lg .tl-wheel.is-month .tl-wheel-val {
+  font-weight: 700;
+}
+
+.tl-calendar-lg .tl-wheel:not(.is-month) .tl-wheel-val {
+  font-weight: 300;
+  color: var(--rg-muted);
+}
+
+.tl-calendar-lg .tl-wheel {
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--ds-radius-sm);
 }
 
 .tl-calendar-lg .tl-cal-today {
+  position: static;
+  transform: none;
   font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Листание месяцев — круглые кнопки на нейтральной ступени. */
+.tl-calendar-lg .rdp-button_previous,
+.tl-calendar-lg .rdp-button_next {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--ds-surface-2);
+  transition: background-color 0.15s, scale 0.15s;
+}
+
+.tl-calendar-lg .rdp-button_previous:hover:not(:disabled),
+.tl-calendar-lg .rdp-button_next:hover:not(:disabled) {
+  background: var(--ds-surface-3);
+}
+
+.tl-calendar-lg .rdp-button_previous:active,
+.tl-calendar-lg .rdp-button_next:active {
+  scale: 0.96;
+}
+
+.tl-calendar-lg .rdp-chevron {
+  fill: var(--rg-text);
 }
 
 
@@ -303,7 +351,8 @@ h2 {
 /* Сетка тянется на всю ширину карточки; table-layout: fixed раскидывает 7 колонок поровну,
    поэтому ячейки расширяются под окно (на фуллскрине — крупные), без фиксированной ширины дня. */
 .tl-calendar-lg .rdp-month_grid {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 6px;
   table-layout: fixed;
   width: 100%;
 }
@@ -312,7 +361,12 @@ h2 {
   height: var(--rdp-day-height);
   padding: 0;
   vertical-align: top;
-  border: 1px solid var(--rg-line);
+}
+
+/* Сетка месяца — плитки с зазором, а не разлинованная таблица. */
+.tl-calendar-lg .tl-cal-cell {
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-2);
 }
 
 .tl-cal-cell {
@@ -331,9 +385,9 @@ h2 {
 
 /* Нерабочий день — ниша surface-2; праздник среди них выделен красным числом.
    Заливка rust ушла: этот цвет по системе значит ошибку и удаление. */
-.tl-cal-cell.is-weekend:not(.is-today),
-.tl-cal-cell.is-holiday:not(.is-today) {
-  background: var(--ds-surface-2);
+.tl-calendar-lg .tl-cal-cell.is-weekend,
+.tl-calendar-lg .tl-cal-cell.is-holiday {
+  background: var(--ds-surface-3);
 }
 
 .tl-cal-cell.is-holiday:not(.is-today) .tl-cal-num {
@@ -362,14 +416,16 @@ h2 {
   color: var(--rg-muted);
 }
 
-/* «Сегодня» — тонкая amber-обводка ячейки; число лишь подкрашено,
-   чтобы не спорить с amber-кружками дней рождения. */
-.tl-cal-cell.is-today {
-  box-shadow: inset 0 0 0 1px var(--ds-accent-ink);
-}
-
+/* «Сегодня» — число в жёлтом круге: единственный акцент на экране месяца. */
 .tl-cal-cell.is-today .tl-cal-num {
-  color: var(--ds-accent-ink);
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: var(--rg-amber);
+  color: var(--ds-on-accent);
   font-weight: 700;
 }
 
@@ -389,9 +445,9 @@ h2 {
   width: 100%;
   align-items: center;
   gap: 5px;
-  padding: 3px 7px;
+  padding: 3px 8px;
   border: none;
-  border-radius: 5px;
+  border-radius: 9999px;
   font-family: inherit;
   font-size: 12px;
   line-height: 1.3;
@@ -400,14 +456,11 @@ h2 {
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rg-text) 12%, transparent);
-  transition: box-shadow 0.15s;
+  transition: filter 0.15s;
 }
 
 .tl-cal-chip:hover {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--rg-text) 12%, transparent),
-    var(--ds-shadow-1);
+  filter: brightness(1.25);
 }
 
 .tl-cal-chip-dot {
@@ -421,7 +474,7 @@ h2 {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: 9999px;
   object-fit: cover;
 }
 
@@ -433,14 +486,16 @@ h2 {
 
 .tl-cal-more {
   align-self: flex-start;
-  padding: 0 4px;
+  padding: 1px 8px;
   border: none;
-  background: none;
+  border-radius: 9999px;
+  background: var(--ds-surface-1);
   font-family: inherit;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--rg-muted);
   cursor: pointer;
+  transition: color 0.15s;
 }
 
 .tl-cal-more:hover {
