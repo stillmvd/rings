@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import { todayISO } from "@/lib/dates";
 import { REPEAT_OPTIONS, type RepeatKind, type RepeatUnit } from "@/lib/reminders";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/Switch";
 import { IconPicker } from "@/components/ui/IconPicker";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { Button } from "@/components/ui/Button";
+import { FormGroup } from "@/components/ui/FormGroup";
 import type { ReminderInput } from "@/db/queries/reminders";
 import { DEFAULT_CATEGORY_COLOR } from "@/lib/colors";
 
@@ -28,29 +29,6 @@ export interface ReminderFormValues {
   icon: string;
   color: string;
   eventId: number | null;
-}
-
-function Group({
-  title,
-  accent,
-  children,
-}: {
-  title: string;
-  accent?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-3xl border border-line p-4">
-      <h3
-        className={`mb-3 inline-block rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] ${
-          accent ? "bg-amber text-ink" : "bg-surface-2 text-muted"
-        }`}
-      >
-        {title}
-      </h3>
-      <div className="flex flex-col gap-3">{children}</div>
-    </section>
-  );
 }
 
 const DEFAULT_ICON = "Bell";
@@ -146,7 +124,7 @@ export function ReminderForm({
 
       <Textarea value={note} onChange={setNote} placeholder="Заметка (необязательно)" />
 
-      <Group title="Когда" accent>
+      <FormGroup title="Когда" accent>
         <div className="grid grid-cols-[1fr_auto] items-end gap-2">
           <DatePicker
             label="Дата"
@@ -186,9 +164,9 @@ export function ReminderForm({
             />
           </div>
         )}
-      </Group>
+      </FormGroup>
 
-      <Group title="Уведомление">
+      <FormGroup title="Уведомление">
         <div className="grid grid-cols-2 gap-2">
           <Input
             label="Напомнить за (0 — выкл)"
@@ -223,12 +201,12 @@ export function ReminderForm({
             min={1}
           />
         )}
-      </Group>
+      </FormGroup>
 
-      <Group title="Вид">
+      <FormGroup title="Вид">
         <ColorPicker value={color} onChange={setColor} />
         <IconPicker value={icon} onChange={setIcon} color={color} />
-      </Group>
+      </FormGroup>
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (

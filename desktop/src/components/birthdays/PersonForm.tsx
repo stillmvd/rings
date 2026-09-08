@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
+import { FormGroup } from "@/components/ui/FormGroup";
 import { filterAcceptedImages, ACCEPTED_IMAGE_TYPES } from "@/lib/media";
 import { mediaSrc } from "@/lib/paths";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
@@ -29,7 +30,6 @@ export interface PersonFormValues {
   photo: string | null;
 }
 
-const AMBER_CONTAINER = "var(--ds-surface-2)";
 const withYear2000 = (iso: string) => `2000-${iso.slice(5)}`;
 
 interface PersonFormProps {
@@ -145,16 +145,16 @@ export function PersonForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-3.5">
-      <div className="relative px-2 pt-1">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-4">
+      <div className="relative">
         <motion.button
           type="button"
           onClick={() => inputRef.current?.click()}
           onHoverStart={() => setAvatarHover(true)}
           onHoverEnd={() => setAvatarHover(false)}
           whileTap={{ scale: 0.98 }}
-          className="relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl"
-          style={{ background: AMBER_CONTAINER }}
+          className="relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-3xl"
+          style={{ background: "var(--ds-surface-2)" }}
         >
           {avatarSrc && (
             <motion.img
@@ -183,7 +183,7 @@ export function PersonForm({
                 <motion.span
                   key="cake"
                   className="relative"
-                  style={{ color: "var(--rg-amber)" }}
+                  style={{ color: "var(--ds-accent-ink)" }}
                   initial={{ scale: 0.3, opacity: 0, rotate: 35 }}
                   animate={{ scale: 1, opacity: 1, rotate: 0 }}
                   exit={{ scale: 0.3, opacity: 0, rotate: -35 }}
@@ -200,7 +200,8 @@ export function PersonForm({
             type="button"
             aria-label="Убрать фото"
             onClick={clearAvatar}
-            className="absolute right-4 top-3 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-black/55 text-white transition-colors hover:bg-black/75"
+            className="absolute right-4 top-4 grid h-10 w-10 cursor-pointer place-items-center rounded-full transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96]"
+            style={{ background: "var(--rg-bg)", color: "var(--rg-text)" }}
           >
             <X size={16} strokeWidth={1.75} />
           </button>
@@ -218,7 +219,6 @@ export function PersonForm({
       </div>
 
       <Input
-        label="Имя"
         value={name}
         onChange={setName}
         error={nameError}
@@ -226,24 +226,26 @@ export function PersonForm({
         placeholder="Кого добавляем?"
       />
 
-      <SegmentedControl
-        label="Год рождения"
-        segments={[
-          { value: "known", label: "Известен" },
-          { value: "unknown", label: "Неизвестен" },
-        ]}
-        value={hasYear ? "known" : "unknown"}
-        onChange={(v) => setHasYear(v === "known")}
-      />
+      <FormGroup title="Когда родился" accent>
+        <SegmentedControl
+          label="Год рождения"
+          segments={[
+            { value: "known", label: "Известен" },
+            { value: "unknown", label: "Неизвестен" },
+          ]}
+          value={hasYear ? "known" : "unknown"}
+          onChange={(v) => setHasYear(v === "known")}
+        />
 
-      <DatePicker
-        label={hasYear ? "Дата рождения" : "День и месяц (год не учитывается)"}
-        value={birthDate}
-        onChange={setBirthDate}
-        error={dateError}
-        min={TIMELINE_MIN_DATE}
-        max={hasYear ? todayISO() : TIMELINE_MAX_DATE}
-      />
+        <DatePicker
+          label={hasYear ? "Дата рождения" : "День и месяц (год не учитывается)"}
+          value={birthDate}
+          onChange={setBirthDate}
+          error={dateError}
+          min={TIMELINE_MIN_DATE}
+          max={hasYear ? todayISO() : TIMELINE_MAX_DATE}
+        />
+      </FormGroup>
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (

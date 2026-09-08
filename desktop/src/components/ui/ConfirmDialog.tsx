@@ -20,8 +20,8 @@ export function ConfirmDialog({
 }) {
   return (
     <Dialog open={open} onClose={onClose} title={title} width={380}>
-      <p className="text-sm text-app-text">{message}</p>
-      <div className="mt-5 flex justify-end gap-2">
+      <p className="text-[15px] leading-relaxed text-app-text">{message}</p>
+      <div className="mt-6 flex justify-end gap-2">
         <Button variant="ghost" onClick={onClose}>
           Отмена
         </Button>

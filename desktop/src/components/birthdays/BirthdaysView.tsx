@@ -75,9 +75,14 @@ export function BirthdaysView({
 
   if (people.length === 0) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-muted">
-        <Cake size={40} strokeWidth={1.5} />
-        <p className="max-w-sm">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-6 text-center">
+        <span
+          className="grid h-20 w-20 place-items-center rounded-full"
+          style={{ background: "var(--ds-surface-2)", color: "var(--ds-accent-ink)" }}
+        >
+          <Cake size={36} strokeWidth={1.5} />
+        </span>
+        <p className="max-w-sm text-[15px] leading-relaxed text-muted">
           Пока никого нет. Добавьте близких людей — и здесь появятся их дни рождения с отсчётом и
           возрастом.
         </p>
