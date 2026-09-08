@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { useReminders } from "@/components/events/RemindersProvider";
 import { todayISO } from "@/lib/dates";
 
@@ -46,13 +47,9 @@ export function QuickAdd() {
       <div className="w-44 shrink-0">
         <DatePicker value={date} onChange={setDate} />
       </div>
-      <input
-        type="time"
-        value={time}
-        onChange={(e) => setTime(e.target.value)}
-        aria-label="Время"
-        className="h-10 shrink-0 rounded-xl border border-line bg-surface-2 px-2 text-sm tabular-nums text-app-text outline-none transition-colors focus:border-amber"
-      />
+      <div className="w-28 shrink-0">
+        <TimePicker value={time} onChange={setTime} />
+      </div>
       <button
         type="button"
         aria-label="Добавить"

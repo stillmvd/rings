@@ -5,6 +5,7 @@ import { REPEAT_OPTIONS, type RepeatKind, type RepeatUnit } from "@/lib/reminder
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { Select } from "@/components/ui/Select";
 import { Switch } from "@/components/ui/Switch";
 import { IconPicker } from "@/components/ui/IconPicker";
@@ -132,15 +133,7 @@ export function ReminderForm({
           min={TIMELINE_MIN_DATE}
           max={TIMELINE_MAX_DATE}
         />
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted">Время</span>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-sm text-app-text outline-none transition focus:border-amber"
-          />
-        </label>
+        <TimePicker label="Время" value={time} onChange={setTime} />
       </div>
 
       <Select

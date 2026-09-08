@@ -196,7 +196,7 @@ h2 {
   gap: 0.35rem;
 }
 
-.tl-cal-wheel {
+.tl-wheel {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,21 +210,21 @@ h2 {
   transition: background-color 0.15s, border-color 0.15s;
 }
 
-.tl-cal-wheel:hover {
+.tl-wheel:hover {
   background: color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface));
   border-color: var(--rg-line);
 }
 
-.tl-cal-wheel.is-month {
+.tl-wheel.is-month {
   text-transform: capitalize;
 }
 
-.tl-cal-wheel-val {
+.tl-wheel-val {
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 
-.tl-cal-wheel-chev {
+.tl-wheel-chev {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,11 +236,11 @@ h2 {
   transition: opacity 0.15s, color 0.15s;
 }
 
-.tl-cal-wheel:hover .tl-cal-wheel-chev {
+.tl-wheel:hover .tl-wheel-chev {
   opacity: 0.55;
 }
 
-.tl-cal-wheel-chev:hover {
+.tl-wheel-chev:hover {
   opacity: 1;
   color: var(--rg-amber);
 }

@@ -342,7 +342,7 @@ function WheelField({
   return (
     <div
       ref={ref}
-      className={`tl-cal-wheel${isMonth ? " is-month" : ""}`}
+      className={`tl-wheel${isMonth ? " is-month" : ""}`}
       role="spinbutton"
       aria-label={ariaLabel}
       title="Прокрутите колёсиком"
@@ -351,17 +351,17 @@ function WheelField({
         type="button"
         tabIndex={-1}
         aria-label="Назад"
-        className="tl-cal-wheel-chev"
+        className="tl-wheel-chev"
         onClick={() => onShift(-1)}
       >
         <ChevronUp size={13} strokeWidth={1.75} />
       </button>
-      <span className="tl-cal-wheel-val">{label}</span>
+      <span className="tl-wheel-val">{label}</span>
       <button
         type="button"
         tabIndex={-1}
         aria-label="Вперёд"
-        className="tl-cal-wheel-chev"
+        className="tl-wheel-chev"
         onClick={() => onShift(1)}
       >
         <ChevronDown size={13} strokeWidth={1.75} />
