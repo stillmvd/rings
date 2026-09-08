@@ -27,7 +27,7 @@ export function useToast() {
 const META: Record<ToastType, { icon: typeof Info; color: string }> = {
   success: { icon: CheckCircle2, color: "var(--ds-success)" },
   error: { icon: AlertCircle, color: "var(--rg-rust)" },
-  info: { icon: Info, color: "var(--rg-amber)" },
+  info: { icon: Info, color: "var(--ds-accent-ink)" },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {

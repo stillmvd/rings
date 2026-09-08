@@ -23,17 +23,14 @@
   --rg-outline: oklch(1 0 0 / 0.1);
 
   /* Значимость несёт плотность заливки, а не оттенок: обычное — контур,
-     важное — сплошная, самое важное — сплошной акцент. Цвет при этом остаётся
+     важное — сплошная, главное — сплошной акцент. Цвет при этом остаётся
      за категорией, поэтому обе шкалы читаются одновременно. */
   --rg-sig-1: var(--ds-text-faint);
   --rg-sig-1-on: var(--ds-bg);
-  --rg-sig-1-on-container: var(--ds-text-muted);
   --rg-sig-2: var(--ds-text);
   --rg-sig-2-on: var(--ds-bg);
-  --rg-sig-2-on-container: var(--ds-text);
   --rg-sig-3: var(--ds-accent);
   --rg-sig-3-on: var(--ds-on-accent);
-  --rg-sig-3-on-container: var(--ds-accent-ink);
 
   --rg-ease: var(--ds-ease);
 }
@@ -131,7 +128,7 @@ h2 {
 
 .tl-calendar .rdp-root {
   --rdp-accent-color: var(--rg-amber);
-  --rdp-today-color: var(--rg-amber);
+  --rdp-today-color: var(--ds-accent-ink);
   --rdp-day-width: 40px;
   --rdp-day-height: 40px;
   --rdp-day_button-width: 40px;
@@ -241,7 +238,7 @@ h2 {
 
 .tl-wheel-chev:hover {
   opacity: 1;
-  color: var(--rg-amber);
+  color: var(--ds-accent-ink);
 }
 
 /* Кнопка «Сегодня» — вторичное действие на нейтральной ступени, появляется вне текущего месяца. */
@@ -368,11 +365,11 @@ h2 {
 /* «Сегодня» — тонкая amber-обводка ячейки; число лишь подкрашено,
    чтобы не спорить с amber-кружками дней рождения. */
 .tl-cal-cell.is-today {
-  box-shadow: inset 0 0 0 1px var(--rg-amber);
+  box-shadow: inset 0 0 0 1px var(--ds-accent-ink);
 }
 
 .tl-cal-cell.is-today .tl-cal-num {
-  color: var(--rg-amber);
+  color: var(--ds-accent-ink);
   font-weight: 700;
 }
 
@@ -384,9 +381,9 @@ h2 {
   overflow: hidden;
 }
 
-/* Чип события — приглушённый tonal-фон (accent.container), текст всегда читаемый (app-text),
-   а цвет категории/значимости несёт точка-метка. Насыщенная заливка мелкого текста плохо
-   читалась и скакала чёрным/белым — tonal решает обе проблемы разом. */
+/* Чип события — нейтральная ступень поверхности, цвет категории несёт только точка-метка.
+   Тонированная заливка дублировала точку и красила мелкий текст, который от неё плохо
+   читался и скакал чёрным/белым. */
 .tl-cal-chip {
   display: flex;
   width: 100%;

@@ -105,7 +105,7 @@ function PersonView({ person }: { person: Person }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <Cake size={64} strokeWidth={1.25} style={{ color: "var(--rg-amber)" }} />
+          <Cake size={64} strokeWidth={1.25} style={{ color: "var(--ds-accent-ink)" }} />
         )}
       </div>
 

@@ -56,7 +56,7 @@ export function GalleryView({
           <button
             type="button"
             onClick={() => onFilterChange(EMPTY_FILTER)}
-            className="text-sm text-amber underline-offset-4 transition-colors hover:underline"
+            className="text-sm text-accent-ink underline-offset-4 transition-colors hover:underline"
           >
             Сбросить фильтры
           </button>

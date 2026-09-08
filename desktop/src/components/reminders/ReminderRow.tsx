@@ -39,7 +39,7 @@ export function ReminderRow({
         className={`relative grid h-5 w-5 shrink-0 cursor-pointer place-items-center rounded-full border transition-[background-color,border-color,scale] duration-150 ease-[var(--rg-ease)] after:absolute after:-inset-x-2 after:-inset-y-1.5 active:scale-[0.96] disabled:cursor-default ${
           completed
             ? "border-amber bg-amber text-ink"
-            : "border-line text-transparent hover:border-amber hover:text-amber"
+            : "border-line text-transparent hover:border-[var(--ds-accent-ink)] hover:text-[var(--ds-accent-ink)]"
         }`}
       >
         <Check size={12} strokeWidth={3} />

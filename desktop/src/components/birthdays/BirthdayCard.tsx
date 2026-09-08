@@ -89,7 +89,7 @@ export function BirthdayCard({
             className="flex h-full w-full items-center justify-center"
             style={{ background: HERO_BG }}
           >
-            <Cake size={56} strokeWidth={1.5} style={{ color: "var(--rg-amber)" }} />
+            <Cake size={56} strokeWidth={1.5} style={{ color: "var(--ds-accent-ink)" }} />
           </div>
         )}
 

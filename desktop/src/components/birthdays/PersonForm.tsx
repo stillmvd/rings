@@ -170,7 +170,7 @@ export function PersonForm({
               <motion.span
                 key="upload"
                 className="relative"
-                style={{ color: avatarSrc ? "#fff" : "var(--rg-amber)" }}
+                style={{ color: avatarSrc ? "#fff" : "var(--ds-accent-ink)" }}
                 initial={{ scale: 0.3, opacity: 0, rotate: -35 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 exit={{ scale: 0.3, opacity: 0, rotate: 35 }}

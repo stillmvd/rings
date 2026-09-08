@@ -92,7 +92,7 @@ export function Select({
               >
                 <OptionIcon opt={opt} />
                 <span className="flex-1 truncate">{opt.label}</span>
-                {opt.value === value && <Check size={15} strokeWidth={1.75} className="shrink-0 text-amber" />}
+                {opt.value === value && <Check size={15} strokeWidth={1.75} className="shrink-0 text-accent-ink" />}
               </button>
             ))}
           </div>
