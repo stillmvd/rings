@@ -86,19 +86,19 @@ export function DateScrubber({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      className="absolute bottom-8 right-1 top-24 z-20 w-6 cursor-ns-resize touch-none"
+      className="absolute bottom-10 right-2 top-24 z-20 w-8 cursor-ns-resize touch-none"
     >
-      <div className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-line" />
+      <div className="absolute bottom-0 left-1/2 top-0 w-0.5 -translate-x-1/2 rounded-full bg-surface-2 opacity-60" />
       <div
-        className={`absolute left-1/2 h-8 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors ${
-          active ? "bg-amber" : "bg-muted/60"
+        className={`absolute left-1/2 h-12 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors ${
+          active ? "bg-amber" : "bg-muted"
         }`}
         style={{ top: `${frac * 100}%` }}
       />
       {active && label && (
         <div
-          className="pointer-events-none absolute right-7 -translate-y-1/2 whitespace-nowrap rounded-lg bg-app-text px-3 py-1 text-sm font-medium text-surface-0 shadow-lg"
-          style={{ top: `${frac * 100}%` }}
+          className="pointer-events-none absolute right-8 -translate-y-1/2 whitespace-nowrap rounded-2xl bg-surface-3 px-3.5 py-2 text-[13px] font-medium text-app-text"
+          style={{ top: `${frac * 100}%`, boxShadow: "var(--ds-shadow-2)" }}
         >
           {label}
         </div>

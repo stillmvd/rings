@@ -1,5 +1,7 @@
 import { useMemo, useRef } from "react";
+import { Images } from "lucide-react";
 import { formatMonthRu } from "@/lib/dates";
+import { Button } from "@/components/ui/Button";
 import { EventCard } from "./EventCard";
 import { DateScrubber } from "./DateScrubber";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
@@ -50,16 +52,22 @@ export function GalleryView({
   if (groups.length === 0) {
     const filterOn = isFilterActive(filter);
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-muted">
-        {filterOn ? "Ничего не найдено по фильтру." : "Нет событий для галереи."}
+      <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-6 text-center">
+        <span
+          className="grid h-20 w-20 place-items-center rounded-full"
+          style={{ background: "var(--ds-surface-2)", color: "var(--ds-accent-ink)" }}
+        >
+          <Images size={36} strokeWidth={1.5} />
+        </span>
+        <p className="max-w-sm text-[15px] leading-relaxed text-muted">
+          {filterOn
+            ? "Ничего не нашлось по фильтру. Попробуйте смягчить условия."
+            : "Пока нет событий. Добавьте первое — и здесь появятся карточки с фото."}
+        </p>
         {filterOn && onFilterChange && (
-          <button
-            type="button"
-            onClick={() => onFilterChange(EMPTY_FILTER)}
-            className="text-sm text-accent-ink underline-offset-4 transition-colors hover:underline"
-          >
+          <Button variant="secondary" onClick={() => onFilterChange(EMPTY_FILTER)}>
             Сбросить фильтры
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -72,16 +80,30 @@ export function GalleryView({
         className="h-full w-full overflow-y-auto px-6 py-16 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         <div className="mx-auto max-w-6xl">
-          {groups.map((group) => (
-            <section key={group.key} data-scrubber-key={group.key} className="mb-10">
+          {groups.map((group, gi) => (
+            <section key={group.key} data-scrubber-key={group.key} className="mb-12">
               <div className="sticky top-0 z-30 mb-4 flex justify-center">
-                <h2 className="m-0 inline-flex items-center rounded-full border border-line bg-surface-1/85 px-4 py-1.5 text-sm font-medium text-app-text shadow-sm backdrop-blur">
+                <h2
+                  className="m-0 inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-xs font-medium uppercase tracking-[0.12em] text-muted backdrop-blur"
+                  style={{ boxShadow: "var(--ds-shadow-1)" }}
+                >
                   {group.label}
+                  <span
+                    className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-app-text"
+                    style={{ background: "var(--ds-surface-3)" }}
+                  >
+                    {group.events.length}
+                  </span>
                 </h2>
               </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-                {group.events.map((event) => (
-                  <EventCard key={event.id} event={event} onClick={onEventClick} />
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
+                {group.events.map((event, i) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    highlight={gi === 0 && i === 0}
+                    onClick={onEventClick}
+                  />
                 ))}
               </div>
             </section>
