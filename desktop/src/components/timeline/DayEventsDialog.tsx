@@ -66,7 +66,7 @@ export function DayEventsDialog({
       {open && (
         <motion.div
           className="fixed inset-0 z-[86] flex items-center justify-center p-4"
-          style={{ background: "color-mix(in srgb, #000 45%, transparent)" }}
+          style={{ background: "var(--rg-scrim)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

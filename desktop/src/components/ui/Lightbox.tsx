@@ -36,7 +36,7 @@ export function Lightbox({
       {open && img && (
         <motion.div
           className="fixed inset-0 z-[110] grid place-items-center p-10"
-          style={{ background: "color-mix(in srgb, #000 82%, transparent)" }}
+          style={{ background: "var(--rg-scrim-strong)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

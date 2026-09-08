@@ -36,13 +36,13 @@ function readColors(): GridColors {
   const s = getComputedStyle(document.documentElement);
   const v = (name: string, fallback: string) => s.getPropertyValue(name).trim() || fallback;
   return {
-    line: v("--rg-line", "#232327"),
-    lineStrong: v("--rg-muted", "#8d897e"),
-    text: v("--rg-text", "#f5f1ea"),
-    muted: v("--rg-muted", "#8d897e"),
-    today: v("--rg-amber", "#ffb224"),
-    grayZone: v("--rg-muted", "#8d897e"),
-    axis: v("--ds-text-faint", "#808080"),
+    line: v("--rg-line", "#1f1f1f"),
+    lineStrong: v("--rg-muted", "#9a9a9a"),
+    text: v("--rg-text", "#ffffff"),
+    muted: v("--rg-muted", "#9a9a9a"),
+    today: v("--rg-amber", "#ffff1e"),
+    grayZone: v("--rg-muted", "#9a9a9a"),
+    axis: v("--ds-text-faint", "#6b6b6b"),
   };
 }
 

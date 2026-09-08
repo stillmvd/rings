@@ -28,7 +28,7 @@ export function Dialog({
       {open && (
         <motion.div
           className="fixed inset-0 z-[90] grid place-items-center p-6"
-          style={{ background: "color-mix(in srgb, #000 45%, transparent)" }}
+          style={{ background: "var(--rg-scrim)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
