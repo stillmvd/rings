@@ -107,8 +107,16 @@ export function SearchPanel({
               />
               <button
                 type="button"
-                aria-label="Закрыть"
-                onClick={onClose}
+                aria-label={filter.query ? "Очистить запрос" : "Закрыть"}
+                title={filter.query ? "Очистить запрос" : "Закрыть"}
+                onClick={() => {
+                  if (filter.query) {
+                    onFilterChange({ ...filter, query: "" });
+                    inputRef.current?.focus();
+                  } else {
+                    onClose();
+                  }
+                }}
                 className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-3 hover:text-app-text active:scale-[0.96]"
               >
                 <X size={16} strokeWidth={1.75} />

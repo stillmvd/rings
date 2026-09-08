@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { SearchPanel } from "./SearchPanel";
+import { FilterIndicator } from "./FilterIndicator";
 import { filterStore, searchOpenStore } from "@/lib/search";
+import { EMPTY_FILTER } from "@/lib/filter";
 import { useEvents } from "@/components/events/EventsProvider";
 import { useQuery } from "@/lib/useQuery";
 import { getEventsInRange, type TimelineEvent } from "@/db/queries/events";
@@ -39,14 +41,21 @@ export function SearchHost() {
   };
 
   return (
-    <SearchPanel
-      open={open}
-      filter={filter}
-      categories={categories ?? []}
-      events={events ?? []}
-      onFilterChange={filterStore.set}
-      onSelectResult={handleSelect}
-      onClose={() => searchOpenStore.set(false)}
-    />
+    <>
+      <FilterIndicator
+        filter={filter}
+        onOpen={() => searchOpenStore.set(true)}
+        onClear={() => filterStore.set(EMPTY_FILTER)}
+      />
+      <SearchPanel
+        open={open}
+        filter={filter}
+        categories={categories ?? []}
+        events={events ?? []}
+        onFilterChange={filterStore.set}
+        onSelectResult={handleSelect}
+        onClose={() => searchOpenStore.set(false)}
+      />
+    </>
   );
 }
