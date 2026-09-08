@@ -15,8 +15,8 @@ import type { Person } from "@/db/queries/people";
 
 const ELEVATION_1 = "var(--ds-shadow-1)";
 const ELEVATION_2 = "var(--ds-shadow-2)";
-const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
-const HERO_BG = "var(--ds-surface-2)";
+const METRIC_BG = "var(--ds-surface-2)";
+const HERO_BG = "var(--ds-surface-3)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -34,9 +34,11 @@ function Metric({ icon, label, value }: { icon: ReactNode; label: string; value:
 
 export function BirthdayCard({
   person,
+  highlight,
   onClick,
 }: {
   person: Person;
+  highlight?: boolean;
   onClick: (person: Person) => void;
 }) {
   const nb = nextBirthdayISO(person.birth_date);
@@ -124,7 +126,7 @@ export function BirthdayCard({
           </span>
           <span
             className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums"
-            style={{ color: "var(--ds-accent-ink)" }}
+            style={{ color: highlight ? "var(--ds-accent-ink)" : "var(--rg-text)" }}
           >
             {heroValue}
           </span>

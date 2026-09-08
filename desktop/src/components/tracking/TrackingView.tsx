@@ -45,8 +45,14 @@ function Section({
         </div>
       )}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5">
-        {events.map((event) => (
-          <TrackingCard key={event.id} event={event} variant={variant} onClick={onEventClick} />
+        {events.map((event, i) => (
+          <TrackingCard
+            key={event.id}
+            event={event}
+            variant={variant}
+            highlight={i === 0}
+            onClick={onEventClick}
+          />
         ))}
       </div>
     </section>

@@ -39,8 +39,13 @@ function Section({
         </div>
       )}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5">
-        {people.map((person) => (
-          <BirthdayCard key={person.id} person={person} onClick={onPersonClick} />
+        {people.map((person, i) => (
+          <BirthdayCard
+            key={person.id}
+            person={person}
+            highlight={i === 0}
+            onClick={onPersonClick}
+          />
         ))}
       </div>
     </section>

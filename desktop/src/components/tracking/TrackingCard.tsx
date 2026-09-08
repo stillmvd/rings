@@ -23,8 +23,8 @@ import type { Significance } from "@/lib/constants";
 
 const ELEVATION_1 = "var(--ds-shadow-1)";
 const ELEVATION_2 = "var(--ds-shadow-2)";
-const METRIC_BG = "color-mix(in srgb, var(--rg-text) 6%, var(--rg-surface))";
-const AMBER_CONTAINER = "var(--ds-surface-2)";
+const METRIC_BG = "var(--ds-surface-2)";
+const HERO_BG = "var(--ds-surface-3)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
@@ -56,10 +56,12 @@ function Metric({
 export function TrackingCard({
   event,
   variant,
+  highlight,
   onClick,
 }: {
   event: TimelineEvent;
   variant: "past" | "future";
+  highlight?: boolean;
   onClick: (event: TimelineEvent) => void;
 }) {
   const accent = eventAccent(event);
@@ -73,8 +75,7 @@ export function TrackingCard({
 
   const anniversary = isFuture ? null : formatNextAnniversary(event.date);
 
-  const heroBg = isFuture ? AMBER_CONTAINER : accent.container;
-  const heroColor = isFuture ? "var(--rg-text)" : accent.onContainer;
+
 
   return (
     <button
@@ -145,12 +146,15 @@ export function TrackingCard({
           <p className="mt-0.5 text-sm text-muted">{formatFullRu(event.date)}</p>
         </div>
 
-        <div className="rounded-2xl px-4 py-3" style={{ background: heroBg, color: heroColor }}>
+        <div className="rounded-2xl px-4 py-3" style={{ background: HERO_BG, color: "var(--rg-text)" }}>
           <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
             {isFuture ? <BellRing size={14} strokeWidth={1.75} /> : <Hourglass size={14} strokeWidth={1.75} />}
             {isFuture ? "Осталось" : "Уже прошло"}
           </span>
-          <span className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums">
+          <span
+            className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums"
+            style={{ color: highlight ? "var(--ds-accent-ink)" : "var(--rg-text)" }}
+          >
             {countdown
               ? countdown.done
                 ? "Наступило"
