@@ -58,15 +58,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.96 }}
                   transition={{ type: "spring", duration: 0.3, bounce: 0 }}
-                  className="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-line bg-surface-1 px-4 py-3 text-sm text-app-text shadow-lg"
+                  className="pointer-events-auto flex items-center gap-3 rounded-full bg-surface-2 py-2.5 pl-2.5 pr-4 text-sm text-app-text shadow-lg"
                 >
-                  <Icon size={18} style={{ color: META[t.type].color }} />
-                  <span className="max-w-xs text-pretty">{t.message}</span>
+                  <span
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                    style={{
+                      background: `color-mix(in srgb, ${META[t.type].color} 18%, transparent)`,
+                      color: META[t.type].color,
+                    }}
+                  >
+                    <Icon size={18} />
+                  </span>
+                  <span className="max-w-xs text-pretty font-medium">{t.message}</span>
                   <button
                     type="button"
                     aria-label="Закрыть уведомление"
                     onClick={() => dismiss(t.id)}
-                    className="relative ml-1 cursor-pointer opacity-70 transition-[opacity,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:opacity-100 active:scale-[0.96]"
+                    className="relative ml-1 shrink-0 cursor-pointer opacity-70 transition-[opacity,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:opacity-100 active:scale-[0.96]"
                   >
                     <X size={16} />
                   </button>

@@ -8,7 +8,7 @@ export function Titlebar() {
   return (
     <div
       data-tauri-drag-region
-      className="flex h-9 shrink-0 items-center justify-between border-b border-line bg-surface-0"
+      className="flex h-10 shrink-0 items-center justify-between border-b border-line bg-surface-0"
     >
       <div className="pointer-events-none flex items-center gap-2 pl-3">
         <Mark size={16} />

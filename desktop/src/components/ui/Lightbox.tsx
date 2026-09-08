@@ -47,7 +47,7 @@ export function Lightbox({
             type="button"
             aria-label="Закрыть"
             onClick={onClose}
-            className="absolute right-5 top-5 grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+            className="absolute right-5 top-5 grid h-12 w-12 cursor-pointer place-items-center rounded-full bg-black/50 text-white transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-black/70 active:scale-[0.96]"
           >
             <X size={22} />
           </button>
@@ -58,7 +58,7 @@ export function Lightbox({
                 aria-label="Назад"
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => onIndexChange((index - 1 + count) % count)}
-                className="absolute left-5 grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+                className="absolute left-5 grid h-12 w-12 cursor-pointer place-items-center rounded-full bg-black/50 text-white transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-black/70 active:scale-[0.96]"
               >
                 <ChevronLeft size={24} />
               </button>
@@ -77,7 +77,7 @@ export function Lightbox({
             key={img.key}
             src={img.src}
             alt=""
-            className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+            className="max-h-full max-w-full rounded-4xl object-contain shadow-2xl"
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.15 }}

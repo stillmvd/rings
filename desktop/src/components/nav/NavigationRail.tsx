@@ -39,10 +39,10 @@ function RailButton({
       aria-label={label}
       title={label}
       aria-current={active ? "page" : undefined}
-      className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
+      className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-full transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
         active
           ? "bg-amber text-ink"
-          : "text-muted hover:bg-surface-1 hover:text-app-text"
+          : "text-muted hover:bg-surface-2 hover:text-app-text"
       }`}
     >
       <Icon size={20} strokeWidth={1.75} />
@@ -56,7 +56,7 @@ export function NavigationRail() {
   return (
     <nav
       aria-label="Основная навигация"
-      className="flex h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-line bg-surface-0 py-4"
+      className="flex h-full w-[4.5rem] shrink-0 flex-col items-center gap-1.5 border-r border-line bg-surface-0 py-5"
     >
       {DESTINATIONS.map(({ value, label, icon }) => (
         <RailButton
