@@ -32,7 +32,18 @@ export function Select({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<HTMLButtonElement>(null);
   const selected = options.find((o) => o.value === value);
+
+  // Списки лет и месяцев длиннее окна: без этого открываются с начала, на 2100 году.
+  useEffect(() => {
+    if (!open) return;
+    const list = listRef.current;
+    const active = activeRef.current;
+    if (!list || !active) return;
+    list.scrollTop = active.offsetTop - list.clientHeight / 2 + active.offsetHeight / 2;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -64,10 +75,14 @@ export function Select({
           <ChevronDown size={16} strokeWidth={1.75} className="shrink-0 text-muted" />
         </button>
         {open && (
-          <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-line bg-surface-1 py-1 shadow-lg">
+          <div
+            ref={listRef}
+            className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-line bg-surface-1 py-1 shadow-lg"
+          >
             {options.map((opt) => (
               <button
                 key={opt.value}
+                ref={opt.value === value ? activeRef : undefined}
                 type="button"
                 onClick={() => {
                   onChange(opt.value);
