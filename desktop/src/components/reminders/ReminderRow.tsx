@@ -104,7 +104,7 @@ export function ReminderRow({
 
       <span
         role="tooltip"
-        className="pointer-events-none absolute bottom-full left-8 z-30 mb-1.5 flex max-w-[280px] translate-y-1 items-center gap-2 rounded-2xl bg-surface-3 px-3.5 py-2 text-[13px] text-app-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 ease-[var(--rg-ease)] group-hover:translate-y-0 group-hover:opacity-100"
+        className="pointer-events-none absolute bottom-full left-8 z-30 mb-1.5 flex max-w-[280px] translate-y-1 items-center gap-2 rounded-2xl bg-surface-3 px-3.5 py-2 text-[13px] text-app-text opacity-0 shadow-lg transition-[opacity,transform] delay-0 duration-150 ease-[var(--rg-ease)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-500"
       >
         {Icon &&
           createElement(Icon, {
