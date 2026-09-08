@@ -217,6 +217,7 @@ h2 {
 
 .tl-wheel-val {
   line-height: 1.15;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -269,10 +270,16 @@ h2 {
 
 .tl-calendar-lg .rdp-root {
   --rdp-day-width: 152px;
-  /* fixedWeeks → всегда 6 рядов, поэтому высота ряда просто фиксирована и ужимается под окно.
-     ponytail: overhead 226px (titlebar+шапка+паддинги+бордер таблицы) прикинут; при ошибке — лишь
-     чуть скролла/пустоты, не прыжки. Точнее — считать при желании, пока не нужно. */
-  --rdp-day-height: clamp(76px, (100vh - 226px) / 6, 130px);
+  /* fixedWeeks → всегда 6 рядов, поэтому высота ряда фиксирована и ужимается под окно.
+     Overhead — не одно магическое число, а сумма реальных слагаемых вёрстки: правка паддинга
+     или кегля шапки видна прямо здесь, а не протухает молча (уже протухала на редизайне). */
+  --tl-cal-overhead: calc(
+    37px /* титлбар h-9 + бордер */ + 3rem /* padding страницы p-6 */ +
+      3rem /* padding карточки p-6 */ + 3.4rem /* шапка месяца: текст 2rem + отступ снизу */ +
+      1.7rem /* строка дней недели */ + 48px /* 8 зазоров border-spacing по 6px */ +
+      40px /* запас: округления высоты ряда не должны рождать скроллбар */
+  );
+  --rdp-day-height: clamp(68px, (100vh - var(--tl-cal-overhead)) / 6, 130px);
   --rdp-day_button-width: 108px;
   --rdp-day_button-height: 92px;
   --rdp-day_button-border-radius: 0.75rem;
