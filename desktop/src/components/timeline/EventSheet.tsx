@@ -247,27 +247,6 @@ function EventView({
         )}
       </button>
 
-      {images.length > 1 && (
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {images.slice(1).map((img, i) => (
-            <button
-              key={img.key}
-              type="button"
-              onClick={() => onLightbox(i + 1)}
-              className="h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-2xl bg-surface-2 transition-[scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96]"
-            >
-              <img
-                src={img.src}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-
       <div>
         <h3 className="text-2xl font-bold leading-tight tracking-tight text-app-text">
           {event.title}

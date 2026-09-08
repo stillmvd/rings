@@ -38,14 +38,3 @@ export async function deleteMedia(id: number): Promise<string | null> {
   await db.execute("DELETE FROM event_media WHERE id = ?", [id]);
   return rows[0]?.path ?? null;
 }
-
-export async function reorderMedia(eventId: number, orderedIds: number[]): Promise<void> {
-  const db = await getDb();
-  for (let i = 0; i < orderedIds.length; i++) {
-    await db.execute("UPDATE event_media SET sort_order = ? WHERE id = ? AND event_id = ?", [
-      i,
-      orderedIds[i],
-      eventId,
-    ]);
-  }
-}

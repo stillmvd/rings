@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Target } from "lucide-react";
+import { createElement, useState } from "react";
+import { ImageIcon, Target } from "lucide-react";
 import type { CategoryNode } from "@/db/queries/categories";
 import type { EventMedia } from "@/db/queries/media";
-import { MediaUploader, filterAcceptedImages, type MediaItem } from "./MediaUploader";
 import {
   SIGNIFICANCE_VALUES,
   TIMELINE_MIN_DATE,
@@ -20,6 +19,8 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Button } from "@/components/ui/Button";
 import { FormGroup } from "@/components/ui/FormGroup";
+import { PhotoPicker, usePhotoState, type PhotoChange } from "@/components/ui/PhotoPicker";
+import { resolveIconOrNull } from "@/lib/icons";
 
 export interface EventFormValues {
   title: string;
@@ -32,12 +33,6 @@ export interface EventFormValues {
   track: boolean;
 }
 
-export interface EventMediaPayload {
-  files: File[];
-  removedIds: number[];
-  orderedIds: number[];
-}
-
 export interface EventFormPayload {
   title: string;
   description: string;
@@ -46,7 +41,7 @@ export interface EventFormPayload {
   significance: Significance;
   categoryId: number | null;
   track: boolean;
-  media: EventMediaPayload;
+  photo: PhotoChange;
 }
 
 interface EventFormProps {
@@ -95,51 +90,7 @@ export function EventForm({
   const [dateError, setDateError] = useState<string>();
   const [endDateError, setEndDateError] = useState<string>();
 
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>(() =>
-    (initialMedia ?? []).map((m) => ({ key: `e-${m.id}`, kind: "existing", media: m })),
-  );
-  const pendingUrls = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    const urls = pendingUrls.current;
-    return () => urls.forEach((u) => URL.revokeObjectURL(u));
-  }, []);
-
-  const handlePick = useCallback((files: File[]) => {
-    setMediaItems((prev) => [
-      ...prev,
-      ...files.map((file) => {
-        const url = URL.createObjectURL(file);
-        pendingUrls.current.add(url);
-        return { key: `p-${crypto.randomUUID()}`, kind: "pending" as const, file, url };
-      }),
-    ]);
-  }, []);
-
-  useEffect(() => {
-    function handlePaste(e: ClipboardEvent) {
-      if (!e.clipboardData) return;
-      const files = filterAcceptedImages(
-        Array.from(e.clipboardData.items)
-          .filter((it) => it.kind === "file")
-          .map((it) => it.getAsFile())
-          .filter((f): f is File => f !== null),
-      );
-      if (!files.length) return;
-      e.preventDefault();
-      handlePick(files);
-    }
-    document.addEventListener("paste", handlePaste);
-    return () => document.removeEventListener("paste", handlePaste);
-  }, [handlePick]);
-
-  function handleRemoveMedia(item: MediaItem) {
-    if (item.kind === "pending") {
-      URL.revokeObjectURL(item.url);
-      pendingUrls.current.delete(item.url);
-    }
-    setMediaItems((prev) => prev.filter((it) => it.key !== item.key));
-  }
+  const photo = usePhotoState(initialMedia?.[0]?.path);
 
   function handleKindChange(next: "point" | "period") {
     setKind(next);
@@ -147,6 +98,8 @@ export function EventForm({
   }
 
   const selectedCategory = categories.find((c) => c.id === categoryId) ?? null;
+  const selectedSub = selectedCategory?.children.find((c) => c.id === subcategoryId) ?? null;
+  const CategoryIcon = resolveIconOrNull(selectedSub?.icon ?? selectedCategory?.icon);
   const subOptions: SelectOption[] = (selectedCategory?.children ?? []).map((c) => ({
     value: String(c.id),
     label: c.name,
@@ -209,14 +162,6 @@ export function EventForm({
 
     if (!valid) return;
 
-    const orderedIds = mediaItems.filter((i) => i.kind === "existing").map((i) => i.media.id);
-    const removedIds = (initialMedia ?? [])
-      .map((m) => m.id)
-      .filter((id) => !orderedIds.includes(id));
-    const files = mediaItems
-      .filter((i): i is Extract<MediaItem, { kind: "pending" }> => i.kind === "pending")
-      .map((i) => i.file);
-
     onSubmit({
       title: title.trim(),
       description: description.trim(),
@@ -225,12 +170,25 @@ export function EventForm({
       significance,
       categoryId: subcategoryId ?? categoryId,
       track,
-      media: { files, removedIds, orderedIds },
+      photo: photo.change(),
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-4">
+      <PhotoPicker
+        src={photo.src}
+        onPick={photo.pick}
+        onClear={photo.clear}
+        placeholder={
+          CategoryIcon ? (
+            createElement(CategoryIcon, { size: 44, strokeWidth: 1.5 })
+          ) : (
+            <ImageIcon size={44} strokeWidth={1.5} />
+          )
+        }
+      />
+
       <Input
         value={title}
         onChange={setTitle}
@@ -308,15 +266,6 @@ export function EventForm({
           ]}
           value={track ? "on" : "off"}
           onChange={(v) => setTrack(v === "on")}
-        />
-      </FormGroup>
-
-      <FormGroup title="Фотографии">
-        <MediaUploader
-          items={mediaItems}
-          onReorder={setMediaItems}
-          onPick={handlePick}
-          onRemove={handleRemoveMedia}
         />
       </FormGroup>
 

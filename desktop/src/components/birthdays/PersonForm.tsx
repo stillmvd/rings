@@ -1,20 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Cake, ImagePlus, X } from "lucide-react";
+import { useState } from "react";
+import { Cake } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
 import { FormGroup } from "@/components/ui/FormGroup";
-import { filterAcceptedImages, ACCEPTED_IMAGE_TYPES } from "@/lib/media";
-import { mediaSrc } from "@/lib/paths";
+import { PhotoPicker, usePhotoState, type PhotoChange } from "@/components/ui/PhotoPicker";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import { todayISO } from "@/lib/dates";
 
-export type PersonPhotoChange =
-  | { kind: "keep" }
-  | { kind: "set"; file: File }
-  | { kind: "remove" };
+export type PersonPhotoChange = PhotoChange;
 
 export type PersonFormPayload = {
   name: string;
@@ -53,65 +48,10 @@ export function PersonForm({
   const [hasYear, setHasYear] = useState(initial?.hasYear ?? true);
   const [birthDate, setBirthDate] = useState(initial?.birthDate ?? "");
 
-  const [existingPhoto, setExistingPhoto] = useState<string | null>(initial?.photo ?? null);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const photo = usePhotoState(initial?.photo);
 
   const [nameError, setNameError] = useState<string>();
   const [dateError, setDateError] = useState<string>();
-  const [avatarHover, setAvatarHover] = useState(false);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    return () => {
-      if (pendingUrl) URL.revokeObjectURL(pendingUrl);
-    };
-  }, [pendingUrl]);
-
-  const avatarSrc = pendingUrl ?? (existingPhoto ? mediaSrc(existingPhoto) : null);
-
-  const pickFile = useCallback(
-    (files: FileList | File[]) => {
-      const accepted = filterAcceptedImages(files);
-      if (!accepted.length) return;
-      if (pendingUrl) URL.revokeObjectURL(pendingUrl);
-      const url = URL.createObjectURL(accepted[0]);
-      setPendingFile(accepted[0]);
-      setPendingUrl(url);
-    },
-    [pendingUrl],
-  );
-
-  useEffect(() => {
-    function handlePaste(e: ClipboardEvent) {
-      if (!e.clipboardData) return;
-      const files = filterAcceptedImages(
-        Array.from(e.clipboardData.items)
-          .filter((it) => it.kind === "file")
-          .map((it) => it.getAsFile())
-          .filter((f): f is File => f !== null),
-      );
-      if (!files.length) return;
-      e.preventDefault();
-      pickFile(files);
-    }
-    document.addEventListener("paste", handlePaste);
-    return () => document.removeEventListener("paste", handlePaste);
-  }, [pickFile]);
-
-  function clearAvatar() {
-    if (pendingUrl) URL.revokeObjectURL(pendingUrl);
-    setPendingFile(null);
-    setPendingUrl(null);
-    setExistingPhoto(null);
-  }
-
-  function photoChange(): PersonPhotoChange {
-    if (pendingFile) return { kind: "set", file: pendingFile };
-    if (!existingPhoto && initial?.photo) return { kind: "remove" };
-    return { kind: "keep" };
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,83 +80,18 @@ export function PersonForm({
       name: name.trim(),
       birthDate: hasYear ? birthDate : withYear2000(birthDate),
       hasYear,
-      photo: photoChange(),
+      photo: photo.change(),
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-4">
-      <div className="relative">
-        <motion.button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          onHoverStart={() => setAvatarHover(true)}
-          onHoverEnd={() => setAvatarHover(false)}
-          whileTap={{ scale: 0.98 }}
-          className="relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-3xl"
-          style={{ background: "var(--ds-surface-2)" }}
-        >
-          {avatarSrc && (
-            <motion.img
-              src={avatarSrc}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              animate={{ scale: avatarHover ? 1.05 : 1, filter: avatarHover ? "brightness(0.6)" : "brightness(1)" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            />
-          )}
-          <AnimatePresence mode="popLayout" initial={false}>
-            {avatarHover ? (
-              <motion.span
-                key="upload"
-                className="relative"
-                style={{ color: avatarSrc ? "#fff" : "var(--ds-accent-ink)" }}
-                initial={{ scale: 0.3, opacity: 0, rotate: -35 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.3, opacity: 0, rotate: 35 }}
-                transition={{ type: "spring", stiffness: 500, damping: 22 }}
-              >
-                <ImagePlus size={44} strokeWidth={1.5} />
-              </motion.span>
-            ) : (
-              !avatarSrc && (
-                <motion.span
-                  key="cake"
-                  className="relative"
-                  style={{ color: "var(--ds-accent-ink)" }}
-                  initial={{ scale: 0.3, opacity: 0, rotate: 35 }}
-                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                  exit={{ scale: 0.3, opacity: 0, rotate: -35 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                >
-                  <Cake size={44} strokeWidth={1.5} />
-                </motion.span>
-              )
-            )}
-          </AnimatePresence>
-        </motion.button>
-        {avatarSrc && (
-          <button
-            type="button"
-            aria-label="Убрать фото"
-            onClick={clearAvatar}
-            className="absolute right-4 top-4 grid h-10 w-10 cursor-pointer place-items-center rounded-full transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96]"
-            style={{ background: "var(--rg-bg)", color: "var(--rg-text)" }}
-          >
-            <X size={16} strokeWidth={1.75} />
-          </button>
-        )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED_IMAGE_TYPES.join(",")}
-          className="hidden"
-          onChange={(e) => {
-            if (e.target.files) pickFile(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
+      <PhotoPicker
+        src={photo.src}
+        onPick={photo.pick}
+        onClear={photo.clear}
+        placeholder={<Cake size={44} strokeWidth={1.5} />}
+      />
 
       <Input
         value={name}

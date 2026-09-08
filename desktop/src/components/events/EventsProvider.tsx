@@ -20,7 +20,7 @@ import {
   deleteEvent,
   getEventsInRange,
 } from "@/db/queries/events";
-import { listMediaByEvent, addMedia, deleteMedia, reorderMedia } from "@/db/queries/media";
+import { listMediaByEvent, addMedia, deleteMedia } from "@/db/queries/media";
 import { createMark, deleteMark, getMarksInRange } from "@/db/queries/marks";
 import { listCategories } from "@/db/queries/categories";
 import { listMarkTypes } from "@/db/queries/markTypes";
@@ -77,16 +77,13 @@ export function EventsProvider({ children }: { children: ReactNode }) {
   const [confirmEvent, setConfirmEvent] = useState<number | null>(null);
   const [markMenu, setMarkMenu] = useState<{ mark: Mark; x: number; y: number } | null>(null);
 
-  const finalizeMedia = async (eventId: number, media: EventFormPayload["media"]) => {
-    for (const mediaId of media.removedIds) {
-      const path = await deleteMedia(mediaId);
+  const finalizePhoto = async (eventId: number, photo: EventFormPayload["photo"]) => {
+    if (photo.kind === "keep") return;
+    for (const m of await listMediaByEvent(eventId)) {
+      const path = await deleteMedia(m.id);
       if (path) await deleteMediaFile(path);
     }
-    if (media.orderedIds.length > 0) await reorderMedia(eventId, media.orderedIds);
-    for (const file of media.files) {
-      const rel = await writeMediaFile(file);
-      await addMedia(eventId, rel);
-    }
+    if (photo.kind === "set") await addMedia(eventId, await writeMediaFile(photo.file));
   };
 
   const openCreate = useCallback((dateISO: string) => {
@@ -123,7 +120,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     if (err) return show(err, "error");
     setSheet(null);
     const id = await createEvent(eventInput(p));
-    await finalizeMedia(id, p.media);
+    await finalizePhoto(id, p.photo);
     bumpDataVersion();
     show("Событие создано", "success");
   };
@@ -133,7 +130,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     if (err) return show(err, "error");
     setSheet(null);
     await updateEvent(id, eventInput(p));
-    await finalizeMedia(id, p.media);
+    await finalizePhoto(id, p.photo);
     bumpDataVersion();
     show("Изменения сохранены", "success");
   };
