@@ -35,14 +35,14 @@ export function QuickAdd() {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-surface-2 p-2 pl-4">
+    <div className="flex items-center gap-2 rounded-full bg-surface-1 p-2 pl-6 shadow-sm">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="Новое напоминание…"
         aria-label="Новое напоминание"
-        className="h-10 min-w-0 flex-1 bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
+        className="h-12 min-w-0 flex-1 bg-transparent text-[15px] text-app-text outline-none placeholder:text-muted"
       />
       <div className="w-44 shrink-0">
         <DatePicker value={date} onChange={setDate} />
@@ -54,9 +54,9 @@ export function QuickAdd() {
         type="button"
         aria-label="Добавить"
         onClick={submit}
-        className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.96]"
+        className="grid h-12 w-12 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.96]"
       >
-        <Plus size={18} strokeWidth={1.75} />
+        <Plus size={22} strokeWidth={2} />
       </button>
     </div>
   );

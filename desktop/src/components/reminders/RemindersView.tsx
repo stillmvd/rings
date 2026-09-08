@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AlarmClock, Bell, Cake, ChevronRight, Moon, Sunset, Trash2 } from "lucide-react";
+import { AlarmClock, ArrowUpRight, Bell, Cake, ChevronRight, Moon, Sunset, Trash2 } from "lucide-react";
 import { addDays, parseISO } from "date-fns";
 import {
   toISO,
@@ -16,6 +16,7 @@ import {
   snoozeTomorrow,
 } from "@/lib/reminders";
 import { ContextMenu } from "@/components/ui/ContextMenu";
+import { modeStore } from "@/lib/mode";
 import { isBirthdayToday, formatTurningAge } from "@/lib/birthday";
 import { useTodayISO } from "@/components/tracking/clock";
 import { useReminders } from "@/components/events/RemindersProvider";
@@ -24,7 +25,25 @@ import { ReminderRow } from "./ReminderRow";
 import type { Reminder } from "@/db/queries/reminders";
 import type { Person } from "@/db/queries/people";
 
-const CARD_SHADOW = "shadow-sm";
+const CARD = "rounded-4xl bg-surface-1 p-7 shadow-sm";
+
+function RoundArrow({ label, onAccent }: { label: string; onAccent?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={() => modeStore.set("calendar")}
+      className={`absolute right-6 top-6 grid h-11 w-11 cursor-pointer place-items-center rounded-full transition-[background-color,filter,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] ${
+        onAccent
+          ? "bg-surface-0 text-app-text hover:brightness-125"
+          : "bg-surface-2 text-app-text hover:bg-surface-3"
+      }`}
+    >
+      <ArrowUpRight size={20} strokeWidth={2} />
+    </button>
+  );
+}
 
 const appear = (i: number) => ({
   initial: { opacity: 0, y: 8 },
@@ -34,8 +53,8 @@ const appear = (i: number) => ({
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}>
-      <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">{title}</h2>
+    <section className={`relative ${CARD}`}>
+      <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-muted">{title}</h2>
       {children}
     </section>
   );
@@ -45,6 +64,7 @@ function Rows({
   items,
   dateLabelFor,
   completed = false,
+  onAccent = false,
   onToggle,
   onOpen,
   onMenu,
@@ -53,6 +73,7 @@ function Rows({
   items: Reminder[];
   dateLabelFor?: (r: Reminder) => string | undefined;
   completed?: boolean;
+  onAccent?: boolean;
   onToggle: (id: number) => void;
   onOpen?: (r: Reminder) => void;
   onMenu?: (r: Reminder, x: number, y: number) => void;
@@ -67,6 +88,7 @@ function Rows({
             reminder={r}
             dateLabel={dateLabelFor?.(r)}
             completed={completed}
+            onAccent={onAccent}
             onToggle={onToggle}
             onOpen={onOpen}
             onMenu={onMenu}
@@ -124,7 +146,7 @@ export function RemindersView({
 
   return (
     <div className="h-full w-full overflow-y-auto">
-      <div className="mx-auto flex max-w-5xl flex-col gap-5 px-6 py-10">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
         <motion.div {...appear(0)}>
           <QuickAdd />
         </motion.div>
@@ -145,9 +167,9 @@ export function RemindersView({
             {groups.overdue.length > 0 && (
               <motion.section
                 {...appear(1)}
-                className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}
+                className={CARD}
               >
-                <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-rust">
+                <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.14em] text-rust">
                   Просроченные · {groups.overdue.length}
                 </h2>
                 <Rows
@@ -160,12 +182,14 @@ export function RemindersView({
               </motion.section>
             )}
 
-            <motion.div {...appear(2)} className="grid gap-5 lg:grid-cols-[3fr_2fr]">
-              <section className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}>
-                <h2 className="text-2xl font-bold text-app-text">
-                  Сегодня, {formatRu(today, "d MMMM")}
+            <motion.div {...appear(2)} className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+              <section className="relative rounded-4xl bg-amber p-7 text-ink shadow-sm">
+                <RoundArrow label="Открыть календарь" onAccent />
+                <h2 className="max-w-[70%] text-[34px] leading-[1.1] tracking-tight">
+                  <span className="font-light">Сегодня,</span>{" "}
+                  <span className="font-bold">{formatRu(today, "d MMMM")}</span>
                 </h2>
-                <p className="mt-0.5 mb-4 text-sm text-muted">{formatWeekdayFullRu(today)}</p>
+                <p className="mb-6 mt-1.5 text-sm opacity-60">{formatWeekdayFullRu(today)}</p>
 
                 {birthdays.length > 0 && (
                   <ul className="mb-3 flex flex-col gap-0.5">
@@ -176,16 +200,18 @@ export function RemindersView({
                           <button
                             type="button"
                             onClick={() => onPersonClick(p)}
-                            className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-2"
+                            className="flex w-full cursor-pointer items-center gap-3 rounded-full px-4 py-2.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--ds-on-accent)_10%,transparent)]"
                           >
-                            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-amber text-ink">
-                              <Cake size={12} strokeWidth={1.75} />
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-amber">
+                              <Cake size={14} strokeWidth={1.75} />
                             </span>
-                            <span className="min-w-0 flex-1 truncate text-sm text-app-text">
+                            <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">
                               День рождения — {p.name}
                             </span>
                             {turning && (
-                              <span className="shrink-0 text-xs text-muted">исполняется {turning}</span>
+                              <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--ds-on-accent)_12%,transparent)] px-2.5 py-1 text-xs text-ink">
+                                {turning}
+                              </span>
                             )}
                           </button>
                         </li>
@@ -197,13 +223,14 @@ export function RemindersView({
                 {groups.today.length > 0 ? (
                   <Rows
                     items={groups.today}
+                    onAccent
                     onToggle={finishReminder}
                     onOpen={onReminderOpen}
                     onMenu={openMenu} onEventJump={onEventJump}
                   />
                 ) : (
                   birthdays.length === 0 && (
-                    <p className="text-sm text-muted">На сегодня напоминаний нет.</p>
+                    <p className="text-sm text-ink opacity-60">На сегодня напоминаний нет.</p>
                   )
                 )}
               </section>
@@ -215,7 +242,7 @@ export function RemindersView({
                   <div className="flex flex-col gap-4">
                     {groups.tomorrow.length > 0 && (
                       <div>
-                        <h3 className="mb-1.5 text-xs font-medium text-muted">Завтра</h3>
+                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">Завтра</h3>
                         <Rows
                           items={groups.tomorrow}
                           onToggle={finishReminder}
@@ -226,7 +253,7 @@ export function RemindersView({
                     )}
                     {groups.week.length > 0 && (
                       <div>
-                        <h3 className="mb-1.5 text-xs font-medium text-muted">На неделе</h3>
+                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">На неделе</h3>
                         <Rows
                           items={groups.week}
                           dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
@@ -238,7 +265,7 @@ export function RemindersView({
                     )}
                     {groups.later.length > 0 && (
                       <div>
-                        <h3 className="mb-1.5 text-xs font-medium text-muted">Позже</h3>
+                        <h3 className="mb-2 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-medium text-muted">Позже</h3>
                         <Rows
                           items={groups.later}
                           dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
@@ -256,7 +283,7 @@ export function RemindersView({
             {groups.completed.length > 0 && (
               <motion.section
                 {...appear(3)}
-                className={`rounded-2xl bg-surface-1 p-5 ${CARD_SHADOW}`}
+                className="rounded-full bg-surface-1 px-6 py-3 shadow-sm"
               >
                 <div className="flex items-center justify-between gap-2">
                   <button
