@@ -1,5 +1,12 @@
-import { createElement, type ReactNode } from "react";
-import { CalendarDays, CalendarClock, Cake, Hourglass, BellRing } from "lucide-react";
+import { createElement } from "react";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  CalendarClock,
+  Cake,
+  Hourglass,
+  BellRing,
+} from "lucide-react";
 import { formatFullRu, formatWeekdayFullRu } from "@/lib/dates";
 import {
   elapsedSince,
@@ -18,40 +25,16 @@ import { getSignificanceMeta } from "@/lib/significance";
 import { mediaSrc } from "@/lib/paths";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { CoverPlaceholder } from "@/components/ui/CoverPlaceholder";
+import { MetricChip } from "@/components/ui/MetricChip";
 import type { TimelineEvent } from "@/db/queries/events";
 import type { Significance } from "@/lib/constants";
 
 const ELEVATION_1 = "var(--ds-shadow-1)";
 const ELEVATION_2 = "var(--ds-shadow-2)";
-const METRIC_BG = "var(--ds-surface-2)";
-const HERO_BG = "var(--ds-surface-3)";
+
+const ON_ACCENT_SOFT = "color-mix(in srgb, var(--ds-on-accent) 10%, transparent)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-
-function Metric({
-  icon,
-  label,
-  value,
-  wide,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  wide?: boolean;
-}) {
-  return (
-    <div
-      className={`flex flex-col gap-0.5 rounded-xl px-3 py-2 ${wide ? "col-span-2" : ""}`}
-      style={{ background: METRIC_BG }}
-    >
-      <span className="flex items-center gap-1 text-xs text-muted">
-        {icon}
-        {label}
-      </span>
-      <span className="text-sm font-medium tabular-nums text-app-text">{value}</span>
-    </div>
-  );
-}
 
 export function TrackingCard({
   event,
@@ -75,20 +58,28 @@ export function TrackingCard({
 
   const anniversary = isFuture ? null : formatNextAnniversary(event.date);
 
-
+  const heroValue = countdown
+    ? countdown.done
+      ? "Наступило"
+      : formatCountdown(countdown)
+    : isFuture
+      ? remainingUntil(event.date)
+      : elapsedSince(event.date);
 
   return (
     <button
       type="button"
       onClick={() => onClick(event)}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-surface-1 text-left text-app-text transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96]"
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-4xl text-left transition-[box-shadow,scale] duration-200 ease-[var(--rg-ease)] active:scale-[0.96] ${
+        highlight ? "bg-amber text-ink" : "bg-surface-1 text-app-text"
+      }`}
       style={{ boxShadow: ELEVATION_1 }}
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = ELEVATION_2)}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = ELEVATION_1)}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-20 bg-app-text opacity-0 transition-opacity duration-200 group-hover:opacity-[0.08]"
+        className="pointer-events-none absolute inset-0 z-20 bg-app-text opacity-0 transition-opacity duration-200 group-hover:opacity-[0.06]"
       />
 
       <div className="relative aspect-video w-full overflow-hidden">
@@ -101,11 +92,12 @@ export function TrackingCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <CoverPlaceholder fill={accent.fill} icon={event.category_icon} />
+          <CoverPlaceholder fill={accent.fill} icon={event.category_icon} onAccent={highlight} />
         )}
+
         {event.category_name && (
           <span
-            className="absolute left-3 top-3 z-10 inline-flex max-w-[60%] items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium"
+            className="absolute left-4 top-4 z-10 inline-flex max-w-[60%] items-center gap-1.5 truncate rounded-full px-3 py-1.5 text-xs font-medium"
             style={{
               background: accent.fill,
               color: accent.onFill,
@@ -119,65 +111,76 @@ export function TrackingCard({
         )}
 
         <span
-          className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-app-text backdrop-blur"
+          className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-app-text backdrop-blur"
           style={{
             background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
             boxShadow: "var(--ds-shadow-1)",
           }}
         >
-          <SignificanceIcon level={event.significance as Significance} size={14} />
+          <SignificanceIcon level={event.significance as Significance} size={13} />
           {sig.label}
         </span>
 
-        {isFuture && (
-          <span
-            className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-            style={{ background: "var(--rg-amber)", color: "var(--rg-bg)" }}
-          >
-            <BellRing size={13} strokeWidth={1.75} />
-            Напоминание
-          </span>
-        )}
+        <span
+          aria-hidden
+          className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full transition-[background-color,scale] duration-150 ease-[var(--rg-ease)] group-hover:scale-105"
+          style={{
+            background: highlight ? "var(--ds-on-accent)" : "var(--rg-bg)",
+            color: highlight ? "var(--rg-amber)" : "var(--rg-text)",
+          }}
+        >
+          <ArrowUpRight size={18} strokeWidth={2} />
+        </span>
       </div>
 
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-3.5 p-5">
         <div>
-          <h3 className="truncate text-xl font-bold text-app-text">{event.title}</h3>
-          <p className="mt-0.5 text-sm text-muted">{formatFullRu(event.date)}</p>
+          <h3 className="line-clamp-2 text-2xl font-bold tracking-tight">{event.title}</h3>
+          <p className={`mt-0.5 text-sm ${highlight ? "opacity-60" : "text-muted"}`}>
+            {formatFullRu(event.date)}
+          </p>
         </div>
 
-        <div className="rounded-2xl px-4 py-3" style={{ background: HERO_BG, color: "var(--rg-text)" }}>
-          <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
+        <div
+          className="rounded-3xl px-5 py-4"
+          style={{ background: highlight ? ON_ACCENT_SOFT : "var(--ds-surface-3)" }}
+        >
+          <span
+            className={`flex items-center gap-1.5 text-xs font-medium ${
+              highlight ? "opacity-70" : "text-muted"
+            }`}
+          >
             {isFuture ? <BellRing size={14} strokeWidth={1.75} /> : <Hourglass size={14} strokeWidth={1.75} />}
             {isFuture ? "Осталось" : "Уже прошло"}
           </span>
           <span
-            className="mt-0.5 block text-2xl font-bold leading-tight tabular-nums"
-            style={{ color: highlight ? "var(--ds-accent-ink)" : "var(--rg-text)" }}
+            className="mt-1 block text-[28px] font-bold leading-none tabular-nums"
+            style={{ color: highlight ? "var(--ds-on-accent)" : "var(--rg-text)" }}
           >
-            {countdown
-              ? countdown.done
-                ? "Наступило"
-                : formatCountdown(countdown)
-              : isFuture
-                ? remainingUntil(event.date)
-                : elapsedSince(event.date)}
+            {heroValue}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Metric
-            icon={<CalendarDays size={13} strokeWidth={1.75} />}
-            label="Всего дней"
+        <div className="flex flex-wrap gap-2">
+          <MetricChip
+            icon={<CalendarDays size={12} strokeWidth={1.75} />}
+            label="Всего"
             value={formatTotalDays(event.date)}
+            onAccent={highlight}
           />
-          <Metric
-            icon={<CalendarClock size={13} strokeWidth={1.75} />}
-            label="День недели"
+          <MetricChip
+            icon={<CalendarClock size={12} strokeWidth={1.75} />}
+            label="День"
             value={cap(formatWeekdayFullRu(event.date))}
+            onAccent={highlight}
           />
           {anniversary && (
-            <Metric icon={<Cake size={13} strokeWidth={1.75} />} label="Годовщина" value={anniversary} wide />
+            <MetricChip
+              icon={<Cake size={12} strokeWidth={1.75} />}
+              label="Годовщина"
+              value={anniversary}
+              onAccent={highlight}
+            />
           )}
         </div>
       </div>

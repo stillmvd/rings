@@ -15,12 +15,14 @@ function Section({
   events,
   variant,
   showHeader,
+  accentFirst,
   onEventClick,
 }: {
   title: string;
   events: TimelineEvent[];
   variant: "past" | "future";
   showHeader: boolean;
+  accentFirst?: boolean;
   onEventClick: (event: TimelineEvent) => void;
 }) {
   return (
@@ -28,16 +30,13 @@ function Section({
       {showHeader && (
         <div className="sticky top-0 z-30 mb-4 flex justify-center">
           <h2
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium text-app-text backdrop-blur"
-            style={{
-              background: "color-mix(in srgb, var(--rg-surface) 85%, transparent)",
-              boxShadow: "var(--ds-shadow-1)",
-            }}
+            className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-xs font-medium uppercase tracking-[0.12em] text-muted backdrop-blur"
+            style={{ boxShadow: "var(--ds-shadow-1)" }}
           >
             {title}
             <span
               className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium text-app-text"
-              style={{ background: "var(--ds-surface-2)" }}
+              style={{ background: "var(--ds-surface-3)" }}
             >
               {events.length}
             </span>
@@ -50,7 +49,7 @@ function Section({
             key={event.id}
             event={event}
             variant={variant}
-            highlight={i === 0}
+            highlight={accentFirst && i === 0}
             onClick={onEventClick}
           />
         ))}
@@ -78,11 +77,16 @@ export function TrackingView({
 
   if (past.length === 0 && future.length === 0) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center text-muted">
-        <Target size={40} strokeWidth={1.5} />
-        <p className="max-w-sm">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-5 px-6 text-center">
+        <span
+          className="grid h-20 w-20 place-items-center rounded-full"
+          style={{ background: "var(--ds-surface-2)", color: "var(--ds-accent-ink)" }}
+        >
+          <Target size={36} strokeWidth={1.5} />
+        </span>
+        <p className="max-w-sm text-[15px] leading-relaxed text-muted">
           Нет отслеживаемых событий. Включите «Отслеживание» при создании или редактировании
-          события — и оно появится здесь.
+          события — и оно появится здесь с отсчётом и годовщиной.
         </p>
       </div>
     );
@@ -92,21 +96,23 @@ export function TrackingView({
     <div className="relative h-full w-full">
       <div className="h-full w-full overflow-y-auto px-6 py-20 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="mx-auto flex max-w-6xl flex-col gap-12">
-          {past.length > 0 && (
-            <Section
-              title="Уже прошло"
-              events={past}
-              variant="past"
-              showHeader={future.length > 0}
-              onEventClick={onEventClick}
-            />
-          )}
           {future.length > 0 && (
             <Section
               title="Предстоящее"
               events={future}
               variant="future"
               showHeader={past.length > 0}
+              accentFirst
+              onEventClick={onEventClick}
+            />
+          )}
+          {past.length > 0 && (
+            <Section
+              title="Уже прошло"
+              events={past}
+              variant="past"
+              showHeader={future.length > 0}
+              accentFirst={future.length === 0}
               onEventClick={onEventClick}
             />
           )}
