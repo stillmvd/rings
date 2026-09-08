@@ -32,12 +32,11 @@ export function ReminderRow({
 
   return (
     <motion.li
-      layout
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 16 }}
       transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-      className="group flex items-center gap-2.5"
+      className="group relative flex items-center gap-1.5"
     >
       <button
         type="button"
@@ -58,18 +57,12 @@ export function ReminderRow({
           e.preventDefault();
           onMenu(reminder, e.clientX, e.clientY);
         }}
-        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-full px-3 py-2.5 text-left transition-colors ${
+        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-full px-2.5 py-2.5 text-left transition-colors ${
           onAccent
             ? "hover:bg-[color-mix(in_srgb,var(--ds-on-accent)_10%,transparent)]"
             : "hover:bg-surface-2"
         }`}
       >
-        {Icon &&
-          createElement(Icon, {
-            size: 16,
-            color: onAccent ? undefined : (reminder.color ?? undefined),
-            className: "shrink-0",
-          })}
         <span
           className={`min-w-0 flex-1 truncate text-[15px] ${
             completed
@@ -108,6 +101,19 @@ export function ReminderRow({
           <ArrowUpRight size={15} strokeWidth={1.75} />
         </button>
       )}
+
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-8 z-30 mb-1.5 flex max-w-[280px] translate-y-1 items-center gap-2 rounded-2xl bg-surface-3 px-3.5 py-2 text-[13px] text-app-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 ease-[var(--rg-ease)] group-hover:translate-y-0 group-hover:opacity-100"
+      >
+        {Icon &&
+          createElement(Icon, {
+            size: 15,
+            color: reminder.color ?? undefined,
+            className: "shrink-0",
+          })}
+        <span className="min-w-0">{reminder.title}</span>
+      </span>
     </motion.li>
   );
 }

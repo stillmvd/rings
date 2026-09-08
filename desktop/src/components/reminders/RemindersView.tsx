@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { createElement, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { AlarmClock, ArrowUpRight, Bell, Cake, ChevronRight, Moon, Sunset, Trash2 } from "lucide-react";
 import { addDays, parseISO } from "date-fns";
@@ -17,6 +17,7 @@ import {
 } from "@/lib/reminders";
 import { ContextMenu } from "@/components/ui/ContextMenu";
 import { modeStore } from "@/lib/mode";
+import { resolveIconOrNull } from "@/lib/icons";
 import { isBirthdayToday, formatTurningAge } from "@/lib/birthday";
 import { useTodayISO } from "@/components/tracking/clock";
 import { useReminders } from "@/components/events/RemindersProvider";
@@ -26,6 +27,25 @@ import type { Reminder } from "@/db/queries/reminders";
 import type { Person } from "@/db/queries/people";
 
 const CARD = "rounded-4xl bg-surface-1 p-7 shadow-sm";
+
+function IconRow({ items, onAccent }: { items: Reminder[]; onAccent?: boolean }) {
+  const icons = items
+    .map((r) => ({ id: r.id, Icon: resolveIconOrNull(r.icon), color: r.color }))
+    .filter((x) => x.Icon !== null);
+  if (icons.length === 0) return null;
+  return (
+    <span className={`flex shrink-0 items-center gap-1.5 ${onAccent ? "opacity-50" : "opacity-70"}`}>
+      {icons.slice(0, 6).map(({ id, Icon, color }) =>
+        createElement(Icon!, {
+          key: id,
+          size: 13,
+          strokeWidth: 1.75,
+          color: onAccent ? undefined : (color ?? undefined),
+        }),
+      )}
+    </span>
+  );
+}
 
 function RoundArrow({ label, onAccent }: { label: string; onAccent?: boolean }) {
   return (
@@ -54,17 +74,22 @@ const appear = (i: number) => ({
 function Card({
   title,
   empty,
+  items,
   children,
 }: {
   title: string;
   empty?: string;
+  items?: Reminder[];
   children?: React.ReactNode;
 }) {
   return (
     <section className={`relative flex h-full flex-col ${CARD}`}>
-      <h2 className="mb-4 self-start rounded-full bg-surface-2 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted">
-        {title}
-      </h2>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="rounded-full bg-surface-2 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted">
+          {title}
+        </h2>
+        <IconRow items={items ?? []} />
+      </div>
       {children ?? <p className="text-sm text-muted opacity-60">{empty}</p>}
     </section>
   );
@@ -197,7 +222,10 @@ export function RemindersView({
                   <span className="font-light">Сегодня,</span>{" "}
                   <span className="font-bold">{formatRu(today, "d MMMM")}</span>
                 </h2>
-                <p className="mb-6 mt-1.5 text-sm opacity-60">{formatWeekdayFullRu(today)}</p>
+                <div className="mb-6 mt-1.5 flex items-center gap-3">
+                  <p className="text-sm opacity-60">{formatWeekdayFullRu(today)}</p>
+                  <IconRow items={groups.today} onAccent />
+                </div>
 
                 {birthdays.length > 0 && (
                   <ul className="mb-3 flex flex-col gap-0.5">
@@ -244,6 +272,7 @@ export function RemindersView({
               </section>
 
               <Card
+                items={groups.tomorrow}
                 title="Завтра"
                 empty={groups.tomorrow.length === 0 ? "Ничего не запланировано" : undefined}
               >
@@ -259,6 +288,7 @@ export function RemindersView({
               </Card>
 
               <Card
+                items={groups.week}
                 title="На неделе"
                 empty={groups.week.length === 0 ? "Неделя свободна" : undefined}
               >
@@ -274,7 +304,7 @@ export function RemindersView({
                 ) : undefined}
               </Card>
 
-              <Card title="Позже" empty={groups.later.length === 0 ? "Пусто" : undefined}>
+              <Card items={groups.later} title="Позже" empty={groups.later.length === 0 ? "Пусто" : undefined}>
                 {groups.later.length > 0 ? (
                   <Rows
                     items={groups.later}
