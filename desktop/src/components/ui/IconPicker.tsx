@@ -32,7 +32,8 @@ export function IconPicker({
         />
       </div>
 
-      <div className="mt-2 grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto rounded-3xl border border-line bg-surface-2 p-3">
+      <div className="mt-2 overflow-hidden rounded-3xl border border-line bg-surface-2">
+        <div className="grid h-52 grid-cols-7 content-start gap-1.5 overflow-y-auto p-3">
         {filtered.map((name) => {
           const active = name === value;
           return (
@@ -57,6 +58,7 @@ export function IconPicker({
             Ничего не найдено
           </span>
         )}
+        </div>
       </div>
     </div>
   );

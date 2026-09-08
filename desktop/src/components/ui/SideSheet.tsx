@@ -58,7 +58,7 @@ export function SideSheet({
                 <X size={20} strokeWidth={1.75} />
               </button>
             </header>
-            <div className="min-h-0 flex-1 overflow-y-auto px-7 pb-7">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-7 pb-7 [scrollbar-gutter:stable]">{children}</div>
           </motion.aside>
         </>
       )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { TIMELINE_MIN_DATE, TIMELINE_MAX_DATE, isValidISODate } from "@/lib/constants";
 import { todayISO } from "@/lib/dates";
 import { REPEAT_OPTIONS, type RepeatKind, type RepeatUnit } from "@/lib/reminders";
@@ -28,6 +28,29 @@ export interface ReminderFormValues {
   icon: string;
   color: string;
   eventId: number | null;
+}
+
+function Group({
+  title,
+  accent,
+  children,
+}: {
+  title: string;
+  accent?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-line p-4">
+      <h3
+        className={`mb-3 inline-block rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] ${
+          accent ? "bg-amber text-ink" : "bg-surface-2 text-muted"
+        }`}
+      >
+        {title}
+      </h3>
+      <div className="flex flex-col gap-3">{children}</div>
+    </section>
+  );
 }
 
 const DEFAULT_ICON = "Bell";
@@ -112,9 +135,8 @@ export function ReminderForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-3.5">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-4">
       <Input
-        label="Название"
         value={title}
         onChange={setTitle}
         error={titleError}
@@ -122,86 +144,91 @@ export function ReminderForm({
         placeholder="О чём напомнить?"
       />
 
-      <Textarea label="Заметка" value={note} onChange={setNote} placeholder="Детали (необязательно)" />
+      <Textarea value={note} onChange={setNote} placeholder="Заметка (необязательно)" />
 
-      <div className="grid grid-cols-[1fr_auto] items-end gap-2">
-        <DatePicker
-          label="Дата"
-          value={date}
-          onChange={setDate}
-          error={dateError}
-          min={TIMELINE_MIN_DATE}
-          max={TIMELINE_MAX_DATE}
+      <Group title="Когда" accent>
+        <div className="grid grid-cols-[1fr_auto] items-end gap-2">
+          <DatePicker
+            label="Дата"
+            value={date}
+            onChange={setDate}
+            error={dateError}
+            min={TIMELINE_MIN_DATE}
+            max={TIMELINE_MAX_DATE}
+          />
+          <TimePicker label="Время" value={time} onChange={setTime} />
+        </div>
+
+        <Select
+          label="Повтор"
+          options={REPEAT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+          value={repeat}
+          onChange={(v) => setRepeat(v as RepeatKind)}
         />
-        <TimePicker label="Время" value={time} onChange={setTime} />
-      </div>
 
-      <Select
-        label="Повтор"
-        options={REPEAT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-        value={repeat}
-        onChange={(v) => setRepeat(v as RepeatKind)}
-      />
+        {repeat === "custom" && (
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              label="Каждые"
+              value={repeatEvery}
+              onChange={setRepeatEvery}
+              type="number"
+              min={1}
+            />
+            <Select
+              label="Единица"
+              options={[
+                { value: "day", label: "дней" },
+                { value: "week", label: "недель" },
+              ]}
+              value={repeatUnit}
+              onChange={(v) => setRepeatUnit(v as RepeatUnit)}
+            />
+          </div>
+        )}
+      </Group>
 
-      {repeat === "custom" && (
+      <Group title="Уведомление">
         <div className="grid grid-cols-2 gap-2">
           <Input
-            label="Каждые"
-            value={repeatEvery}
-            onChange={setRepeatEvery}
+            label="Напомнить за (0 — выкл)"
+            value={preValue}
+            onChange={setPreValue}
             type="number"
-            min={1}
+            min={0}
           />
           <Select
             label="Единица"
             options={[
+              { value: "min", label: "минут" },
+              { value: "hour", label: "часов" },
               { value: "day", label: "дней" },
-              { value: "week", label: "недель" },
             ]}
-            value={repeatUnit}
-            onChange={(v) => setRepeatUnit(v as RepeatUnit)}
+            value={preUnit}
+            onChange={(v) => setPreUnit(v as PreUnit)}
           />
         </div>
-      )}
 
-      <div className="grid grid-cols-2 gap-2">
-        <Input
-          label="Напомнить за (0 — выкл)"
-          value={preValue}
-          onChange={setPreValue}
-          type="number"
-          min={0}
-        />
-        <Select
-          label="Единица"
-          options={[
-            { value: "min", label: "минут" },
-            { value: "hour", label: "часов" },
-            { value: "day", label: "дней" },
-          ]}
-          value={preUnit}
-          onChange={(v) => setPreUnit(v as PreUnit)}
-        />
-      </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-app-text">Повторять, пока не выполню</span>
+          <Switch label="Повторять, пока не выполню" checked={nag} onChange={setNag} />
+        </div>
 
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm text-app-text">Повторять уведомление, пока не выполню</span>
-        <Switch label="Повторять уведомление, пока не выполню" checked={nag} onChange={setNag} />
-      </div>
+        {nag && (
+          <Input
+            label="Интервал повтора, минут"
+            value={nagIntervalMin}
+            onChange={setNagIntervalMin}
+            type="number"
+            min={1}
+          />
+        )}
+      </Group>
 
-      {nag && (
-        <Input
-          label="Интервал повтора, минут"
-          value={nagIntervalMin}
-          onChange={setNagIntervalMin}
-          type="number"
-          min={1}
-        />
-      )}
-
-      <ColorPicker label="Цвет" value={color} onChange={setColor} />
-
-      <IconPicker label="Иконка" value={icon} onChange={setIcon} color={color} />
+      <Group title="Вид">
+        <ColorPicker value={color} onChange={setColor} />
+        <IconPicker value={icon} onChange={setIcon} color={color} />
+      </Group>
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (
