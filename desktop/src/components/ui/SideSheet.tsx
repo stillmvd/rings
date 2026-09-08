@@ -3,17 +3,17 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 
+const SHEET_WIDTH = 430;
+
 export function SideSheet({
   open,
   onClose,
   title,
-  width = 430,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title?: ReactNode;
-  width?: number;
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -40,7 +40,7 @@ export function SideSheet({
             role="dialog"
             aria-modal="true"
             className="fixed right-0 top-0 z-[81] flex h-screen flex-col rounded-l-4xl bg-surface-1 text-app-text shadow-2xl"
-            style={{ width }}
+            style={{ width: SHEET_WIDTH }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}

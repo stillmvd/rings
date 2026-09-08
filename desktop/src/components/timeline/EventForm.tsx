@@ -19,6 +19,7 @@ import { Select, type SelectOption } from "@/components/ui/Select";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { Button } from "@/components/ui/Button";
+import { FormGroup } from "@/components/ui/FormGroup";
 
 export interface EventFormValues {
   title: string;
@@ -229,9 +230,8 @@ export function EventForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-3.5">
+    <form onSubmit={handleSubmit} className="flex min-h-full flex-1 flex-col gap-4">
       <Input
-        label="Название"
         value={title}
         onChange={setTitle}
         error={titleError}
@@ -240,80 +240,85 @@ export function EventForm({
       />
 
       <Textarea
-        label="Описание"
         value={description}
         onChange={setDescription}
         placeholder="Детали (необязательно)"
       />
 
-      <SegmentedControl
-        label="Длительность"
-        segments={kindSegments}
-        value={kind}
-        onChange={handleKindChange}
-      />
+      <FormGroup title="Когда" accent>
+        <SegmentedControl
+          label="Длительность"
+          segments={kindSegments}
+          value={kind}
+          onChange={handleKindChange}
+        />
 
-      <DatePicker
-        label={kind === "period" ? "Начало" : "Дата"}
-        value={date}
-        onChange={setDate}
-        error={dateError}
-        min={TIMELINE_MIN_DATE}
-        max={TIMELINE_MAX_DATE}
-      />
-
-      {kind === "period" && (
         <DatePicker
-          label="Конец"
-          value={endDate}
-          onChange={setEndDate}
-          error={endDateError}
-          min={date}
+          label={kind === "period" ? "Начало" : "Дата"}
+          value={date}
+          onChange={setDate}
+          error={dateError}
+          min={TIMELINE_MIN_DATE}
           max={TIMELINE_MAX_DATE}
         />
-      )}
 
-      <SegmentedControl
-        label="Значимость"
-        segments={sigSegments}
-        value={String(significance)}
-        onChange={(v) => setSignificance(Number(v) as Significance)}
-      />
+        {kind === "period" && (
+          <DatePicker
+            label="Конец"
+            value={endDate}
+            onChange={setEndDate}
+            error={endDateError}
+            min={date}
+            max={TIMELINE_MAX_DATE}
+          />
+        )}
+      </FormGroup>
 
-      <Select
-        label="Категория"
-        options={categoryOptions}
-        value={categoryId !== null ? String(categoryId) : ""}
-        onChange={handleCategoryChange}
-        placeholder="Без категории"
-      />
-
-      {subOptions.length > 0 && (
-        <Select
-          label="Подкатегория"
-          options={[{ value: "", label: "—" }, ...subOptions]}
-          value={subcategoryId !== null ? String(subcategoryId) : ""}
-          onChange={(v) => setSubcategoryId(v ? Number(v) : null)}
-          placeholder="—"
+      <FormGroup title="Вид">
+        <SegmentedControl
+          label="Значимость"
+          segments={sigSegments}
+          value={String(significance)}
+          onChange={(v) => setSignificance(Number(v) as Significance)}
         />
-      )}
 
-      <SegmentedControl
-        label="Отслеживание"
-        segments={[
-          { value: "off", label: "Выкл" },
-          { value: "on", label: "Вкл", icon: <Target size={16} strokeWidth={1.75} /> },
-        ]}
-        value={track ? "on" : "off"}
-        onChange={(v) => setTrack(v === "on")}
-      />
+        <Select
+          label="Категория"
+          options={categoryOptions}
+          value={categoryId !== null ? String(categoryId) : ""}
+          onChange={handleCategoryChange}
+          placeholder="Без категории"
+        />
 
-      <MediaUploader
-        items={mediaItems}
-        onReorder={setMediaItems}
-        onPick={handlePick}
-        onRemove={handleRemoveMedia}
-      />
+        {subOptions.length > 0 && (
+          <Select
+            label="Подкатегория"
+            options={[{ value: "", label: "—" }, ...subOptions]}
+            value={subcategoryId !== null ? String(subcategoryId) : ""}
+            onChange={(v) => setSubcategoryId(v ? Number(v) : null)}
+            placeholder="—"
+          />
+        )}
+
+        <SegmentedControl
+          label="Отслеживание"
+          segments={[
+            { value: "off", label: "Выкл" },
+            { value: "on", label: "Вкл", icon: <Target size={16} strokeWidth={1.75} /> },
+          ]}
+          value={track ? "on" : "off"}
+          onChange={(v) => setTrack(v === "on")}
+        />
+      </FormGroup>
+
+      <FormGroup title="Фотографии">
+        <MediaUploader
+          items={mediaItems}
+          onReorder={setMediaItems}
+          onPick={handlePick}
+          onRemove={handleRemoveMedia}
+        />
+      </FormGroup>
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-4">
         {onDelete ? (

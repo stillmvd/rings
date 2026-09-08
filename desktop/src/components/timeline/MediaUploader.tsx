@@ -41,9 +41,7 @@ export function MediaUploader({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium text-muted">Фотографии</span>
-
+    <div className="flex flex-col gap-2.5">
       {items.length > 0 && (
         <Reorder.Group axis="x" values={items} onReorder={onReorder} className="flex flex-wrap gap-2">
           {items.map((item, i) => (
@@ -51,7 +49,7 @@ export function MediaUploader({
               key={item.key}
               value={item}
               onClick={() => setLightbox(i)}
-              className="group relative h-16 w-16 cursor-grab overflow-hidden rounded-lg border border-line bg-surface-2 active:cursor-grabbing"
+              className="group relative h-16 w-16 cursor-grab overflow-hidden rounded-2xl bg-surface-2 active:cursor-grabbing"
             >
               <img
                 src={mediaItemSrc(item)}
@@ -67,7 +65,7 @@ export function MediaUploader({
                   e.stopPropagation();
                   onRemove(item);
                 }}
-                className="absolute right-0.5 top-0.5 grid h-5 w-5 cursor-pointer place-items-center rounded-md bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-1 top-1 grid h-6 w-6 cursor-pointer place-items-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <X size={12} strokeWidth={1.75} />
               </button>
@@ -85,14 +83,16 @@ export function MediaUploader({
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed py-3 text-xs transition-colors ${
+        className={`flex cursor-pointer items-center justify-center gap-3 rounded-3xl border border-dashed py-4 text-[13px] transition-colors active:scale-[0.99] ${
           dragOver
-            ? "border-amber bg-amber/10 text-app-text"
+            ? "border-amber text-app-text"
             : "border-line text-muted hover:border-amber hover:text-app-text"
         }`}
       >
-        <ImagePlus size={15} strokeWidth={1.75} />
-        Перетащите, вставьте (Ctrl+V) или нажмите
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-2">
+          <ImagePlus size={18} strokeWidth={1.75} />
+        </span>
+        Перетащите, вставьте или нажмите
       </button>
 
       <input
