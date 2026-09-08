@@ -134,7 +134,7 @@ export function TrackingCard({
       </div>
 
       <div className="flex flex-col gap-3.5 p-5">
-        <div>
+        <div className="min-h-[4.8rem]">
           <h3 className="line-clamp-2 text-2xl font-bold tracking-tight">{event.title}</h3>
           <p className={`mt-0.5 text-sm ${highlight ? "opacity-60" : "text-muted"}`}>
             {formatFullRu(event.date)}
