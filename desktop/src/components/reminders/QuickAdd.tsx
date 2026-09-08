@@ -34,14 +34,14 @@ export function QuickAdd() {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-surface-1 p-2 pl-4 shadow-sm">
+    <div className="flex items-center gap-2 rounded-2xl bg-surface-2 p-2 pl-4">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="Новое напоминание…"
         aria-label="Новое напоминание"
-        className="h-9 min-w-0 flex-1 bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
+        className="h-10 min-w-0 flex-1 bg-transparent text-sm text-app-text outline-none placeholder:text-muted"
       />
       <div className="w-44 shrink-0">
         <DatePicker value={date} onChange={setDate} />
@@ -51,13 +51,13 @@ export function QuickAdd() {
         value={time}
         onChange={(e) => setTime(e.target.value)}
         aria-label="Время"
-        className="h-9 shrink-0 rounded-lg border border-line bg-surface-2 px-2 text-sm tabular-nums text-app-text outline-none transition-colors focus:border-amber"
+        className="h-10 shrink-0 rounded-xl border border-line bg-surface-2 px-2 text-sm tabular-nums text-app-text outline-none transition-colors focus:border-amber"
       />
       <button
         type="button"
         aria-label="Добавить"
         onClick={submit}
-        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.96]"
+        className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full bg-amber text-ink transition-[scale,filter] duration-150 ease-[var(--rg-ease)] hover:brightness-105 active:scale-[0.96]"
       >
         <Plus size={18} strokeWidth={1.75} />
       </button>
