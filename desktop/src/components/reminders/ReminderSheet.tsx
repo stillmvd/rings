@@ -42,7 +42,6 @@ export function ReminderSheet({
       open={state !== null}
       onClose={onClose}
       title={state?.mode === "edit" ? "Редактирование" : "Новое напоминание"}
-      width={390}
     >
       {state?.mode === "create" && (
         <ReminderForm

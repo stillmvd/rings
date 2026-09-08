@@ -7,7 +7,7 @@ export function SideSheet({
   open,
   onClose,
   title,
-  width = 390,
+  width = 430,
   children,
 }: {
   open: boolean;

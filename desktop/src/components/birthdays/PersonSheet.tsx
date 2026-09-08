@@ -38,7 +38,7 @@ export function PersonSheet({ state, onStartEdit, onCreate, onUpdate, onDelete, 
         : undefined;
 
   return (
-    <SideSheet open={state !== null} onClose={onClose} title={title} width={390}>
+    <SideSheet open={state !== null} onClose={onClose} title={title}>
       {state?.mode === "create" && <PersonForm key="create" onSubmit={onCreate} onCancel={onClose} />}
 
       {state?.mode === "edit" && (
