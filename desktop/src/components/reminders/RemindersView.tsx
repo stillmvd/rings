@@ -291,8 +291,8 @@ export function RemindersView({
             {groups.completed.length > 0 && (
               <motion.section
                 {...appear(3)}
-                className={`bg-surface-1 shadow-sm transition-[padding,border-radius] duration-300 ease-[var(--rg-ease)] ${
-                  showCompleted ? "rounded-4xl px-8 py-7" : "rounded-full px-6 py-3"
+                className={`rounded-4xl bg-surface-1 shadow-sm transition-[padding] duration-300 ease-[var(--rg-ease)] ${
+                  showCompleted ? "px-8 py-7" : "px-6 py-3.5"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
