@@ -38,5 +38,4 @@ jobs:
           releaseBody: Установщик для Windows. Обновление ставится из приложения — Настройки → Обновления.
           releaseDraft: false
           prerelease: false
-          uploadUpdaterJson: true
           updaterJsonPreferNsis: true
