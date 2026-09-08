@@ -24,3 +24,6 @@ brand/trail-scale.html
 folder.ico
 desktop.ini
 __pycache__/
+
+# скриншот по умолчанию от _maintenance/window-ui.ps1
+shot.png
