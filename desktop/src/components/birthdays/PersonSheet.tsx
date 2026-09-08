@@ -114,7 +114,7 @@ function PersonView({ person }: { person: Person }) {
       </div>
 
       <div className="rounded-3xl px-5 py-4" style={{ background: "var(--ds-surface-3)" }}>
-        <span className="flex items-center gap-1.5 text-xs font-medium text-faint">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-muted">
           <Gift size={14} strokeWidth={1.75} />
           {today ? "День рождения" : "До дня рождения"}
         </span>
