@@ -6,7 +6,7 @@ const VARIANTS: Record<Variant, string> = {
   primary: "bg-amber text-ink hover:brightness-105",
   secondary: "bg-tonal text-app-text hover:bg-tonal-hover",
   ghost: "text-muted hover:bg-surface-2 hover:text-app-text",
-  danger: "bg-rust text-white hover:brightness-110",
+  danger: "text-rust hover:bg-[color-mix(in_srgb,var(--rg-rust)_12%,transparent)]",
 };
 
 export function Button({

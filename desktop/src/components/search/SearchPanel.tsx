@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Search, X } from "lucide-react";
 import { resolveIcon } from "@/lib/icons";
 import { SIGNIFICANCE_LIST } from "@/lib/significance";
+import { SignificanceIcon } from "@/components/ui/SignificanceIcon";
 import { formatFullRu, formatDayMonthRu } from "@/lib/dates";
 import { EMPTY_FILTER, isFilterActive, matchesFilter, type EventFilter } from "@/lib/filter";
 import type { Significance } from "@/lib/constants";
@@ -204,10 +205,7 @@ export function SearchPanel({
                         on ? "bg-surface-2" : "border-line text-muted hover:text-app-text"
                       }`}
                     >
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: meta.color }}
-                      />
+                      <SignificanceIcon level={meta.level} size={14} />
                       {meta.label}
                     </button>
                   );
