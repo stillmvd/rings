@@ -47,6 +47,7 @@
   --color-app-text: var(--rg-text);
   --color-line: var(--rg-line);
   --color-muted: var(--rg-muted);
+  --color-faint: var(--ds-text-faint);
   --color-amber: var(--rg-amber);
   --color-rust: var(--rg-rust);
   --color-ink: var(--ds-on-accent);

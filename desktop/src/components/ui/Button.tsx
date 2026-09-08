@@ -21,7 +21,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex cursor-pointer items-center justify-center gap-1.5 h-10 rounded-full px-5 text-sm font-medium transition-[background-color,color,filter,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center gap-2 h-11 rounded-full px-6 text-sm font-semibold transition-[background-color,color,filter,scale] duration-150 ease-[var(--rg-ease)] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
       {...rest}
     >
       {children}

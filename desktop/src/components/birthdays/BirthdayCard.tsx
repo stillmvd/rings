@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import {
   ArrowUpRight,
   Cake,
@@ -19,38 +18,15 @@ import {
 import { mediaSrc } from "@/lib/paths";
 import { useNowMs } from "@/components/tracking/clock";
 import { useLiveSeconds } from "./useLiveSeconds";
+import { MetricChip } from "@/components/ui/MetricChip";
 import type { Person } from "@/db/queries/people";
 
 const ELEVATION_1 = "var(--ds-shadow-1)";
 const ELEVATION_2 = "var(--ds-shadow-2)";
 
 const ON_ACCENT_SOFT = "color-mix(in srgb, var(--ds-on-accent) 10%, transparent)";
-const ON_ACCENT_LINE = "color-mix(in srgb, var(--ds-on-accent) 14%, transparent)";
 
 const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-
-function Metric({
-  icon,
-  label,
-  value,
-  onAccent,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  onAccent?: boolean;
-}) {
-  return (
-    <span
-      className="inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs"
-      style={{ background: onAccent ? ON_ACCENT_LINE : "var(--ds-surface-2)" }}
-    >
-      <span className={onAccent ? "opacity-70" : "text-muted"}>{icon}</span>
-      <span className={onAccent ? "opacity-70" : "text-muted"}>{label}</span>
-      <span className="truncate font-medium tabular-nums">{value}</span>
-    </span>
-  );
-}
 
 export function BirthdayCard({
   person,
@@ -175,7 +151,7 @@ export function BirthdayCard({
 
         <div className="flex flex-wrap gap-2">
           {age && (
-            <Metric
+            <MetricChip
               icon={<Hourglass size={12} strokeWidth={1.75} />}
               label="Сейчас"
               value={age}
@@ -183,20 +159,20 @@ export function BirthdayCard({
             />
           )}
           {turning && (
-            <Metric
+            <MetricChip
               icon={<Cake size={12} strokeWidth={1.75} />}
               label="Исполнится"
               value={turning}
               onAccent={highlight}
             />
           )}
-          <Metric
+          <MetricChip
             icon={<CalendarHeart size={12} strokeWidth={1.75} />}
             label="Дата"
             value={cap(formatDayMonthRu(nb))}
             onAccent={highlight}
           />
-          <Metric
+          <MetricChip
             icon={<CalendarClock size={12} strokeWidth={1.75} />}
             label="День"
             value={cap(formatWeekdayFullRu(nb))}

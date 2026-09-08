@@ -17,8 +17,8 @@ export function IconButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`relative grid h-9 w-9 cursor-pointer place-items-center rounded-full text-muted transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] before:absolute before:left-1/2 before:top-1/2 before:h-10 before:w-10 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-surface-2 active:scale-[0.96] ${
-        danger ? "hover:text-rust" : "hover:text-app-text"
+      className={`grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-surface-2 text-app-text transition-[background-color,color,scale] duration-150 ease-[var(--rg-ease)] hover:bg-surface-3 active:scale-[0.96] ${
+        danger ? "hover:text-rust" : ""
       }`}
     >
       {children}
