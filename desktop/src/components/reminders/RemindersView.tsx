@@ -16,6 +16,7 @@ import {
   snoozeTomorrow,
 } from "@/lib/reminders";
 import { ContextMenu } from "@/components/ui/ContextMenu";
+import { Dialog } from "@/components/ui/Dialog";
 import { modeStore } from "@/lib/mode";
 import { resolveIconOrNull } from "@/lib/icons";
 import { isBirthdayToday, formatTurningAge } from "@/lib/birthday";
@@ -38,7 +39,7 @@ function IconRow({ items, onAccent }: { items: Reminder[]; onAccent?: boolean })
       {icons.slice(0, 6).map(({ id, Icon, color }) =>
         createElement(Icon!, {
           key: id,
-          size: 13,
+          size: 15,
           strokeWidth: 1.75,
           color: onAccent ? undefined : (color ?? undefined),
         }),
@@ -84,22 +85,26 @@ function Card({
 }) {
   return (
     <section className={`relative flex h-full flex-col ${CARD}`}>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="rounded-full bg-surface-2 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted">
+      <div className="mb-4 flex items-center">
+        <h2 className="flex items-center gap-2.5 rounded-full bg-surface-2 py-1.5 pl-3.5 pr-3 text-xs font-medium tracking-wide text-muted">
           {title}
+          <IconRow items={items ?? []} />
         </h2>
-        <IconRow items={items ?? []} />
       </div>
       {children ?? <p className="text-sm text-muted opacity-60">{empty}</p>}
     </section>
   );
 }
 
+const MAX_ROWS = 4;
+
 function Rows({
   items,
   dateLabelFor,
   completed = false,
   onAccent = false,
+  limit,
+  onMore,
   onToggle,
   onOpen,
   onMenu,
@@ -109,15 +114,20 @@ function Rows({
   dateLabelFor?: (r: Reminder) => string | undefined;
   completed?: boolean;
   onAccent?: boolean;
+  limit?: number;
+  onMore?: () => void;
   onToggle: (id: number) => void;
   onOpen?: (r: Reminder) => void;
   onMenu?: (r: Reminder, x: number, y: number) => void;
   onEventJump?: (eventId: number) => void;
 }) {
+  const shown = limit ? items.slice(0, limit) : items;
+  const hidden = items.length - shown.length;
   return (
+    <>
     <ul className="flex flex-col gap-0.5">
       <AnimatePresence initial={false}>
-        {items.map((r) => (
+        {shown.map((r) => (
           <ReminderRow
             key={r.id}
             reminder={r}
@@ -132,6 +142,85 @@ function Rows({
         ))}
       </AnimatePresence>
     </ul>
+    {hidden > 0 && (
+      <button
+        type="button"
+        onClick={onMore}
+        className="mt-2 cursor-pointer self-start rounded-full bg-surface-2 px-4 py-1.5 text-xs text-muted transition-colors hover:bg-surface-3 hover:text-app-text"
+      >
+        Ещё {hidden}
+      </button>
+    )}
+    </>
+  );
+}
+
+type MoreGroup = "tomorrow" | "week" | "later";
+const MORE_TITLE: Record<MoreGroup, string> = { tomorrow: "Завтра", week: "На неделе", later: "Позже" };
+
+function groupByDate(items: Reminder[]) {
+  const map = new Map<string, Reminder[]>();
+  for (const r of items) {
+    const key = effectiveDateISO(r);
+    map.set(key, [...(map.get(key) ?? []), r]);
+  }
+  return [...map.entries()].sort(([a], [b]) => (a < b ? -1 : 1));
+}
+
+function MoreDialog({
+  group,
+  items,
+  today,
+  onClose,
+  onToggle,
+  onOpen,
+  onMenu,
+  onEventJump,
+}: {
+  group: MoreGroup | null;
+  items: Reminder[];
+  today: string;
+  onClose: () => void;
+  onToggle: (id: number) => void;
+  onOpen: (r: Reminder) => void;
+  onMenu: (r: Reminder, x: number, y: number) => void;
+  onEventJump?: (eventId: number) => void;
+}) {
+  const days = groupByDate(items);
+  const showLabels = days.length >= 2;
+  return (
+    <Dialog
+      open={group !== null && items.length > 0}
+      onClose={onClose}
+      width={520}
+      title={
+        group && (
+          <>
+            {MORE_TITLE[group]}{" "}
+            <span className="font-light text-muted">{items.length}</span>
+          </>
+        )
+      }
+    >
+      <div className="flex flex-col gap-1.5">
+        {days.map(([iso, rows]) => (
+          <div key={iso} className="flex flex-col">
+            {showLabels && (
+              <span className="mb-1 mt-1.5 inline-flex w-fit rounded-full bg-surface-2 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
+                {formatRu(iso, iso.slice(0, 4) === today.slice(0, 4) ? "d MMMM, EEEEEE" : "d MMMM yyyy, EEEEEE")}
+              </span>
+            )}
+            <Rows
+              items={rows}
+              onToggle={onToggle}
+              onOpen={onOpen}
+              onMenu={onMenu}
+              onEventJump={onEventJump}
+            />
+          </div>
+        ))}
+      </div>
+    </Dialog>
   );
 }
 
@@ -151,6 +240,7 @@ export function RemindersView({
     useReminders();
   const [showCompleted, setShowCompleted] = useState(false);
   const [menu, setMenu] = useState<{ reminder: Reminder; x: number; y: number } | null>(null);
+  const [more, setMore] = useState<MoreGroup | null>(null);
 
   const onReminderOpen = openEditReminder;
   const openMenu = (reminder: Reminder, x: number, y: number) => setMenu({ reminder, x, y });
@@ -279,6 +369,8 @@ export function RemindersView({
                 {groups.tomorrow.length > 0 ? (
                   <Rows
                     items={groups.tomorrow}
+                    limit={MAX_ROWS}
+                    onMore={() => setMore("tomorrow")}
                     onToggle={finishReminder}
                     onOpen={onReminderOpen}
                     onMenu={openMenu}
@@ -295,6 +387,8 @@ export function RemindersView({
                 {groups.week.length > 0 ? (
                   <Rows
                     items={groups.week}
+                    limit={MAX_ROWS}
+                    onMore={() => setMore("week")}
                     dateLabelFor={(r) => formatWeekdayShortRu(effectiveDateISO(r))}
                     onToggle={finishReminder}
                     onOpen={onReminderOpen}
@@ -308,6 +402,8 @@ export function RemindersView({
                 {groups.later.length > 0 ? (
                   <Rows
                     items={groups.later}
+                    limit={MAX_ROWS}
+                    onMore={() => setMore("later")}
                     dateLabelFor={(r) => formatDayMonthRu(effectiveDateISO(r))}
                     onToggle={finishReminder}
                     onOpen={onReminderOpen}
@@ -364,6 +460,20 @@ export function RemindersView({
           </>
         )}
       </div>
+
+      <MoreDialog
+        group={more}
+        items={more ? groups[more] : []}
+        today={today}
+        onClose={() => setMore(null)}
+        onToggle={finishReminder}
+        onOpen={(r) => {
+          setMore(null);
+          setTimeout(() => onReminderOpen(r), 120);
+        }}
+        onMenu={openMenu}
+        onEventJump={onEventJump}
+      />
 
       <ContextMenu
         open={menu !== null}

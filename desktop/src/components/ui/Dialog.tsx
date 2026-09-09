@@ -8,12 +8,14 @@ export function Dialog({
   onClose,
   title,
   width = 460,
+  zIndex = 90,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title?: ReactNode;
   width?: number;
+  zIndex?: number;
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -27,8 +29,8 @@ export function Dialog({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[90] grid place-items-center p-6"
-          style={{ background: "var(--rg-scrim)" }}
+          className="fixed inset-0 grid place-items-center p-6"
+          style={{ zIndex, background: "var(--rg-scrim)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

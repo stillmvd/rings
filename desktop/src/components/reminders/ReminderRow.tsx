@@ -1,7 +1,5 @@
-import { createElement } from "react";
 import { motion } from "motion/react";
 import { ArrowUpRight, Check } from "lucide-react";
-import { resolveIconOrNull } from "@/lib/icons";
 import type { Reminder } from "@/db/queries/reminders";
 
 export function ReminderRow({
@@ -23,8 +21,6 @@ export function ReminderRow({
   onMenu?: (reminder: Reminder, x: number, y: number) => void;
   onEventJump?: (eventId: number) => void;
 }) {
-  const Icon = resolveIconOrNull(reminder.icon);
-
   const box = onAccent
     ? "border-[color-mix(in_srgb,var(--ds-on-accent)_35%,transparent)] text-transparent hover:border-ink hover:text-ink"
     : "border-line text-transparent hover:border-[var(--ds-accent-ink)] hover:text-[var(--ds-accent-ink)]";
@@ -57,14 +53,14 @@ export function ReminderRow({
           e.preventDefault();
           onMenu(reminder, e.clientX, e.clientY);
         }}
-        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-full px-2.5 py-2.5 text-left transition-colors ${
+        className={`flex min-w-0 flex-1 cursor-pointer flex-col items-start rounded-2xl px-2.5 py-2 text-left transition-colors ${
           onAccent
             ? "hover:bg-[color-mix(in_srgb,var(--ds-on-accent)_10%,transparent)]"
             : "hover:bg-surface-2"
         }`}
       >
         <span
-          className={`min-w-0 flex-1 truncate text-[15px] ${
+          className={`w-full truncate text-[15px] ${
             completed
               ? "text-muted line-through"
               : onAccent
@@ -76,11 +72,7 @@ export function ReminderRow({
         </span>
         {(dateLabel || reminder.time) && (
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums ${
-              onAccent
-                ? "bg-[color-mix(in_srgb,var(--ds-on-accent)_12%,transparent)] text-ink"
-                : "text-muted"
-            }`}
+            className={`-mt-0.5 text-xs leading-tight tabular-nums ${onAccent ? "text-ink opacity-60" : "text-muted"}`}
           >
             {[dateLabel, reminder.time].filter(Boolean).join(" · ")}
           </span>
@@ -102,18 +94,6 @@ export function ReminderRow({
         </button>
       )}
 
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full left-8 z-30 mb-1.5 flex max-w-[280px] translate-y-1 items-center gap-2 rounded-2xl bg-surface-3 px-3.5 py-2 text-[13px] text-app-text opacity-0 shadow-lg transition-[opacity,transform] delay-0 duration-150 ease-[var(--rg-ease)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-500"
-      >
-        {Icon &&
-          createElement(Icon, {
-            size: 15,
-            color: reminder.color ?? undefined,
-            className: "shrink-0",
-          })}
-        <span className="min-w-0">{reminder.title}</span>
-      </span>
     </motion.li>
   );
 }

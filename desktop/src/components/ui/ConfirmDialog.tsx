@@ -19,7 +19,7 @@ export function ConfirmDialog({
   onClose: () => void;
 }) {
   return (
-    <Dialog open={open} onClose={onClose} title={title} width={380}>
+    <Dialog open={open} onClose={onClose} title={title} width={380} zIndex={95}>
       <p className="text-[15px] leading-relaxed text-app-text">{message}</p>
       <div className="mt-6 flex justify-end gap-2">
         <Button variant="ghost" onClick={onClose}>
