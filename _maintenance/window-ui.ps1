@@ -1,8 +1,9 @@
 ﻿param(
-  [ValidateSet("shot", "click", "show", "hide")][string]$Do = "shot",
+  [ValidateSet("shot", "click", "show", "hide", "key")][string]$Do = "shot",
   [string]$Out = "shot.png",
   [int]$X = 0,
-  [int]$Y = 0
+  [int]$Y = 0,
+  [int]$Vk = 0x74
 )
 
 Add-Type @"
@@ -69,6 +70,15 @@ if ($Do -eq "hide") { [void][U]::ShowWindow($app, 0); Write-Output "hidden"; exi
 
 $wr = New-Object U+R; [void][U]::GetWindowRect($app, [ref]$wr)
 $w = $wr.Rt - $wr.L; $ht = $wr.B - $wr.T
+
+if ($Do -eq "key") {
+  $child = Get-WebViewChild $app
+  [void][U]::PostMessage($child, 0x0100, [IntPtr]$Vk, [IntPtr]::Zero)
+  Start-Sleep -Milliseconds 40
+  [void][U]::PostMessage($child, 0x0101, [IntPtr]$Vk, [IntPtr]::Zero)
+  Write-Output "KEY $Vk"
+  exit 0
+}
 
 if ($Do -eq "click") {
   $child = Get-WebViewChild $app
