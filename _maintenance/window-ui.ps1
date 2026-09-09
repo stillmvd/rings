@@ -1,4 +1,4 @@
-param(
+﻿param(
   [ValidateSet("shot", "click", "show", "hide")][string]$Do = "shot",
   [string]$Out = "shot.png",
   [int]$X = 0,
@@ -40,7 +40,8 @@ function Get-WebViewChild([IntPtr]$parent) {
 
 # Окно приложения ищем по классу "Tauri Window": MainWindowHandle не годится —
 # при сворачивании в трей он уезжает на служебное окно single-instance.
-$pids = @(Get-Process desktop -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
+# desktop.exe — дев-сборка, Trail.exe — установленная копия.
+$pids = @(Get-Process desktop, Trail -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
 if ($pids.Count -eq 0) { Write-Output "NO_PROCESS"; exit 1 }
 
 $script:app = [IntPtr]::Zero
